@@ -132,6 +132,12 @@
     <ClCompile Include="src\tests\DefaultScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\tests\TestPBRNormalMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\vendor\imgui\imconfig.h">
@@ -263,8 +269,15 @@
     <ClInclude Include="src\tests\DefaultScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\tests\TestPBRNormalMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\TopenGL\res\Shaders\BatchShader.shader" />
+    <None Include="..\..\..\..\Downloads\survival_guitar_backpack.zip" />
   </ItemGroup>
 </Project>

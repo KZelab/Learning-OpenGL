@@ -95,7 +95,8 @@ void Model::loadModel(const std::string& path, bool flipUVs)
     // Model.h header comment for a full explanation.
     unsigned int flags = aiProcess_Triangulate
         | aiProcess_GenSmoothNormals
-        | aiProcess_CalcTangentSpace;
+        | aiProcess_CalcTangentSpace
+        | aiProcess_PreTransformVertices;
 
     if (flipUVs)
         flags |= aiProcess_FlipUVs;
@@ -189,11 +190,22 @@ ModelMesh Model::processMesh(const aiMesh* mesh, const aiScene* scene)
             v = mesh->mTextureCoords[0][i].y;
         }
 
+		float tx = 1.0f, ty = 0.0f, tz = 0.0f; //add this to support gltf tangent space normal maps, 
+        //which require tangents and bitangents in addition to normals.  
+        // Assimp's aiProcess_CalcTangentSpace populates the mTangents array, so we check for its presence here.
+        if (mesh->mTangents)
+        {
+            tx = mesh->mTangents[i].x;
+            ty = mesh->mTangents[i].y;
+            tz = mesh->mTangents[i].z;
+        }
+
         vertices.emplace_back(
             mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z,
             nx, ny, nz,
             r, g, b,
-            u, v
+            u, v,
+            tx, ty, tz
         );
     }
 
@@ -217,6 +229,9 @@ ModelMesh Model::processMesh(const aiMesh* mesh, const aiScene* scene)
 
         std::vector<MeshTexture> diffuseMaps =
             loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+
+		if (diffuseMaps.empty()) // Some models (e.g. glTF) use aiTextureType_BASE_COLOR instead of aiTextureType_DIFFUSE for the main color texture.
+            diffuseMaps = loadMaterialTextures(material, aiTextureType_BASE_COLOR, "texture_diffuse");
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
         std::vector<MeshTexture> specularMaps =

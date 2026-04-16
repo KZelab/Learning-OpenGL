@@ -38,6 +38,7 @@ void Mesh::SetupMesh()
 	layout.Push<float>(3); //normals nx, ny, nz
 	layout.Push<float>(3); //colour r, g, b
 	layout.Push<float>(2); //texture coordinates u, v
+	layout.Push<float>(3); //tangent tx, ty, tz
 
 	m_VAO->AddBuffer(*m_VBO, layout);
 

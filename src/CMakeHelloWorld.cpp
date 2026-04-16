@@ -15,6 +15,8 @@
 #include "tests/testProceduralArt.h"
 #include "tests/testProjections.h"
 #include "tests/TestPBR.h"
+#include "tests/TestPBRNormalMap.h"
+#include "tests/TestPBRSphereGrid.h"
 #include "tests/testClearColour.h"
 #include "tests/testTexture2D.h"
 #include "tests/testRayCasting.h"
@@ -99,6 +101,8 @@ int main() {
         TestMenu->RegisterTest<test::testEffects>("Effects shader", window);
         TestMenu->RegisterTest<test::testProceduralArt>("Art shader", window);
         TestMenu->RegisterTest<test::TestPBR>("PBR Rendering", window);
+        TestMenu->RegisterTest<test::TestPBRNormalMap>("PBR + Normal Map", window);
+        TestMenu->RegisterTest<test::TestPBRSphereGrid>("PBR Sphere Grid", window);
         TestMenu->RegisterTest<test::TestProjections>("Projections");
         TestMenu->RegisterTest<test::TestParticleSystem>("Particle System", window);
         TestMenu->RegisterTest<test::TestGPUParticles>("GPU Particles", window);

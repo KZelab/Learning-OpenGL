@@ -23,7 +23,8 @@
 // =============================================================================
 // CONSTRUCTOR
 // =============================================================================
-Camera::Camera(GLFWwindow* window, glm::vec3 startPosition, glm::vec3 startUp, float startYaw, float startPitch, float startFOV) :
+Camera::Camera(GLFWwindow* window, glm::vec3 startPosition, glm::vec3 startUp, float startYaw, float startPitch, float startFOV,
+    bool invertPitch) :
     position(startPosition),
     worldUp(startUp),
     yaw(startYaw),
@@ -32,7 +33,8 @@ Camera::Camera(GLFWwindow* window, glm::vec3 startPosition, glm::vec3 startUp, f
     movementSpeed(5.0f),      // 5 units per second
     mouseSensitivity(0.1f),   // 0.1 degrees per pixel
     smoothFactor(0.1f),       // Interpolation rate
-    m_window(window)
+    m_window(window),
+	m_invertPitch(invertPitch)
 {
     // Calculate initial camera vectors from yaw/pitch
     UpdateCameraVectors();
@@ -352,7 +354,7 @@ void Camera::ProcessMouse(float xOffset, float yOffset)
 
     // Apply rotation
     yaw += xOffset;     // Horizontal mouse → horizontal rotation
-    pitch -= yOffset;   // Vertical mouse → vertical rotation (note the sign)
+    pitch += m_invertPitch ? yOffset : -yOffset;
 
     // Clamp pitch to prevent gimbal lock and camera flipping
     if (pitch > 89.0f) pitch = 89.0f;

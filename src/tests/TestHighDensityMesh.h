@@ -11,7 +11,8 @@
 #include "glm/glm.hpp"
 
 namespace test {
-    class TestHighDensityMesh : public Tests {
+	class TestHighDensityMesh : public Tests { //not really worth doing in class, will just be a copy of TestPBRNormalMap but with a different model, 
+        
     public:
         TestHighDensityMesh(GLFWwindow* window);
 

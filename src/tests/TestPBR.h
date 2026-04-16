@@ -14,14 +14,16 @@ namespace test
 	{
 	public:
 		TestPBR(GLFWwindow* window);
+		virtual ~TestPBR() = default;
 
 		void Update(float deltaTime) override;
 		void Render() override;
 		void RenderGUI() override;
 
-	private:
+	protected:
 		void ApplyMaterialPreset(int preset);
 
+	protected:
 		GLFWwindow* m_Window;
 
 		std::unique_ptr<Camera> m_Camera;

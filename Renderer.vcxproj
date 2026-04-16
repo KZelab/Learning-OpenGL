@@ -36,6 +36,9 @@
     <ClCompile Include="src\tests\testClearColour.cpp" />
     <ClCompile Include="src\tests\testMultipleLightSources.cpp" />
     <ClCompile Include="src\tests\TestPBR.cpp" />
+    <ClCompile Include="src\tests\TestPBRNormalMap.cpp" />
+    <ClCompile Include="src\tests\TestPBRSphereGrid.cpp" />
+    <ClCompile Include="src\Skybox.cpp" />
     <ClCompile Include="src\tests\testProjections.cpp" />
     <ClCompile Include="src\tests\testProceduralArt.cpp" />
     <ClCompile Include="src\tests\testTexture2D.cpp" />
@@ -78,6 +81,9 @@
     <ClInclude Include="src\tests\testClearColour.h" />
     <ClInclude Include="src\tests\testMultipleLightSources.h" />
     <ClInclude Include="src\tests\TestPBR.h" />
+    <ClInclude Include="src\tests\TestPBRNormalMap.h" />
+    <ClInclude Include="src\tests\TestPBRSphereGrid.h" />
+    <ClInclude Include="src\Skybox.h" />
     <ClInclude Include="src\tests\testProjections.h" />
     <ClInclude Include="src\tests\testProceduralArt.h" />
     <ClInclude Include="src\tests\testTexture2D.h" />
@@ -105,6 +111,7 @@
     <ClInclude Include="src\VertexBufferLayout.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\Downloads\survival_guitar_backpack.zip" />
     <None Include="..\..\TopenGL\res\Shaders\BatchShader.shader" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

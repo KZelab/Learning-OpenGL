@@ -38,7 +38,8 @@ public:
         glm::vec3 startUp,
         float startYaw,
         float startPitch,
-        float startFOV);
+        float startFOV,
+        bool invertPitch = true);
 
     void processInput(float deltaTime);
 
@@ -97,7 +98,7 @@ private:
     glm::vec3 targetPosition;
     glm::vec3 targetFront;
     bool detached = false;
-
+	
     // ==========================================================================
     // EULER ANGLES
     // ==========================================================================
@@ -153,5 +154,5 @@ private:
      */
     void UpdateCameraVectors();
 
-    
+    bool m_invertPitch;
 };

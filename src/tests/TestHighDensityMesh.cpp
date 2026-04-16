@@ -21,8 +21,10 @@ namespace test {
             45.0f                           // fov
         );
 
-        m_Model  = std::make_unique<Model>("res/Models/poly.obj");
+        m_Model  = std::make_unique<Model>("res/Model/Creative_Character_free.obj");
         m_Shader = std::make_unique<Shader>("res/Shaders/Mesh.shader");
+
+		InitDefaultScene();
     }
 
     void TestHighDensityMesh::Update(float deltaTime) {
@@ -40,6 +42,8 @@ namespace test {
     void TestHighDensityMesh::Render() {
         Renderer renderer;
         renderer.Clear();
+
+        m_DefaultScene->Render(m_View, m_Projection);
 
         m_Shader->Bind();
 
