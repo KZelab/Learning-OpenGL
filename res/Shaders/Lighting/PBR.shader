@@ -1,3 +1,5 @@
+#shader vertex
+#version 330 core
 // =============================================================================
 // Physically Based Rendering (PBR) Shader
 // =============================================================================
@@ -19,8 +21,6 @@
 //    highlights are by controlling the distribution of microfacet normals.
 // =============================================================================
 
-#shader vertex
-#version 330 core
 
 // Vertex attributes from the VAO (see Vertex.h layout)
 layout(location = 0) in vec3 aPosition;  // Object-space vertex position
@@ -57,10 +57,8 @@ void main()
 }
 
 
-// =============================================================================
 #shader fragment
 #version 330 core
-// =============================================================================
 // The fragment shader is where all the PBR math happens.
 // For each pixel covered by a triangle, we evaluate the Reflectance Equation:
 //

@@ -22,7 +22,7 @@ test::TestPBR::TestPBR(GLFWwindow* window)
 		45.0f                          // FOV
 	);
 
-	m_PBRShader = std::make_unique<Shader>("res/shaders/Lighting/PBR.shader");
+	m_PBRShader = std::make_unique<Shader>("res/Shaders/Lighting/PBR.shader");
 
 	m_Sphere = GeometryFactory::CreateSphere(32, 32);
 

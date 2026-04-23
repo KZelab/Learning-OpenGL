@@ -26,7 +26,7 @@ test::TestMSAA::TestMSAA(GLFWwindow* window)
     m_ScreenShader = std::make_unique<Shader>("res/shaders/testmsaascreen.shader");
 
     // Low subdivision count makes polygon edge aliasing clearly visible
-    m_Mesh = GeometryFactory::CreateSphere(8, 8);
+    m_Mesh = GeometryFactory::CreateSphere(4, 4);
 
     // The screen quad is intentionally built by hand rather than through GeometryFactory.
     // GeometryFactory meshes always use the full Vertex struct (position vec3, normal vec3,
