@@ -24,6 +24,7 @@
 #include "tests/TestGPUParticles.h"
 #include "tests/TestShadowMapping.h"
 #include "tests/Tests.h"
+#include "tests/TestMSAA.h"
 
 #include "vendor/imgui/imgui.h"     // Dear ImGui library for GUI elements
 #include "vendor/imgui/imgui_impl_glfw.h" // ImGui GLFW backend
@@ -109,6 +110,7 @@ int main() {
         TestMenu->RegisterTest<test::TestShadowMapping>("Shadow Mapping", window);
 		TestMenu->RegisterTest<test::TestHighDensityMesh>("High Density Mesh", window);
 		TestMenu->RegisterTest<test::TestCamera>("Camera", window);
+		TestMenu->RegisterTest<test::TestMSAA>("MSAA", window);
         float lastTimeFrame = 0.0f;
         float deltaTime = 0.0f;
 
