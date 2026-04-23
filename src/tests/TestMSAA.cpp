@@ -28,6 +28,13 @@ test::TestMSAA::TestMSAA(GLFWwindow* window)
     // Low subdivision count makes polygon edge aliasing clearly visible
     m_Mesh = GeometryFactory::CreateSphere(8, 8);
 
+    // The screen quad is intentionally built by hand rather than through GeometryFactory.
+    // GeometryFactory meshes always use the full Vertex struct (position vec3, normal vec3,
+    // colour vec3, texCoords vec2, tangent vec3 = 14 floats / 56 bytes per vertex), and UVs
+    // land at attribute location 3.  The screen shader only needs a vec2 position at location 0
+    // and a vec2 UV at location 1 — 4 floats / 16 bytes per vertex.  Using a Mesh here would
+    // upload 40 bytes of unused normal/colour/tangent data per vertex every frame and would
+    // require the shader to be rewritten to match the Mesh attribute layout.
     float positions[] = {
         -1.0f, -1.0f,   0.0f, 0.0f,
          1.0f, -1.0f,   1.0f, 0.0f,
@@ -66,9 +73,14 @@ test::TestMSAA::~TestMSAA()
 
 void test::TestMSAA::BuildFramebuffers()
 {
+    // MSAA requires two framebuffers because OpenGL cannot expose a multisampled
+    // renderbuffer as a shader-readable texture.  The MSAA FBO stores the raw
+    // per-sample data; the resolve FBO owns a plain GL_TEXTURE_2D that the blit
+    // step writes into.  When MSAA is disabled we still use this two-FBO path
+    // (samples = 1) so the rest of the render code stays unchanged.
     int samples = m_MSAAEnabled ? s_SampleOptions[m_SampleIndex] : 1;
 
-    m_MSAAFBO = std::make_unique<MSAAFramebuffer>(m_Width, m_Height, samples);
+    m_MSAAFBO    = std::make_unique<MSAAFramebuffer>(m_Width, m_Height, samples);
     m_ResolveFBO = std::make_unique<Framebuffer>(m_Width, m_Height);
 }
 
@@ -93,18 +105,7 @@ void test::TestMSAA::Update(float deltaTime)
     );
 }
 
-void test::TestMSAA::RenderScene()
-{
-    m_ObjectShader->Bind();
-    m_ObjectShader->setUniformMat4f("u_Model", m_Model);
-    m_ObjectShader->setUniformMat4f("u_View", m_View);
-    m_ObjectShader->setUniformMat4f("u_Projection", m_Projection);
-    m_ObjectShader->setUniform3f("u_Colour",
-        m_ObjectColour.r, m_ObjectColour.g, m_ObjectColour.b);
 
-    m_Mesh->setPosition(glm::vec3(0.0f));
-    m_Mesh->Draw();
-}
 
 void test::TestMSAA::Render()
 {
@@ -124,7 +125,14 @@ void test::TestMSAA::Render()
     renderer.Clear();
     glEnable(GL_DEPTH_TEST);
 
-    RenderScene();
+    m_ObjectShader->Bind();
+    m_ObjectShader->setUniformMat4f("u_Model", m_Model);
+    m_ObjectShader->setUniformMat4f("u_View", m_View);
+    m_ObjectShader->setUniformMat4f("u_Projection", m_Projection);
+    m_ObjectShader->setUniform3f("u_Colour", m_ObjectColour.r, m_ObjectColour.g, m_ObjectColour.b);
+
+    m_Mesh->setPosition(glm::vec3(0.0f));
+    m_Mesh->Draw();
 
     // ------------------------------------------------------------------
     // Pass 2: resolve multisampled buffer into the single-sample FBO
