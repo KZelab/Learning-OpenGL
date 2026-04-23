@@ -4,6 +4,7 @@
 #include "../Mesh/GeometryFactory.h"
 #include "../utils/Camera.h"
 #include "../Framebuffer.h"
+#include "../MSAAFramebuffer.h"
 #include "../VertexArray.h"
 #include "../VertexBuffer.h"
 #include "../IndexBuffer.h"
@@ -28,30 +29,24 @@ namespace test
         void RenderScene();
 
         GLFWwindow* m_Window;
-        std::unique_ptr<Camera>      m_Camera;
-        std::unique_ptr<Mesh>        m_Mesh;
-        std::unique_ptr<Shader>      m_ObjectShader;
-        std::unique_ptr<Shader>      m_ScreenShader;
+        std::unique_ptr<Camera>         m_Camera;
+        std::unique_ptr<Mesh>           m_Mesh;
+        std::unique_ptr<Shader>         m_ObjectShader;
+        std::unique_ptr<Shader>         m_ScreenShader;
 
-        // Multisampled FBO - rendered into each frame
-        std::unique_ptr<Framebuffer> m_MSAAFBO;
-        // Resolve FBO - blit target, colour texture sampled by screen quad
-        std::unique_ptr<Framebuffer> m_ResolveFBO;
+        std::unique_ptr<MSAAFramebuffer> m_MSAAFBO;
+        std::unique_ptr<Framebuffer>     m_ResolveFBO;
 
-        // Screen-space quad
-        std::unique_ptr<VertexArray>  m_QuadVAO;
-        std::unique_ptr<VertexBuffer> m_QuadVBO;
-        std::unique_ptr<IndexBuffer>  m_QuadIBO;
+        std::unique_ptr<VertexArray>    m_QuadVAO;
+        std::unique_ptr<VertexBuffer>   m_QuadVBO;
+        std::unique_ptr<IndexBuffer>    m_QuadIBO;
 
-        // Transforms
         glm::mat4 m_Model;
         glm::mat4 m_View;
         glm::mat4 m_Projection;
 
-        // Object appearance
         glm::vec3 m_ObjectColour;
 
-        // MSAA settings
         bool m_MSAAEnabled = true;
         bool m_Wireframe = false;
         bool m_FBODirty = false;

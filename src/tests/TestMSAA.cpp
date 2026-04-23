@@ -22,18 +22,17 @@ test::TestMSAA::TestMSAA(GLFWwindow* window)
         45.0f
     );
 
-    m_ObjectShader = std::make_unique<Shader>("res/Shaders/testmsaaobject.shader");
-    m_ScreenShader = std::make_unique<Shader>("res/Shaders/testmsaascreen.shader");
+    m_ObjectShader = std::make_unique<Shader>("res/shaders/testmsaaobject.shader");
+    m_ScreenShader = std::make_unique<Shader>("res/shaders/testmsaascreen.shader");
 
     // Low subdivision count makes polygon edge aliasing clearly visible
     m_Mesh = GeometryFactory::CreateSphere(8, 8);
 
-    // Screen-space quad: NDC positions (xy) + texture coordinates (uv)
     float positions[] = {
-        -1.0f, -1.0f,   0.0f, 0.0f,   // bottom left
-         1.0f, -1.0f,   1.0f, 0.0f,   // bottom right
-         1.0f,  1.0f,   1.0f, 1.0f,   // top right
-        -1.0f,  1.0f,   0.0f, 1.0f    // top left
+        -1.0f, -1.0f,   0.0f, 0.0f,
+         1.0f, -1.0f,   1.0f, 0.0f,
+         1.0f,  1.0f,   1.0f, 1.0f,
+        -1.0f,  1.0f,   0.0f, 1.0f
     };
     unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
 
@@ -69,8 +68,8 @@ void test::TestMSAA::BuildFramebuffers()
 {
     int samples = m_MSAAEnabled ? s_SampleOptions[m_SampleIndex] : 1;
 
-    m_MSAAFBO = std::make_unique<Framebuffer>(m_Width, m_Height, false, samples);
-    m_ResolveFBO = std::make_unique<Framebuffer>(m_Width, m_Height, false, 1);
+    m_MSAAFBO = std::make_unique<MSAAFramebuffer>(m_Width, m_Height, samples);
+    m_ResolveFBO = std::make_unique<Framebuffer>(m_Width, m_Height);
 }
 
 // -----------------------------------------------------------------------------
@@ -128,21 +127,12 @@ void test::TestMSAA::Render()
     RenderScene();
 
     // ------------------------------------------------------------------
-    // Pass 2: blit (resolve) the multisampled colour buffer into the
-    //         single-sample resolve FBO so it can be texture-sampled.
-    //         glBlitFramebuffer has no abstraction so raw GL is used here.
+    // Pass 2: resolve multisampled buffer into the single-sample FBO
     // ------------------------------------------------------------------
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_MSAAFBO->GetID());
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_ResolveFBO->GetID());
-    glBlitFramebuffer(
-        0, 0, m_Width, m_Height,
-        0, 0, m_Width, m_Height,
-        GL_COLOR_BUFFER_BIT, GL_NEAREST
-    );
+    m_MSAAFBO->Resolve(*m_ResolveFBO);
 
     // ------------------------------------------------------------------
-    // Pass 3: draw the resolved texture to the default framebuffer via
-    //         the screen quad
+    // Pass 3: draw the resolved texture to the default framebuffer
     // ------------------------------------------------------------------
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, m_Width, m_Height);

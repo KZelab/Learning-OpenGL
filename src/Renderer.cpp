@@ -40,6 +40,47 @@ void Renderer::Clear() const
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 }
+void Renderer::Clear(std::string colour) const
+{
+    std::transform(colour.begin(), colour.end(), colour.begin(), ::towlower);
+    // Clear the color buffer to prepare for a new frame
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    if (colour == "black")
+    {
+        GlCall(glClearColor(0, 0, 0, 1));
+    }
+    if(colour == "white")
+    {
+        GlCall(glClearColor(1, 1, 1, 1));
+	}
+    if(colour == "red")
+    {
+        GlCall(glClearColor(1, 0, 0, 1));
+	}
+    if(colour == "green")
+    {
+        GlCall(glClearColor(0, 1, 0, 1));
+    }
+    if(colour == "blue")
+    {
+        GlCall(glClearColor(0, 0, 1, 1));
+	}
+    if(colour == "yellow")
+    {
+        GlCall(glClearColor(1, 1, 0, 1));
+    }
+    if(colour == "cyan")
+    {
+        GlCall(glClearColor(0, 1, 1, 1));
+    }
+    if(colour == "magenta")
+    {
+        GlCall(glClearColor(1, 0, 1, 1));
+	}
+    
+
+}
 
 void Renderer::ClearColour_Black() const
 {

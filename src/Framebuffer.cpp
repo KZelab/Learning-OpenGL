@@ -1,74 +1,48 @@
 #include "Framebuffer.h"
 #include <iostream>
 
-Framebuffer::Framebuffer(int width, int height, bool depthOnly, int samples)
-    : m_Width(width), m_Height(height), m_DepthOnly(depthOnly), m_Samples(samples)
+Framebuffer::Framebuffer(int width, int height, bool depthOnly)
+    : m_Width(width), m_Height(height), m_DepthOnly(depthOnly)
 {
     glGenFramebuffers(1, &m_RendererID);
     glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 
-    if (m_Samples > 1)
+    glGenTextures(1, &m_DepthTexture);
+    glBindTexture(GL_TEXTURE_2D, m_DepthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_Width, m_Height, 0,
+        GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_DepthTexture, 0);
+
+    if (m_DepthOnly)
     {
-        // ---- Multisampled path (renderbuffer-backed) -------------------------
-        // Multisampled renderbuffers cannot be sampled in a shader directly.
-        // Use glBlitFramebuffer to resolve into a single-sample Framebuffer
-        // before reading the result as a texture.
-
-        glGenRenderbuffers(1, &m_ColorRBO);
-        glBindRenderbuffer(GL_RENDERBUFFER, m_ColorRBO);
-        glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_Samples, GL_RGBA8, m_Width, m_Height);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, m_ColorRBO);
-
-        glGenRenderbuffers(1, &m_DepthRBO);
-        glBindRenderbuffer(GL_RENDERBUFFER, m_DepthRBO);
-        glRenderbufferStorageMultisample(GL_RENDERBUFFER, m_Samples, GL_DEPTH24_STENCIL8, m_Width, m_Height);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_DepthRBO);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
     }
     else
     {
-        // ---- Single-sample path (texture-backed) ----------------------------
-
-        glGenTextures(1, &m_DepthTexture);
-        glBindTexture(GL_TEXTURE_2D, m_DepthTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_Width, m_Height, 0,
-            GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_DepthTexture, 0);
-
-        if (m_DepthOnly)
-        {
-            glDrawBuffer(GL_NONE);
-            glReadBuffer(GL_NONE);
-        }
-        else
-        {
-            glGenTextures(1, &m_ColorTexture);
-            glBindTexture(GL_TEXTURE_2D, m_ColorTexture);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColorTexture, 0);
-        }
+        glGenTextures(1, &m_ColorTexture);
+        glBindTexture(GL_TEXTURE_2D, m_ColorTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_Width, m_Height, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColorTexture, 0);
     }
 
     if (!CheckStatus())
-    {
         std::cerr << "Framebuffer is not complete!" << std::endl;
-    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 Framebuffer::~Framebuffer()
 {
-    if (m_ColorRBO)     glDeleteRenderbuffers(1, &m_ColorRBO);
-    if (m_DepthRBO)     glDeleteRenderbuffers(1, &m_DepthRBO);
     if (m_ColorTexture) glDeleteTextures(1, &m_ColorTexture);
     if (m_DepthTexture) glDeleteTextures(1, &m_DepthTexture);
     if (m_RendererID)   glDeleteFramebuffers(1, &m_RendererID);

@@ -22,6 +22,7 @@ public:
 
 
     void Clear() const;
+    void Clear(std::string colour) const;
 
     void ClearColour_Black() const;
     void ClearColour_White() const;

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\MSAAFramebuffer.cpp" />
     <ClCompile Include="src\Mesh\GeometryFactory.cpp" />
     <ClCompile Include="src\Mesh\Mesh.cpp" />
     <ClCompile Include="src\Mesh\Model.cpp" />
@@ -64,6 +65,7 @@
     <ClCompile Include="src\tests\TestMSAA.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\MSAAFramebuffer.h" />
     <ClInclude Include="src\Mesh\GeometryFactory.h" />
     <ClInclude Include="src\Mesh\Mesh.h" />
     <ClInclude Include="src\Mesh\Model.h" />
