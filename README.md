@@ -1,13 +1,6 @@
 # Branch: 02-first-triangle
 
-## Learning Objective
-Learn to render your first geometric primitive - a triangle! This introduces the core concepts of vertex data, shaders, buffers, and the graphics pipeline that form the foundation of all 3D graphics programming.
 
-## What You'll Build
-A simple application that displays an orange triangle on a blue background. This might seem basic, but you're now officially rendering geometry using the modern OpenGL pipeline!
-
-
-## Key Concepts
 
 ### Core Concepts Learned:
 - **Vertex Data**: The fundamental building blocks of 3D geometry
