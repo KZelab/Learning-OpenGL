@@ -1,15 +1,5 @@
 # Branch: 11-basic-geometry-factories
 
-## Learning Objective
-Master fundamental geometry generation, vertex data management, and index buffer optimization through systematic primitive creation. This branch focuses on building reusable geometry factory systems that form the foundation for all 3D graphics primitives, emphasizing clean code organization and efficient memory management.
-
-## What You'll Build
-An interactive geometry factory system with comprehensive primitive generation capabilities. The system includes triangle, quad, cube, sphere, and fullscreen quad factory methods with organized vertex data management, normal calculation, index buffer optimization, and an interactive test suite for real-time geometry visualization with basic lighting.
-
-![Expected Result](docs/images/11-basic-geometry-factories.png)
-*A 960x540 window with an ImGui interface demonstrating primitive geometry generation and rendering*
-
-## Key Concepts
 
 ### Core Concepts Learned:
 - **Geometry Factory Pattern**: Systematic approach to primitive generation
@@ -45,7 +35,7 @@ An interactive geometry factory system with comprehensive primitive generation c
 ### File Structure
 ```
 src/
-├── CMakeHelloWorld.cpp       # Test harness application with geometry demos
+├── Main.cpp       # Test harness application with geometry demos
 ├── Mesh/
 │   ├── Mesh.h/.cpp          # Enhanced mesh class for geometry rendering
 │   └── GeometryFactory.h/.cpp # Static factory methods for primitive generation
@@ -124,22 +114,7 @@ struct Vertex {
 };
 ```
 
-### Educational Progression
 
-**Learning Path:**
-1. **Triangle Generation** → Understanding basic vertex data and primitive assembly
-2. **Quad Generation** → Introduction to index buffers and vertex reuse
-3. **Cube Generation** → Complex 3D geometry construction and face organisation
-4. **Sphere Generation** → Parametric surface mathematics and subdivision
-5. **Fullscreen Quad** → NDC coordinates and post-processing foundations
-
-**Interactive Features:**
-- Real-time geometry type switching (Triangle/Quad/Cube/Sphere/Fullscreen Quad)
-- Wireframe/solid rendering toggle
-- Rotation speed and scale adjustment
-- Educational information display for each primitive
-- Index count and vertex statistics
-- Basic directional lighting using vertex normals
 
 ## Understanding the Code
 
@@ -386,32 +361,7 @@ void testGeometryFactories::RenderGUI() {
 }
 ```
 
-## What's Different from Previous Branch (10-textures-and-raycasting)
 
-### New Additions:
-- **Enhanced GeometryFactory System**: Comprehensive primitive generation with static factory methods
-- **Sphere Generation**: Parametric surface mathematics using spherical coordinates
-- **Fullscreen Quad**: NDC coordinate generation for post-processing foundations
-- **Organised Mesh Structure**: Enhanced Mesh class moved to dedicated Mesh/ folder
-- **Normal Vector Support**: Full lighting-ready vertex structure with surface normals
-- **testGeometryFactories**: Interactive primitive generation and visualisation with basic lighting
-- **Vertex Data Management**: Structured approach to vertex attribute organisation including normals
-- **Index Buffer Optimisation**: Demonstration of efficient vertex reuse techniques
-- **Educational Progression**: Building from simple triangles to advanced parametric surfaces
-- **Code Organisation**: Clean separation of geometry logic from rendering systems
-
-### What Stayed the Same:
-- Essential test framework architecture (Tests.h/cpp)
-- All previous tests (testClearColour, testTexture2D, testRayCasting)
-- ImGui integration for interactive parameter control
-- Real-time visual feedback and educational interface
-- Core rendering systems (Shader, Renderer, VertexArray, etc.)
-
-### Enhanced Features:
-- **Improved Mesh Class**: Better integration with factory-generated geometry
-- **Structured Vertex Class**: Comprehensive vertex attribute management
-- **Memory Optimization**: Index buffers for efficient vertex usage
-- **Interactive Controls**: Real-time geometry switching and parameter adjustment
 
 ## Learning Experiments
 
@@ -434,9 +384,9 @@ void testGeometryFactories::RenderGUI() {
    // Create subdivisions² quads, each made of 2 triangles
    ```
 
-3. **Color Pattern Experiments**:
+3. **Colour Pattern Experiments**:
    ```cpp
-   // Try different color assignment patterns
+   // Try different colour assignment patterns
    void GeometryFactory::AssignColors(std::vector<Vertex>& vertices) {
        for (size_t i = 0; i < vertices.size(); ++i) {
            // Rainbow pattern
@@ -549,45 +499,6 @@ Different primitives demonstrate various levels of vertex reuse:
 // 8 vertices, 36 indices = 22% unique vertices
 ```
 
-## Common Issues & Solutions
-
-### "Geometry not displaying correctly"
-**Vertex Data Problems:**
-- **Index order**: Ensure counter-clockwise winding for front faces
-- **Position coordinates**: Verify vertex positions are in valid range
-- **Matrix transformations**: Check that MVP matrix transforms are correct
-- **Depth testing**: Enable GL_DEPTH_TEST for proper 3D rendering
-
-### "Colors not appearing as expected"
-**Color Assignment Issues:**
-- **Value ranges**: Ensure color values are in [0.0, 1.0] range
-- **Vertex attributes**: Verify color attribute is properly bound in shader
-- **Shader uniforms**: Check that fragment shader uses vertex colors correctly
-- **Alpha channel**: Consider if alpha blending affects color appearance
-
-### "Memory leaks or crashes"
-**Resource Management Problems:**
-- **Mesh deletion**: Ensure proper cleanup in destructors
-- **Factory ownership**: Caller must delete returned Mesh pointers
-- **OpenGL resources**: Verify VAO/VBO/EBO are properly released
-- **Shader compilation**: Check for shader compilation/linking errors
-
-### "Performance issues with complex geometry"
-**Optimization Concerns:**
-- **Vertex count**: Monitor vertex/triangle count for performance
-- **Index buffer usage**: Prefer indexed rendering for vertex reuse
-- **State changes**: Minimize OpenGL state changes between draws
-- **Memory allocation**: Consider object pooling for frequent mesh creation
-
-## What's Next?
-
-Building on this geometry factory foundation, future branches will explore:
-- **Advanced Geometry (Branch 12)**: Parametric surfaces, spheres, cylinders with mathematical generation
-- **Mesh Loading (Branch 15)**: External model file parsing and vertex data extraction
-- **Subdivision Surfaces**: Smooth surface generation from base geometry
-- **Procedural Generation**: Algorithmic geometry creation and terrain systems
-- **Geometry Shaders**: GPU-based primitive generation and modification
-- **Instanced Rendering**: Efficient rendering of multiple geometry instances
 
 ## Resources for Deeper Learning
 
@@ -663,7 +574,3 @@ CheckGLError("Vertex Buffer Creation");
 CheckGLError("Index Buffer Creation");
 CheckGLError("Vertex Array Setup");
 ```
-
----
-
-This branch establishes the foundation for all future geometry work by providing clean, efficient, and educational primitive generation systems. The factory pattern ensures consistent geometry creation while the interactive test demonstrates real-world usage patterns.
