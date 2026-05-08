@@ -1,15 +1,5 @@
 # Branch: 04-indexed-rendering
 
-## Learning Objective
-Learn efficient geometry rendering using Index Buffer Objects (EBO) to eliminate duplicate vertices. This introduces indexed rendering, which is fundamental for creating complex 3D models efficiently.
-
-## What You'll Build
-A colourful square made from two triangles, but using only 4 vertices instead of 6! This demonstrates how indexed rendering eliminates duplicate vertex data and makes complex geometry more memory-efficient.
-
-![Expected Result](docs/images/04-indexed-square.png)
-*A 960x540 window displaying a rainbow-coloured square with 4 corners: red, green, blue, and yellow*
-
-## Key Concepts
 
 ### Core Concepts Learned:
 - **Index Buffer Objects (EBO)**: Efficient storage of vertex indices
@@ -36,12 +26,6 @@ A colourful square made from two triangles, but using only 4 vertices instead of
 
 ## Code Architecture
 
-### File Structure
-```
-src/
-├── CMakeHelloWorld.cpp    # Main application with indexed square
-└── CMakeHelloWorld.h      # Header file (if needed)
-```
 
 ### Memory Layout Comparison
 
@@ -223,42 +207,6 @@ glDrawElements(mode, count, type, indices);
 3. **Multiple index buffers** - Different detail levels for same geometry
 4. **16-bit indices** - Use `GL_UNSIGNED_SHORT` for smaller models
 
-## Common Issues & Solutions
-
-### "Square not rendering or appears wrong"
-**Possible Causes & Solutions:**
-- **Wrong index count**: Ensure `glDrawElements` count matches your indices array size
-- **Index out of range**: Check all indices are valid (0 to vertex count - 1)
-- **EBO not bound**: EBO must be bound while VAO is active
-- **Wrong index type**: Match `glDrawElements` type parameter to your indices
-
-### "Memory access errors or crashes"
-**Index Array Issues:**
-- **Out-of-bounds indices**: Index 5 with only 4 vertices will crash
-- **Wrong indices data type**: Using `int` indices but specifying `GL_UNSIGNED_SHORT`
-- **Buffer size mismatch**: `sizeof(indices)` doesn't match actual array size
-
-### "Performance not improving with indexing"
-**Optimization Notes:**
-- **Small geometry**: Indexing overhead may outweigh benefits for simple shapes
-- **Cache misses**: Random index access patterns can reduce GPU efficiency
-- **Vertex reuse ratio**: Benefits increase with more shared vertices
-
-### "Triangles facing wrong direction"
-**Winding Order Issues:**
-- **Backface culling**: Enable with `glEnable(GL_CULL_FACE)` to see the effect
-- **Clockwise vs counter-clockwise**: OpenGL default front face is counter-clockwise
-- **Index order matters**: [0,1,2] vs [0,2,1] creates opposite-facing triangles
-
-## What's Next?
-
-In the next branch (`05-transformations`), we'll:
-- Learn about **transformation matrices** for moving, rotating, and scaling objects
-- Understand **Model-View-Projection (MVP)** pipeline
-- Implement **interactive transformations** with keyboard input
-- Create **animated geometry** using time-based transformations
-- Explore **coordinate systems** and **matrix mathematics**
-
 ## Resources for Deeper Learning
 
 ### Essential Reading:
@@ -277,40 +225,3 @@ In the next branch (`05-transformations`), we'll:
 - Geometry instancing and indirect drawing
 - Mesh compression techniques
 
-### Tools for Development:
-- **RenderDoc**: Analyze vertex and index buffer usage
-- **GPU Memory Profilers**: Measure memory bandwidth improvements
-- **Mesh Optimization Tools**: Tools like meshoptimizer for index optimization
-
-## Debug Tips
-
-### Checking Index Buffer State:
-```cpp
-GLint currentEBO;
-glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &currentEBO);
-std::cout << "Current EBO: " << currentEBO << std::endl;
-```
-
-### Verifying Index Data:
-```cpp
-// Print indices for debugging
-for (int i = 0; i < 6; i++) {
-    std::cout << "Index " << i << ": " << indices[i] << std::endl;
-}
-```
-
-### Visualising Vertex Reuse:
-```cpp
-// Color vertices by usage count to see sharing
-// Vertices used by 2 triangles will have different interpolation
-```
-
-### Common Index Buffer Mistakes:
-- Forgetting to bind EBO before uploading data
-- Using signed integers instead of unsigned for indices
-- Calculating wrong byte size for `glBufferData()`
-- Not updating draw call count when changing indices
-
----
-
-**Congratulations!** You've successfully implemented indexed rendering, a fundamental optimization technique used in all modern 3D graphics applications. Understanding how to efficiently organize vertex data and eliminate duplicates is crucial for rendering complex models with millions of triangles. Every 3D game and application relies on these same principles!
