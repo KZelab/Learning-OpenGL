@@ -1,15 +1,8 @@
 # Branch: 09-test-harness
 
-## Learning Objective
-Implement an interactive test harness for experimenting with and demonstrating OpenGL concepts using the abstracted classes from previous branches. This branch introduces the concept of modular testing, interactive GUI-based experimentation, and systematic validation of graphics programming techniques.
+> **Installing ImGui:** `vcpkg install imgui[glfw-binding,opengl3-binding]`
 
-## What You'll Build
-An interactive application with an ImGui-based test selection menu that allows you to experiment with different OpenGL concepts. Each test demonstrates specific features of our abstracted Shader, Mesh, and Renderer classes through real-time, interactive demonstrations.
 
-![Expected Result](docs/images/09-test-harness.png)
-*A 960x540 window with an ImGui interface for selecting and interacting with different OpenGL concept demonstrations*
-
-## Key Concepts
 
 ### Core Concepts Learned:
 - **Interactive Testing**: Building GUI-based tools for experimenting with graphics concepts
@@ -40,7 +33,7 @@ An interactive application with an ImGui-based test selection menu that allows y
 ### File Structure
 ```
 src/
-├── CMakeHelloWorld.cpp       # Test harness main application with ImGui integration
+├── Main.cpp                  # Test harness main application with ImGui integration
 ├── Shader.h/.cpp             # Shader compilation and uniform management
 ├── Mesh.h/.cpp               # Vertex data and geometry abstraction
 ├── Renderer.h/.cpp           # High-level rendering commands
@@ -74,7 +67,7 @@ Dependencies:
 
 The test harness follows a modular, extensible design:
 
-**Main Application (CMakeHelloWorld.cpp):**
+**Main Application (Main.cpp):**
 - Initialises GLFW, GLEW, and ImGui systems
 - Creates and manages the test menu system
 - Provides main rendering loop with delta time calculation
@@ -110,23 +103,7 @@ TestMenu->RegisterTest<TestRenderer>("Renderer Abstraction", window);
 - Automatic memory management and cleanup
 - Extensible design for adding new test types
 
-## What's Different from Previous Branch (08-abstraction)
 
-### New Additions:
-- **Interactive Test Framework**: Complete GUI-based system for concept demonstration
-- **ImGui Integration**: Real-time parameter adjustment and test navigation
-- **Modular Test System**: Extensible framework for adding new concept demonstrations
-- **TestShader**: Interactive demonstration of shader features and uniform handling
-- **TestMesh**: Visual validation of mesh creation and factory methods
-- **TestRenderer**: OpenGL state management and rendering pipeline testing
-- **Educational Interface**: Descriptive GUI elements explaining demonstrated concepts
-- **Delta Time Animation**: Smooth, time-based animations and parameter updates
-
-### What Stayed the Same:
-- All abstracted classes (Shader, Mesh, Renderer) with identical functionality
-- RAII resource management and error checking
-- OpenGL 3.3 Core Profile rendering pipeline
-- Same mathematical foundations and transformation systems
 
 ## Understanding the Code
 
@@ -316,45 +293,7 @@ glDrawElements(GL_TRIANGLES, cubeMesh->GetIndexCount(), GL_UNSIGNED_INT, 0);
    - Automatic transformation inheritance
    - Efficient frustum culling
 
-## Common Issues & Solutions
 
-### "Linker errors with new classes"
-**Build Configuration Problems:**
-- **Missing source files**: Ensure all .cpp files are in Visual Studio project
-- **Include path issues**: Check header file paths and dependencies
-- **Circular includes**: Use forward declarations in headers
-- **Static library linking**: Verify OpenGL libraries are linked correctly
-
-### "Runtime crashes in destructors"
-**Resource Management Issues:**
-- **Double deletion**: Ensure resources aren't deleted multiple times
-- **Use after destruction**: Don't use objects after they're destroyed
-- **OpenGL context**: Ensure OpenGL context exists when destructors run
-- **Exception safety**: Use RAII consistently throughout codebase
-
-### "Performance regression with abstraction"
-**Overhead Concerns:**
-- **Virtual function calls**: Keep hot paths non-virtual where possible
-- **Excessive state changes**: Batch similar rendering operations
-- **Memory allocations**: Pre-allocate containers and reuse objects
-- **Debug vs Release**: Ensure compiler optimizations are enabled
-
-### "Debugging abstracted OpenGL calls"
-**Error Tracking Issues:**
-- **GlCall macro**: Use consistently for all OpenGL calls
-- **Error context**: Check which specific call failed
-- **State validation**: Verify OpenGL state before operations
-- **Resource tracking**: Monitor resource creation and deletion
-
-## What's Next?
-
-In the next branch (`09-test-harness`), we'll:
-- **Implement testing framework** from the main branch architecture
-- **Add unit tests** for our abstracted classes
-- **Create integration tests** for rendering pipeline
-- **Set up automated testing** for graphics code validation
-- **Learn testing patterns** specific to graphics programming
-- **Establish quality assurance** practices for continued development
 
 ## Resources for Deeper Learning
 
@@ -421,13 +360,3 @@ Shader::~Shader() {
     std::cout << "Shader count: " << shaderCount << std::endl;
 }
 ```
-
-### Common Abstraction Mistakes:
-- Creating objects without proper OpenGL context
-- Forgetting to call Bind() before using objects
-- Not handling OpenGL errors consistently
-- Mixing raw OpenGL calls with abstracted classes
-- Improper resource cleanup ordering
-
----
-
