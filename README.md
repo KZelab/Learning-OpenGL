@@ -1,15 +1,6 @@
 # Branch: 08-abstraction
 
-## Learning Objective
-Master software architecture and object-oriented design by refactoring monolithic OpenGL code into reusable, maintainable classes. This branch demonstrates the transition from procedural programming to proper abstraction layers that form the foundation of scalable graphics applications.
 
-## What You'll Build
-The same five rotating textured cubes as previous branches, but now implemented using proper abstraction layers with Shader, Mesh, and Renderer classes. The functionality remains identical while the code becomes modular, reusable, and easier to maintain.
-
-![Expected Result](docs/images/08-abstraction.png)
-*A 960x540 window displaying the same 5 rotating textured cubes, now powered by abstracted class architecture*
-
-## Key Concepts
 
 ### Core Concepts Learned:
 - **Class-Based Architecture**: Organizing code into logical, reusable components
@@ -47,16 +38,13 @@ src/
 ├── IndexBuffer.h/.cpp     # EBO wrapper (from main branch)
 └── VertexBufferLayout.h   # Vertex attribute layout helper
 
-Dependencies:
-├── OpenGL 3.3+           # Graphics API
-└── GLM Library           # Mathematics
 ```
 
 ### Class Responsibility Overview
 
 The abstracted architecture follows a clear separation of concerns:
 
-**Application Layer (CMakeHelloWorld):**
+**Application Layer (Main):**
 - Coordinates overall rendering workflow
 - Manages scene objects and transformations
 - Handles user input and application lifecycle
