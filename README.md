@@ -1,15 +1,6 @@
 # Branch: 07-texturing
 
-## Learning Objective
-Master texture mapping and UV coordinate systems to apply detailed surface patterns to 3D objects. This branch introduces texture creation, sampling, coordinate systems, and filtering modes - fundamental techniques for creating realistic and visually appealing 3D graphics.
 
-## What You'll Build
-Five rotating 3D cubes with alternating procedural textures - checkerboard and gradient patterns. The implementation demonstrates texture binding, UV coordinate mapping, and shader-based texture sampling with colour blending.
-
-![Expected Result](docs/images/07-texturing.png)
-*A 960x540 window displaying 5 rotating cubes with alternating checkerboard and gradient textures*
-
-## Key Concepts
 
 ### Core Concepts Learned:
 - **Texture Mapping**: Applying 2D images to 3D surface geometry
@@ -43,18 +34,7 @@ Five rotating 3D cubes with alternating procedural textures - checkerboard and g
 - **Mipmapping**: Pre-computed lower resolution versions for distant objects
 - **Anisotropic Filtering**: Advanced filtering for textures viewed at steep angles
 
-## Code Architecture
 
-### File Structure
-```
-src/
-├── CMakeHelloWorld.cpp    # Main application with textured 3D cubes
-└── CMakeHelloWorld.h      # Header file (if needed)
-
-Dependencies:
-├── OpenGL 3.3+           # Texture mapping support
-└── GLM Library           # 3D mathematics and transformations
-```
 
 ### Texture Pipeline
 ```
@@ -70,23 +50,7 @@ Vertex layout: [X, Y, Z, R, G, B, U, V]
 Total cube data: 8 vertices × 8 floats = 64 floats
 ```
 
-## What's Different from Previous Branch (06-depth-testing)
 
-### New Additions:
-- **UV texture coordinates** added to vertex data (2 floats per vertex)
-- **Procedural texture generation** with checkerboard and gradient patterns
-- **Texture sampler uniforms** in fragment shader for texture access
-- **Texture binding and management** in render loop
-- **Texture filtering parameters** (nearest vs linear interpolation)
-- **Multiple texture support** with alternating patterns per cube
-- **Texture memory cleanup** in application shutdown
-
-### What Stayed the Same:
-- 3D cube geometry with 8 vertices and indexed rendering
-- Depth testing and backface culling optimisations
-- MVP transformation pipeline and camera setup
-- Multiple cube rendering with individual transformations
-- Keyboard input controls for interactive movement
 
 ## Understanding the Code
 
@@ -287,44 +251,7 @@ for (unsigned int i = 0; i < 5; i++) {
    - Prepare for bump mapping and normal mapping
    - Calculate proper coordinate systems per face
 
-## Common Issues & Solutions
 
-### "Textures appear black or white"
-**Texture Binding Problems:**
-- **Texture not bound**: Ensure `glBindTexture()` is called before drawing
-- **Uniform not set**: Check `glUniform1i(textureLocation, 0)` is called
-- **Wrong texture unit**: Verify texture unit matches uniform value
-- **Texture not generated**: Confirm `glGenTextures()` and `glTexImage2D()` succeed
-
-### "Textures appear stretched or distorted"
-**UV Coordinate Issues:**
-- **Wrong UV values**: Ensure UV coordinates range from 0.0 to 1.0 for normal mapping
-- **Incorrect stride**: Verify vertex attribute pointer stride includes UV data
-- **UV attribute disabled**: Check `glEnableVertexAttribArray(2)` for UV attribute
-- **Wrong offset**: Confirm UV offset calculation (6 * sizeof(float))
-
-### "Textures appear pixelated or blurry"
-**Filtering Parameter Issues:**
-- **Wrong filter mode**: Use `GL_NEAREST` for pixelated, `GL_LINEAR` for smooth
-- **Missing mipmap**: Consider `GL_LINEAR_MIPMAP_LINEAR` for distant objects
-- **Texture size mismatch**: Use power-of-two dimensions for better compatibility
-
-### "Application crashes during texture operations"
-**Memory Management Problems:**
-- **Invalid texture ID**: Check texture generation succeeded
-- **Wrong texture format**: Ensure format matches data (RGB vs RGBA)
-- **Memory leak**: Always call `glDeleteTextures()` in cleanup
-- **Double deletion**: Don't delete the same texture twice
-
-## What's Next?
-
-In the next branch (`08-abstraction`), we'll:
-- **Refactor code architecture** by breaking apart the monolithic source file
-- **Create Shader class** for shader compilation and management
-- **Implement Mesh class** for vertex data and rendering abstraction
-- **Build Renderer class** for high-level rendering commands
-- **Establish project structure** that scales to complex applications
-- **Prepare foundation** for advanced features like lighting and materials
 
 ## Resources for Deeper Learning
 
@@ -377,14 +304,3 @@ glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &wrapT);
 glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, &minFilter);
 glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, &magFilter);
 ```
-
-### Common Texture Mistakes:
-- Forgetting to bind texture before setting parameters
-- Not enabling texture coordinate vertex attribute
-- Using wrong texture unit in uniform (glUniform1i value)
-- Incorrect UV coordinate ranges or vertex data layout
-- Missing texture deletion causing memory leaks
-
----
-
-**Congratulations!** You've successfully implemented texture mapping and UV coordinate systems! Texture mapping is fundamental to modern 3D graphics - every game, 3D application, and visualization tool relies on textures to create detailed, realistic surfaces. You now understand the complete pipeline from procedural texture generation to GPU sampling and rendering.
