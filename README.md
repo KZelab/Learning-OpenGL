@@ -6,8 +6,6 @@ Learn to render your first geometric primitive - a triangle! This introduces the
 ## What You'll Build
 A simple application that displays an orange triangle on a blue background. This might seem basic, but you're now officially rendering geometry using the modern OpenGL pipeline!
 
-![Expected Result](docs/images/02-triangle-orange.png)
-*A 960x540 window displaying an orange triangle on blue background*
 
 ## Key Concepts
 
@@ -44,14 +42,7 @@ A simple application that displays an orange triangle on a blue background. This
 - **Rasterization**: Converting vertices to pixels
 - **Attribute**: Per-vertex data (like position or color)
 
-## Code Architecture
 
-### File Structure
-```
-src/
-├── CMakeHelloWorld.cpp    # Main application with triangle rendering
-└── CMakeHelloWorld.h      # Header file (if needed)
-```
 
 ### Program Flow
 1. **Initialize GLFW & OpenGL** - Set up windowing and graphics context
@@ -75,23 +66,6 @@ Vertices → Vertex Shader → Primitive Assembly → Rasterization → Fragment
 4. **Rasterization**: Determines which pixels are inside the triangle
 5. **Fragment Shader**: Colours each pixel orange (1.0, 0.2, 1.0)
 
-## What's Different from Previous Branch (01-window-setup)
-
-### New Additions:
-- Triangle vertex data (3 vertices with X,Y,Z coordinates)
-- Vertex Buffer Object (VBO) to store data on GPU
-- Vertex Array Object (VAO) to configure vertex attributes
-- Vertex shader (transforms vertex positions)
-- Fragment shader (sets pixel color)
-- Shader compilation and linking functions
-- `glDrawArrays()` call to render the triangle
-- Proper GPU resource cleanup
-
-### What Stayed the Same:
-- GLFW window creation and management
-- OpenGL context setup
-- Basic render loop structure
-- Blue background color
 
 ## Understanding the Code
 
@@ -189,43 +163,7 @@ The VBO stores the vertex data [-0.5,-0.5,0] [0.5,-0.5,0] [0,0.5,0] in GPU memor
 2. **Multiple triangles** - Draw several triangles with different colours
 3. **Wireframe mode** - Use `glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)`
 
-## Common Issues & Solutions
 
-### "Black screen - no triangle visible"
-**Possible Causes & Solutions:**
-- **Vertices outside NDC range**: Check that coordinates are between -1.0 and 1.0
-- **Shader compilation failed**: Check console for shader error messages
-- **Wrong primitive type**: Ensure using `GL_TRIANGLES` in `glDrawArrays()`
-- **VAO not bound**: Make sure `glBindVertexArray(VAO)` is called before drawing
-
-### "Shader compilation failed"
-**Common Issues:**
-- **GLSL version mismatch**: Ensure `#version 330 core` matches your OpenGL version
-- **Syntax errors**: Check semicolons, braces, and GLSL-specific syntax
-- **Variable naming**: OpenGL variable names are case-sensitive
-
-### "Triangle appears flipped or wrong orientation"
-**Solutions:**
-- **Vertex winding order**: Try reversing the order of vertices
-- **Coordinate system**: Remember Y-axis points up in NDC
-- **Viewport**: Check if `glViewport()` is set correctly (handled by GLFW by default)
-
-### "Performance issues or crashes"
-**Memory Management:**
-- Always delete OpenGL objects: `glDeleteBuffers()`, `glDeleteVertexArrays()`, `glDeleteProgram()`
-- Don't bind buffers unnecessarily in render loop
-- Check for OpenGL errors with `glGetError()`
-
-## What's Next?
-
-In the next branch (`03-vertex-attributes`), we'll:
-- Add **colour as a vertex attribute** (rainbow triangle!)
-- Learn about **multiple vertex attributes** and **interleaved data**
-- Understand **vertex attribute layouts** and **offsets**
-- Create **more complex vertex structures**
-- Explore **attribute locations** and **binding**
-
-## Resources for Deeper Learning
 
 ### Essential Reading:
 - [LearnOpenGL - Hello Triangle](https://learnopengl.com/Getting-started/Hello-Triangle)
@@ -248,32 +186,5 @@ In the next branch (`03-vertex-attributes`), we'll:
 - **OpenGL ES Emulator**: Testing on different GPU capabilities
 - **Shader Playground**: Online GLSL shader testing
 
-## Debug Tips
 
-### Checking for OpenGL Errors:
-```cpp
-GLenum error = glGetError();
-if (error != GL_NO_ERROR) {
-    std::cout << "OpenGL Error: " << error << std::endl;
-}
-```
 
-### Verifying Shader Compilation:
-```cpp
-GLint success;
-glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-if (!success) {
-    // Handle compilation error
-}
-```
-
-### Common OpenGL Error Codes:
-- `GL_INVALID_ENUM` (1280): Wrong enumeration value
-- `GL_INVALID_VALUE` (1281): Numeric argument out of range
-- `GL_INVALID_OPERATION` (1282): Operation not allowed in current state
-
----
-
-**Congratulations!** You've successfully rendered your first triangle using modern OpenGL! You now understand the fundamental building blocks of all 3D graphics: vertices, buffers, shaders, and the graphics pipeline. Every complex 3D model is ultimately made up of triangles just like this one.
-
-This triangle represents your entry into the world of real-time graphics programming. From here, the possibilities are endless!
