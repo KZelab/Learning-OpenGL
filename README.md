@@ -1,15 +1,6 @@
 # Branch: 06-depth-testing
 
-## Learning Objective
-Master depth testing and Z-buffer algorithms to render proper 3D scenes with overlapping objects. This branch introduces the depth buffer, 3D geometry creation, and backface culling - essential concepts for any 3D graphics application.
 
-## What You'll Build
-Five rotating 3D cubes positioned at different depths in space, demonstrating proper depth sorting and hidden surface removal. The scene includes backface culling optimisation and interactive controls for the centre cube.
-
-![Expected Result](docs/images/06-depth-testing.png)
-*A 960x540 window displaying 5 rotating multicoloured cubes at various depths, with proper depth testing ensuring correct visibility*
-
-## Key Concepts
 
 ### Core Concepts Learned:
 - **Depth Buffer (Z-Buffer)**: Hardware-accelerated depth testing for hidden surface removal
@@ -40,18 +31,7 @@ Five rotating 3D cubes positioned at different depths in space, demonstrating pr
 - **Near/Far Plane**: Depth range boundaries in perspective projection
 - **Z-Fighting**: Visual artifacts from insufficient depth buffer precision
 
-## Code Architecture
 
-### File Structure
-```
-src/
-├── CMakeHelloWorld.cpp    # Main application with 3D cubes and depth testing
-└── CMakeHelloWorld.h      # Header file (if needed)
-
-Dependencies:
-├── OpenGL 3.3+           # Depth testing support
-└── GLM Library           # 3D mathematics and transformations
-```
 
 ### Depth Testing Pipeline
 ```
@@ -72,24 +52,6 @@ Total vertex data: 8 × 6 = 48 floats
 Index array: 36 unsigned integers
 ```
 
-## What's Different from Previous Branch (05-transformations)
-
-### New Additions:
-- **Depth testing enabled** with `glEnable(GL_DEPTH_TEST)` and depth buffer clearing
-- **3D cube geometry** replacing flat square with proper 8-vertex cube
-- **Indexed rendering with EBO** for efficient vertex reuse across 12 triangles
-- **Backface culling** optimisation eliminating non-visible triangle faces
-- **Multiple cube instances** positioned at different Z-depths
-- **Per-object transformations** with individual rotation speeds and axes
-- **Proper winding order** ensuring correct front-face determination
-
-### What Stayed the Same:
-- MVP transformation pipeline (Model-View-Projection matrices)
-- Vertex shader with transformation matrix uniform
-- Fragment shader with interpolated colours
-- Keyboard input handling (WASD + Q/E controls)
-- Time-based rotation animation
-- GLFW window management and OpenGL context setup
 
 ## Understanding the Code
 
@@ -239,46 +201,7 @@ for (unsigned int i = 0; i < 5; i++) {
    - Render scene from light's perspective to depth texture
    - Use depth texture for shadow calculations in main render
 
-## Common Issues & Solutions
 
-### "Cubes rendering in wrong order"
-**Depth Testing Problems:**
-- **Depth test disabled**: Ensure `glEnable(GL_DEPTH_TEST)` is called
-- **Depth buffer not cleared**: Add `GL_DEPTH_BUFFER_BIT` to `glClear()`
-- **Wrong depth function**: Check `glDepthFunc()` setting (GL_LESS is standard)
-- **Near/far plane issues**: Adjust perspective projection parameters
-
-### "Z-fighting artifacts"
-**Depth Precision Issues:**
-- **Objects too close**: Increase separation between cube positions
-- **Near plane too close**: Increase near plane distance in `glm::perspective()`
-- **Far plane too far**: Decrease far plane distance for better precision
-- **Insufficient depth bits**: Check depth buffer bit depth (usually 24-bit)
-
-### "Cubes appear inside-out"
-**Winding Order Problems:**
-- **Wrong face orientation**: Ensure indices use counter-clockwise winding
-- **Culling incorrect faces**: Check `glCullFace()` and `glFrontFace()` settings
-- **Inside-out geometry**: Verify vertex positions and normal directions
-
-### "Poor performance with many cubes"
-**Rendering Optimisation:**
-- **Backface culling disabled**: Enable `GL_CULL_FACE` for ~50% triangle reduction
-- **Too many draw calls**: Consider instanced rendering for many identical objects
-- **Excessive overdraw**: Use depth pre-pass or early-Z testing
-- **Fragment shader complexity**: Optimise fragment shader for better GPU performance
-
-## What's Next?
-
-In the next branch (`07-texturing`), we'll:
-- Learn about **texture mapping** and UV coordinates for detailed surfaces
-- Implement **texture loading** from image files (PNG, JPG)
-- Understand **texture filtering** (nearest, linear, mipmapping)
-- Apply **multiple textures** to different cube faces
-- Explore **texture wrapping modes** and coordinate systems
-- Create **textured 3D objects** with realistic surface detail
-
-## Resources for Deeper Learning
 
 ### Essential Reading:
 - [LearnOpenGL - Depth Testing](https://learnopengl.com/Advanced-OpenGL/Depth-testing)
@@ -337,13 +260,3 @@ glDisable(GL_CULL_FACE);
 glCullFace(GL_FRONT);
 ```
 
-### Common Depth Testing Mistakes:
-- Forgetting to enable depth testing before rendering
-- Not clearing the depth buffer each frame
-- Using wrong depth comparison function
-- Incorrect near/far plane ratios causing precision loss
-- Wrong vertex winding order causing backface culling issues
-
----
-
-**Congratulations!** You've successfully implemented depth testing and 3D cube rendering! Understanding the depth buffer is crucial for any 3D application - from games to CAD software to scientific visualisation. The Z-buffer algorithm you've implemented is the foundation of modern 3D graphics hardware acceleration.
