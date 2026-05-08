@@ -45,7 +45,7 @@
     <ClCompile Include="src\tests\testTexture2D.cpp" />
     <ClCompile Include="src\tests\testRayCasting.cpp" />
     <ClCompile Include="src\utils\Camera.cpp" />
-    <ClCompile Include="src\CMakeHelloWorld.cpp" />
+    <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Shader.cpp" />
@@ -92,7 +92,7 @@
     <ClInclude Include="src\tests\testTexture2D.h" />
     <ClInclude Include="src\tests\testRayCasting.h" />
     <ClInclude Include="src\utils\Camera.h" />
-    <ClInclude Include="src\CMakeHelloWorld.h" />
+    <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Shader.h" />

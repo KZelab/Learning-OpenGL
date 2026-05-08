@@ -39,7 +39,7 @@
     <ClCompile Include="src\vendor\stb_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CMakeHelloWorld.cpp">
+    <ClCompile Include="src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\IndexBuffer.cpp">
@@ -179,7 +179,7 @@
     <ClInclude Include="src\vendor\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CMakeHelloWorld.h">
+    <ClInclude Include="src\Main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\IndexBuffer.h">
