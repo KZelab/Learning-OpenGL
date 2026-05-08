@@ -1,15 +1,5 @@
 # Branch: 05-transformations
 
-## Learning Objective
-Learn 3D transformations and the graphics pipeline by implementing Model-View-Projection matrices. This introduces coordinate systems, matrix mathematics, and interactive controls that form the foundation of all 3D graphics applications.
-
-## What You'll Build
-An animated, interactive square that continuously rotates and responds to keyboard input. The square can be moved with WASD keys and scaled with Q/E, all rendered with proper 3D perspective projection.
-
-![Expected Result](docs/images/05-animated-square.png)
-*A 960x540 window displaying a rotating rainbow square that responds to keyboard input in 3D space*
-
-## Key Concepts
 
 ### Core Concepts Learned:
 - **Transformation Matrices**: Mathematical tools for moving, rotating, and scaling objects
@@ -45,18 +35,7 @@ An animated, interactive square that continuously rotates and responds to keyboa
 - **Identity Matrix**: Neutral transformation (no change)
 - **Homogeneous Coordinates**: 4D vectors for 3D transformations
 
-## Code Architecture
 
-### File Structure
-```
-src/
-├── CMakeHelloWorld.cpp    # Main application with 3D transformations
-└── CMakeHelloWorld.h      # Header file (if needed)
-
-Dependencies:
-├── GLM Library            # Mathematics for 3D transformations
-└── OpenGL 3.3+           # Matrix uniform support
-```
 
 ### Transformation Pipeline
 ```
@@ -74,23 +53,7 @@ MVP = Projection * View * Model
 ```
 This reads right-to-left: Model → View → Projection
 
-## What's Different from Previous Branch (04-indexed-rendering)
 
-### New Additions:
-- **GLM mathematics library** for 3D vector and matrix operations
-- **MVP matrix uniform** passed to vertex shader each frame
-- **Perspective projection** creating realistic 3D depth
-- **View/camera matrix** positioning virtual camera in 3D space
-- **Dynamic model transformations** with rotation animation
-- **Keyboard input handling** for interactive movement and scaling
-- **Time-based animation** using `glfwGetTime()`
-
-### What Stayed the Same:
-- Indexed square geometry (4 vertices, 6 indices)
-- Vertex attributes (position + colour)
-- Fragment shader (unchanged)
-- VBO/VAO/EBO setup and cleanup
-- Basic render loop structure
 
 ## Understanding the Code
 
@@ -214,43 +177,7 @@ Small incremental movements accumulate over frames for smooth motion.
 3. **Smooth input handling** - Implement acceleration and deceleration
 4. **Camera animation** - Automatic camera movement around the scene
 
-## Common Issues & Solutions
 
-### "Square not visible or distorted"
-**Possible Causes & Solutions:**
-- **Wrong matrix order**: Ensure `MVP = projection * view * model` (not the reverse)
-- **Camera too close/far**: Adjust camera position in `glm::lookAt()`
-- **Wrong field of view**: Try different angles in `glm::perspective()`
-- **Aspect ratio mismatch**: Use actual window width/height ratio
-
-### "Animation too fast or slow"
-**Timing Issues:**
-- **Frame rate dependent**: Use `deltaTime` instead of fixed increments
-- **Rotation speed**: Multiply `currentTime` by a speed factor
-- **Input sensitivity**: Adjust movement amounts in keyboard handling
-
-### "Matrix uniform not updating"
-**Uniform Upload Problems:**
-- **Location not found**: Check `glGetUniformLocation()` return value (-1 = not found)
-- **Wrong shader active**: Call `glUseProgram()` before `glUniformMatrix4fv()`
-- **Shader compilation error**: Uniform might be optimised away if unused
-
-### "Keyboard input not responsive"
-**Input Handling Issues:**
-- **Polling location**: Call `glfwPollEvents()` in render loop
-- **Key state persistence**: Keys need to be held down, not just pressed once
-- **Movement amounts**: Might be too small to see (increase values for testing)
-
-## What's Next?
-
-In the next branch (`06-depth-testing`), we'll:
-- Learn about **depth buffers** and Z-testing for proper 3D rendering
-- Understand **depth function** and **depth writing**
-- Implement **multiple overlapping objects** that render correctly
-- Create **3D cube geometry** instead of flat squares
-- Explore **backface culling** and **winding order**
-
-## Resources for Deeper Learning
 
 ### Essential Reading:
 - [LearnOpenGL - Transformations](https://learnopengl.com/Getting-started/Transformations)
@@ -268,20 +195,8 @@ In the next branch (`06-depth-testing`), we'll:
 - Gimbal lock and rotation interpolation
 - Camera control systems and movement patterns
 
-### Tools for Development:
-- **RenderDoc**: Visualise transformation matrices and uniform values
-- **Linear Algebra Visualizers**: Understand matrix transformations graphically
-- **GLM Documentation**: Complete reference for all mathematics functions
 
-## Debug Tips
 
-### Checking Uniform Locations:
-```cpp
-int mvpLocation = glGetUniformLocation(shaderProgram, "u_MVP");
-if (mvpLocation == -1) {
-    std::cout << "Error: u_MVP uniform not found!" << std::endl;
-}
-```
 
 ### Debugging Matrix Values:
 ```cpp
@@ -294,20 +209,3 @@ for (int i = 0; i < 4; i++) {
     std::cout << std::endl;
 }
 ```
-
-### Verifying Transformations:
-```cpp
-// Test with identity matrix (should render normally)
-glm::mat4 mvp = glm::mat4(1.0f);  // No transformation
-glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, glm::value_ptr(mvp));
-```
-
-### Common Matrix Mistakes:
-- Forgetting to multiply matrices in correct order (P * V * M)
-- Using degrees instead of radians in GLM functions
-- Not updating uniforms every frame for animations
-- Applying transformations in wrong coordinate space
-
----
-
-**Congratulations!** You've successfully implemented 3D transformations and the graphics pipeline! Understanding the Model-View-Projection matrix chain is fundamental to all 3D graphics programming. Every 3D game, CAD application, and visualization tool uses these same mathematical principles to position and display objects in 3D space.
