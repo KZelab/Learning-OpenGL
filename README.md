@@ -1,15 +1,5 @@
 # Branch: 03-vertex-attributes
 
-## Learning Objective
-Learn to use multiple vertex attributes by creating a rainbow triangle! This introduces interleaved vertex data, vertex attribute configuration, and shader communication between vertex and fragment stages.
-
-## What You'll Build
-A beautiful rainbow triangle where each vertex has its own colour (red, green, blue) and OpenGL automatically interpolates the colours across the triangle surface, creating smooth colour gradients.
-
-![Expected Result](docs/images/03-rainbow-triangle.png)
-*A 960x540 window displaying a rainbow triangle with interpolated colours*
-
-## Key Concepts
 
 ### Core Concepts Learned:
 - **Multiple Vertex Attributes**: Each vertex can have multiple properties (position, colour, normals, etc.)
@@ -38,14 +28,7 @@ A beautiful rainbow triangle where each vertex has its own colour (red, green, b
 - **Attribute Location**: Index number identifying vertex attributes
 - **Rasterization Interpolation**: How values are smoothly blended across surfaces
 
-## Code Architecture
 
-### File Structure
-```
-src/
-├── CMakeHelloWorld.cpp    # Main application with rainbow triangle
-└── CMakeHelloWorld.h      # Header file (if needed)
-```
 
 ### Vertex Data Layout
 ```
@@ -191,41 +174,6 @@ OpenGL automatically interpolates vertex colours across the triangle surface:
 3. **Multiple triangles** with different colour schemes
 4. **Index buffer usage** - Eliminate duplicate vertices in square example
 
-## Common Issues & Solutions
-
-### "Triangle appears black or wrong colours"
-**Possible Causes & Solutions:**
-- **Wrong attribute locations**: Ensure VAO locations match shader locations
-- **Incorrect stride/offset**: Check calculations for interleaved data
-- **Missing glEnableVertexAttribArray()**: Enable all used attributes
-- **Shader compilation errors**: Check console for GLSL errors
-
-### "Colours not interpolating smoothly"
-**Solutions:**
-- **Vertex order**: Ensure consistent winding order
-- **Data types**: Use float (not int) for colour values
-- **Normalisation**: Colour values should be 0.0 to 1.0 range
-
-### "Attribute configuration errors"
-**Memory Layout Issues:**
-- **Stride calculation**: Total bytes per vertex (6 * sizeof(float))
-- **Offset calculation**: Bytes to skip before attribute starts
-- **Data alignment**: Ensure proper float alignment in memory
-
-### "Shader linking failures"
-**Common Problems:**
-- **Mismatched variable names**: Vertex shader `out` must match fragment `in`
-- **Type mismatches**: vec3 output must connect to vec3 input
-- **Missing precision qualifiers**: May be needed on some platforms
-
-## What's Next?
-
-In the next branch (`04-indexed-rendering`), we'll:
-- Learn about **Index Buffer Objects (EBO)** for efficient geometry
-- **Eliminate duplicate vertices** when creating squares and complex shapes
-- Understand **indexed vs array drawing** methods
-- Create **more complex geometry** efficiently
-- Explore **triangle strip and fan primitives**
 
 ## Resources for Deeper Learning
 
@@ -249,29 +197,3 @@ In the next branch (`04-indexed-rendering`), we'll:
 - **OpenGL Debugger**: Verify VAO configuration
 - **GPU Memory Profilers**: Analyse vertex data layout efficiency
 
-## Debug Tips
-
-### Checking Vertex Attribute Configuration:
-```cpp
-GLint maxAttribs;
-glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxAttribs);
-std::cout << "Maximum vertex attributes: " << maxAttribs << std::endl;
-```
-
-### Verifying Shader Variables:
-```cpp
-GLint location = glGetAttribLocation(shaderProgram, "aColour");
-if (location == -1) {
-    std::cout << "Attribute 'aColour' not found in shader!" << std::endl;
-}
-```
-
-### Common Attribute Layout Mistakes:
-- Forgetting to multiply by sizeof(float) in stride/offset
-- Using wrong attribute location numbers
-- Mixing up the order of position and colour data
-- Not enabling vertex attribute arrays
-
----
-
-**Congratulations!** You've successfully created your first multi-attribute vertex setup! Understanding vertex attributes is fundamental to all advanced graphics programming - textures, normals, tangents, and more all work using these same principles. The rainbow triangle demonstrates the power of GPU interpolation that makes modern graphics so smooth and beautiful.
