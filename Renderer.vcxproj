@@ -25,7 +25,7 @@
     <ClCompile Include="src\Player\InputHandler.cpp" />
     <ClCompile Include="src\Voxel\ChunkMeshBuilder.cpp" />
     <ClCompile Include="src\Voxel\Chunk.cpp" />
-    <ClCompile Include="src\CMakeHelloWorld.cpp" />
+    <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
@@ -57,7 +57,7 @@
     <ClInclude Include="src\Player\InputHandler.h" />
     <ClInclude Include="src\Voxel\ChunkMeshBuilder.h" />
     <ClInclude Include="src\Voxel\Chunk.h" />
-    <ClInclude Include="src\CMakeHelloWorld.h" />
+    <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Renderer.h" />
