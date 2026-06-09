@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[SOLUTION] Index Buffers and Uniforms | ACCA6021</title>
+
+  <!-- Prism tomorrow theme - inlined to avoid Moodle CSP blocking cdnjs -->
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    .expected-result {
+      background: #eaf4ea;
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .extension {
+      background: #fef9ec;
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+    }
+
+    .extension strong { color: #7a5c00; }
+
+    .warning-box {
+      background: #fff8ec;
+      border-left: 4px solid #C8A951;
+      border-radius: 4px;
+      padding: 0.85rem 1rem;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.95rem;
+    }
+
+    .warning-box strong { color: #7a5c00; }
+
+    .info-box {
+      background: #eef4fb;
+      border-left: 4px solid #003366;
+      border-radius: 4px;
+      padding: 0.85rem 1rem;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.95rem;
+    }
+
+    .info-box strong { color: #003366; }
+
+    .worked-solution {
+      border-top: 3px solid var(--uwtsd-gold);
+    }
+
+    .worked-solution h2 {
+      color: #7a5c00;
+    }
+
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021 - Lab 05 Solution"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 05 - Index Buffers and Uniforms [SOLUTION]</h1>
+  </div>
+</header>
+
+<main>
+
+  <!-- 1. Overview -->
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>
+      Lab 04 exposed two problems. The vertex buffer wasted memory repeating two corner
+      positions, and the quad's colour was fixed at compile time inside the GLSL source.
+      This lab solves both. An <strong>Index Buffer Object (IBO)</strong> lets the GPU
+      reuse vertex positions by number rather than repeating them, shrinking the quad from
+      6 stored vertices to 4. A <strong>uniform variable</strong> opens a data channel
+      from C++ into the running shader, so the colour can be chosen and changed at runtime
+      without touching the GLSL file.
+    </p>
+    <p>
+      This lab follows directly from the lecture on shaders and uniforms. The lecture
+      covered the theory. This lab is the practical implementation.
+    </p>
+  </section>
+
+  <!-- 2. Prerequisites -->
+  <section class="lab-section">
+    <h2>Prerequisites</h2>
+    <ul>
+      <li>Lab 04 complete: a quad renders as two triangles with 6 vertices and <code>glDrawArrays</code>.</li>
+      <li><code>src/main.cpp</code> contains <code>parseShader</code>, <code>compileShader</code>, and <code>createProgram</code> from Lab 03.</li>
+      <li><code>res/shaders/triangle.shader</code> exists and loads correctly.</li>
+    </ul>
+  </section>
+
+  <!-- 3. Learning Objectives -->
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Create an Index Buffer Object and explain how it eliminates duplicated vertex data.</li>
+      <li>Use <code>glDrawElements</code> in place of <code>glDrawArrays</code> and explain the difference between vertex count and index count.</li>
+      <li>Declare a <code>uniform</code> variable in GLSL and explain how it differs from a vertex attribute.</li>
+      <li>Retrieve a uniform location with <code>glGetUniformLocation</code> and write a value with <code>glUniform4f</code>.</li>
+      <li>Diagnose the two most common uniform mistakes: querying the location before the program is linked, and calling <code>glUniform</code> without an active program.</li>
+    </ul>
+  </section>
+
+  <!-- 4. Concept -->
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>
+      Lab 04 stored 6 vertices to draw a quad, repeating two corner positions to satisfy
+      <code>glDrawArrays</code>. An <strong>Index Buffer Object (IBO)</strong> removes
+      the duplication. Instead of listing every vertex in draw order, you store only the
+      4 unique positions and supply a separate array of integer indices. Each index is the
+      0-based slot of a position in the VBO. The GPU assembles triangles by looking up
+      positions by index rather than reading them sequentially. A quad needs 6 indices
+      but only 4 stored positions: the saving grows substantially for dense meshes where
+      every vertex is shared by an average of six triangles.
+    </p>
+    <p>
+      An IBO is a standard buffer object bound to <code>GL_ELEMENT_ARRAY_BUFFER</code>
+      instead of <code>GL_ARRAY_BUFFER</code>. The VAO records the element buffer binding
+      as part of its state, so rebinding the VAO in the render loop restores it
+      automatically. The draw call changes from <code>glDrawArrays</code> to
+      <code>glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0)</code>: the second
+      argument is the number of <em>indices</em>, not vertices.
+    </p>
+    <p>
+      A <strong>uniform</strong> is a value passed from C++ to a shader that stays
+      constant for every vertex and fragment processed in a single draw call. Unlike a
+      vertex attribute, which changes per vertex, a uniform is global to the program. You
+      declare it in GLSL with <code>uniform type name</code>, then from C++ retrieve its
+      location once with <code>glGetUniformLocation</code> and write a value each frame
+      with the matching <code>glUniform*</code> variant. The location must be retrieved
+      after the program is linked. The value must be set while the program is active, so
+      call <code>glUseProgram</code> first. A return value of <code>-1</code> from
+      <code>glGetUniformLocation</code> means the name was not found - check for typos or
+      confirm the uniform is actually used in the shader.
+    </p>
+  </section>
+
+  <!-- 5. Tasks -->
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Add a Uniform to the Shader</h3>
+      <p>
+        Open <code>res/shaders/triangle.shader</code> and update the fragment section so
+        the colour comes from a uniform rather than a hard-coded constant. The vertex
+        section does not change.
+      </p>
+      <ol>
+        <li>Add the line <code>uniform vec4 uColour;</code> before the <code>out vec4 FragColour;</code> declaration.</li>
+        <li>Replace the hard-coded <code>vec4(0.2, 0.6, 1.0, 1.0)</code> assignment with <code>uColour</code>.</li>
+      </ol>
+<pre><code class="language-glsl">#shader fragment
+#version 430 core
+// TODO: declare uniform vec4 uColour here
+out vec4 FragColour;
+void main() {
+    // TODO: assign uColour to FragColour instead of the hard-coded colour
+}</code></pre>
+
+      <div class="info-box">
+        <strong>Why before the out declaration?</strong> Uniform declarations are
+        global to the shader and conventionally placed at the top of the source, before
+        any <code>out</code> or function definitions. The GLSL compiler does not enforce
+        the order, but keeping uniforms at the top makes them easy to find.
+      </div>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Reduce to 4 Unique Vertices</h3>
+      <p>
+        Replace the 6-entry vertex array in <code>src/main.cpp</code> with the 4-entry
+        array below. Remove the duplicate entries that were needed by
+        <code>glDrawArrays</code>. The index array (Task 3) will tell the GPU which
+        positions to use and in what order.
+      </p>
+<pre><code class="language-cpp">// file: src/main.cpp -- replace the existing vertices[] array
+float vertices[] = {
+    -0.5f, -0.5f, 0.0f,   // 0: bottom-left
+     0.5f, -0.5f, 0.0f,   // 1: bottom-right
+     0.5f,  0.5f, 0.0f,   // 2: top-right
+    -0.5f,  0.5f, 0.0f    // 3: top-left
+};</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Define the Index Array</h3>
+      <p>
+        Add the index array immediately after the vertex array. Each row defines one
+        triangle by listing three vertex slot numbers. The positions themselves are not
+        repeated - only the slot references are.
+      </p>
+<pre><code class="language-cpp">// file: src/main.cpp -- add after vertices[]
+unsigned int indices[] = {
+    0, 1, 2,   // triangle 1: bottom-left -> bottom-right -> top-right
+    2, 3, 0    // triangle 2: top-right -> top-left -> bottom-left
+};</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 4 - Create and Upload the IBO</h3>
+      <p>
+        Add the IBO setup after the <code>glVertexAttribPointer</code> and
+        <code>glEnableVertexAttribArray</code> calls, while the VAO is still bound. The
+        VAO stores the element buffer binding as part of its state.
+      </p>
+      <ol>
+        <li>Declare <code>unsigned int ibo</code>.</li>
+        <li>Call <code>glGenBuffers(1, &amp;ibo)</code>.</li>
+        <li>Call <code>glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo)</code>.</li>
+        <li>Call <code>glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW)</code>.</li>
+        <li>Now unbind the VAO with <code>glBindVertexArray(0)</code>.</li>
+      </ol>
+<pre><code class="language-cpp">// file: src/main.cpp -- add after glEnableVertexAttribArray, while VAO is still bound
+// TODO: declare unsigned int ibo
+// TODO: generate one buffer and store in ibo
+// TODO: bind as GL_ELEMENT_ARRAY_BUFFER
+// TODO: upload sizeof(indices) bytes with GL_STATIC_DRAW
+
+glBindVertexArray(0);  // unbind VAO after the IBO is bound, not before</code></pre>
+
+      <div class="warning-box">
+        <strong>Binding order matters.</strong> The IBO must be bound while the VAO is
+        active. The VAO records which element buffer is attached. If you call
+        <code>glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)</code> while the VAO is still
+        bound, you remove the reference and the draw call will read from the wrong
+        location. Unbind the VAO first, then optionally unbind other buffers.
+      </div>
+
+      <p>
+        Also add <code>glDeleteBuffers(1, &amp;ibo)</code> to the cleanup section after
+        the render loop, alongside the existing VBO cleanup.
+      </p>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 5 - Switch to glDrawElements</h3>
+      <p>
+        Inside the render loop, replace the <code>glDrawArrays</code> call. The new call
+        reads 6 indices from the bound IBO and uses them to assemble two triangles from
+        the 4 positions in the VBO.
+      </p>
+      <ol>
+        <li>Remove: <code>glDrawArrays(GL_TRIANGLES, 0, 6);</code></li>
+        <li>Add the call below.</li>
+      </ol>
+<pre><code class="language-cpp">// TODO: replace glDrawArrays with glDrawElements
+//       primitive: GL_TRIANGLES
+//       count: 6  (number of indices, not vertices)
+//       type: GL_UNSIGNED_INT
+//       offset: (void*)0</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 6 - Set the Uniform Value from C++</h3>
+      <p>
+        Wire the C++ side of the uniform. The location is queried once after the program
+        is created and cached for reuse. The value is written each frame after the program
+        is activated.
+      </p>
+      <ol>
+        <li>
+          After the <code>createProgram</code> call and before the render loop, retrieve
+          and store the uniform location:
+        </li>
+      </ol>
+<pre><code class="language-cpp">// file: src/main.cpp -- add after createProgram, before the render loop
+// TODO: call glGetUniformLocation(shader, "uColour") and store the result in int colourLoc
+//       if colourLoc is -1, the name was not found - check the spelling matches the shader exactly</code></pre>
+      <ol start="2">
+        <li>
+          Inside the render loop, after <code>glUseProgram(shader)</code> and before
+          the draw call, set the colour:
+        </li>
+      </ol>
+<pre><code class="language-cpp">// TODO: call glUniform4f(colourLoc, r, g, b, a) with a colour of your choice
+//       glUniform4f takes four floats in the range 0.0 to 1.0 (red, green, blue, alpha)</code></pre>
+
+      <div class="info-box">
+        <strong>Two rules for uniforms.</strong> First: always retrieve the location
+        after the program has been linked - not before. Second: always call
+        <code>glUseProgram</code> before any <code>glUniform</code> call. If either rule
+        is broken the value is silently ignored and the quad appears black (the default
+        for an unset <code>vec4</code> uniform is all zeros).
+      </div>
+    </div>
+
+  </section>
+
+  <!-- 8. Solution -->
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try to complete the tasks above before reading this section.</p>
+    <p>The updated shader file is shown first, then the complete <code>src/main.cpp</code>.</p>
+
+    <div class="task-block">
+      <h3>res/shaders/triangle.shader</h3>
+<pre><code class="language-glsl">#shader vertex
+#version 430 core
+layout (location = 0) in vec3 aPos;
+void main() {
+    gl_Position = vec4(aPos, 1.0);
+}
+
+#shader fragment
+#version 430 core
+uniform vec4 uColour;
+out vec4 FragColour;
+void main() {
+    FragColour = uColour;
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>src/main.cpp</h3>
+<pre><code class="language-cpp">// file: src/main.cpp -- complete solution for Lab 05
+
+#include &lt;GL/glew.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;fstream&gt;
+#include &lt;sstream&gt;
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+struct ShaderSource { std::string vertex; std::string fragment; };
+
+ShaderSource parseShader(const std::string&amp; filepath) {
+    std::ifstream file(filepath);
+    std::stringstream ss[2];
+    int type = -1;
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.find("#shader vertex") != std::string::npos) type = 0;
+        else if (line.find("#shader fragment") != std::string::npos) type = 1;
+        else if (type != -1) ss[type] &lt;&lt; line &lt;&lt; '\n';
+    }
+    return { ss[0].str(), ss[1].str() };
+}
+
+static unsigned int compileShader(unsigned int type, const std::string&amp; source) {
+    unsigned int id = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(id, 1, &amp;src, nullptr);
+    glCompileShader(id);
+    int result;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &amp;result);
+    if (!result) {
+        int length;
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &amp;length);
+        char* message = new char[length];
+        glGetShaderInfoLog(id, length, &amp;length, message);
+        std::cerr &lt;&lt; "Shader compile error: " &lt;&lt; message &lt;&lt; '\n';
+        delete[] message;
+        return 0;
+    }
+    return id;
+}
+
+static unsigned int createProgram(const std::string&amp; vertSrc, const std::string&amp; fragSrc) {
+    unsigned int program = glCreateProgram();
+    unsigned int vs = compileShader(GL_VERTEX_SHADER, vertSrc);
+    unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragSrc);
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+    return program;
+}
+
+int main()
+{
+    if (!glfwInit()) { std::cerr &lt;&lt; "GLFW init failed\n"; return -1; }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Window", nullptr, nullptr);
+    if (!window) { glfwTerminate(); return -1; }
+    glfwMakeContextCurrent(window);
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) { glfwTerminate(); return -1; }
+    std::cout &lt;&lt; "OpenGL: " &lt;&lt; glGetString(GL_VERSION) &lt;&lt; '\n';
+    glfwSwapInterval(1);
+
+    // 4 unique vertex positions (down from 6 in Lab 04)
+    float vertices[] = {
+        -0.5f, -0.5f, 0.0f,   // 0: bottom-left
+         0.5f, -0.5f, 0.0f,   // 1: bottom-right
+         0.5f,  0.5f, 0.0f,   // 2: top-right
+        -0.5f,  0.5f, 0.0f    // 3: top-left
+    };
+
+    // 6 indices reference the 4 positions without repeating position data
+    unsigned int indices[] = {
+        0, 1, 2,   // triangle 1
+        2, 3, 0    // triangle 2
+    };
+
+    // VAO records the vertex layout and the IBO reference
+    unsigned int vao;
+    glGenVertexArrays(1, &amp;vao);
+    glBindVertexArray(vao);
+
+    // VBO holds the 4 unique vertex positions
+    unsigned int vbo;
+    glGenBuffers(1, &amp;vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // IBO holds the 6 indices - must be bound while the VAO is active
+    unsigned int ibo;
+    glGenBuffers(1, &amp;ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // unbind VAO first to preserve the IBO reference stored in it
+    glBindVertexArray(0);
+
+    // load shader and cache the uniform location once after linking
+    ShaderSource src = parseShader("res/shaders/triangle.shader");
+    unsigned int shader = createProgram(src.vertex, src.fragment);
+    int colourLoc = glGetUniformLocation(shader, "uColour");
+
+    while (!glfwWindowShouldClose(window))
+    {
+        glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // activate the program before setting uniforms
+        glUseProgram(shader);
+        glUniform4f(colourLoc, 1.0f, 0.5f, 0.0f, 1.0f);  // orange
+
+        glBindVertexArray(vao);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    glDeleteVertexArrays(1, &amp;vao);
+    glDeleteBuffers(1, &amp;vbo);
+    glDeleteBuffers(1, &amp;ibo);
+    glDeleteProgram(shader);
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}</code></pre>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-glsl.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "lab-assembler": {
+      "command": "node",
+      "args": ["tools/lab-assembler/dist/index.js"]
+    }
+  }
+}

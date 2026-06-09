@@ -9,3 +9,5 @@
 *.cache
 x64/
 docs/
+tools/lab-assembler/node_modules/
+tools/lab-assembler/dist/

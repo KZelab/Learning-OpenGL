@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[SOLUTION] First Triangle | ACCA6021</title>
+
+  <!-- Prism tomorrow theme - inlined to avoid Moodle CSP blocking cdnjs -->
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    .expected-result {
+      background: #eaf4ea;
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .extension {
+      background: #fef9ec;
+      border-radius: 6px;
+      padding: 0.85rem 1rem;
+    }
+
+    .extension strong { color: #7a5c00; }
+
+    .info-box {
+      background: #eef4fb;
+      border-left: 4px solid #003366;
+      border-radius: 4px;
+      padding: 0.85rem 1rem;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.95rem;
+    }
+
+    .info-box strong { color: #003366; }
+
+    .worked-solution {
+      border-top: 3px solid var(--uwtsd-gold);
+    }
+
+    .worked-solution h2 {
+      color: #7a5c00;
+    }
+
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021 - Lab 02 Solution"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 02 - First Triangle [SOLUTION]</h1>
+  </div>
+</header>
+
+<main>
+
+  <!-- 1. Overview -->
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>
+      In the Window and Context lab (Lab 01) you built a render loop that clears the screen
+      each frame. This lab focuses on putting something on that screen for the first time.
+      You will upload triangle geometry from CPU RAM to the GPU using a
+      <strong>Vertex Buffer Object (VBO)</strong>, record how the GPU should interpret it
+      using a <strong>Vertex Array Object (VAO)</strong>, and issue your first draw call with
+      <code>glDrawArrays</code>.
+    </p>
+    <p>
+      This lab uses OpenGL's built-in <strong>fixed-function pipeline</strong> so you can
+      concentrate entirely on the geometry upload process. No custom shaders are written here.
+      The Shaders lab (Lab 03) will replace the hardware defaults with your own GLSL programs.
+      The VAO and VBO pattern you establish in this lab is the foundation that every
+      subsequent lab builds on.
+    </p>
+  </section>
+
+  <!-- 2. Prerequisites -->
+  <section class="lab-section">
+    <h2>Prerequisites</h2>
+    <ul>
+      <li>Lab 01 complete: an 800x600 GLFW window opens, the render loop runs at 60 fps, and the console prints the OpenGL version.</li>
+      <li>GLFW, GLEW, and GLM are linked in the project via vcpkg.</li>
+      <li><code>src/main.cpp</code> contains a working render loop from the Window and Context lab (Lab 01).</li>
+    </ul>
+  </section>
+
+  <!-- 3. Learning Objectives -->
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Explain why vertex data must be uploaded to GPU memory before the GPU can draw it.</li>
+      <li>Create a Vertex Buffer Object and transfer float data to the GPU using <code>glBufferData</code>.</li>
+      <li>Create a Vertex Array Object and record a vertex layout using <code>glVertexAttribPointer</code>.</li>
+      <li>Issue a draw call with <code>glDrawArrays</code> and understand the primitive type and vertex count arguments.</li>
+      <li>Describe the role of OpenGL's fixed-function pipeline and how it differs from a custom GLSL shader.</li>
+    </ul>
+  </section>
+
+  <!-- 4. Concept -->
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>
+      The GPU is a separate processor with its own dedicated memory. Your triangle coordinates
+      exist only in CPU RAM. Before any rendering can happen, that data must cross the system
+      bus into GPU VRAM. A <strong>Vertex Buffer Object (VBO)</strong> is an OpenGL-managed
+      block of GPU memory that holds raw bytes. You create one with <code>glGenBuffers</code>,
+      select it as the active buffer with <code>glBindBuffer(GL_ARRAY_BUFFER, vbo)</code>,
+      then copy your vertex array into it with <code>glBufferData</code>. The
+      <code>GL_STATIC_DRAW</code> hint tells the driver the data will not change often, so it
+      can place the buffer in fast GPU-local memory.
+    </p>
+    <p>
+      Raw bytes in a buffer have no inherent meaning. Nine floats could be three RGB colours,
+      three XYZ positions, or something else entirely. A <strong>Vertex Array Object (VAO)</strong>
+      stores the interpretation rules. While a VAO is bound, each call to
+      <code>glVertexAttribPointer</code> records how one attribute should be read from the
+      currently-bound VBO: how many components it has, what numeric type they are, and how
+      many bytes apart consecutive vertices are (the <em>stride</em>). Calling
+      <code>glEnableVertexAttribArray</code> activates the slot. Binding the VAO again later
+      restores all these rules in a single call.
+    </p>
+    <p>
+      When the draw call <code>glDrawArrays(GL_TRIANGLES, 0, 3)</code> runs, the GPU reads
+      three vertices from the bound VAO and assembles them into a triangle. For this to produce
+      pixels, OpenGL needs a program to run on each vertex and each covered pixel. Writing that
+      program in GLSL is the subject of Lab 03. For now, this lab uses OpenGL's
+      <strong>Compatibility Profile</strong>, which includes a built-in
+      <strong>fixed-function pipeline</strong>. When no custom shader program is bound, the
+      GPU falls back to hardware defaults that colour geometry solid white and apply no
+      transformation. This lets you learn the geometry upload process in isolation, without
+      any shader code.
+    </p>
+
+    <div class="info-box">
+      <strong>Note - Hardware Fixed-Function Pipeline.</strong> The triangle in this lab
+      renders white because OpenGL's built-in fixed-function pipeline assigns a default white
+      colour when no shader is active. This is intentional. The Shaders lab (Lab 03) will
+      replace this behaviour with a GLSL fragment shader that lets you choose any colour.
+      At that point the project also switches back to the Core Profile, which requires custom
+      shaders and disables the fixed-function defaults entirely.
+    </div>
+  </section>
+
+  <!-- 5. Tasks -->
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Switch to Compatibility Profile</h3>
+      <p>
+        The Core Profile from Lab 01 requires a custom shader program to render anything.
+        For this lab, change the profile hint so OpenGL's fixed-function pipeline is
+        available. Open <code>src/main.cpp</code> and find the three
+        <code>glfwWindowHint</code> calls you wrote in Lab 01. Change
+        <code>GLFW_OPENGL_CORE_PROFILE</code> to <code>GLFW_OPENGL_COMPAT_PROFILE</code>.
+      </p>
+      <ol>
+        <li>Locate the line: <code>glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);</code></li>
+        <li>Replace it with the line below.</li>
+      </ol>
+<pre><code class="language-cpp">// file: src/main.cpp -- update the existing profile hint
+glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Add the Triangle Vertex Data</h3>
+      <p>
+        Copy the vertex array below into <code>src/main.cpp</code>, after the GLEW
+        initialisation code and before the render loop. The coordinates are in
+        <strong>Normalised Device Coordinates (NDC)</strong>: the visible window area maps
+        to the range -1.0 to +1.0 on both axes, with the origin at the centre of the window.
+        No coordinate transformation is needed because the fixed-function pipeline uses an
+        identity matrix by default.
+      </p>
+<pre><code class="language-cpp">// file: src/main.cpp -- add after GLEW init, before the render loop
+float vertices[] = {
+     0.0f,  0.5f, 0.0f,   // top centre
+    -0.5f, -0.5f, 0.0f,   // bottom left
+     0.5f, -0.5f, 0.0f    // bottom right
+};</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Create a Vertex Array Object</h3>
+      <p>
+        A VAO must be created and bound before any buffer or layout calls are made.
+        Everything you set up in Tasks 4 and 5 will be recorded into this VAO.
+      </p>
+      <ol>
+        <li>Declare <code>unsigned int vao</code>.</li>
+        <li>Call <code>glGenVertexArrays(1, &amp;vao)</code> to generate one VAO and store its ID.</li>
+        <li>Call <code>glBindVertexArray(vao)</code> to make it the active VAO.</li>
+      </ol>
+<pre><code class="language-cpp">// TODO: declare unsigned int vao
+// TODO: generate one vertex array object and store its ID in vao
+// TODO: bind the VAO</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 4 - Upload Vertex Data to a VBO</h3>
+      <p>
+        With the VAO bound, create a buffer object and copy the vertex array to the GPU.
+        The VBO must be bound while the VAO is active so the association is recorded
+        into the VAO.
+      </p>
+      <ol>
+        <li>Declare <code>unsigned int vbo</code>.</li>
+        <li>Call <code>glGenBuffers(1, &amp;vbo)</code> to generate one buffer and store its ID.</li>
+        <li>Call <code>glBindBuffer(GL_ARRAY_BUFFER, vbo)</code> to select it as the active array buffer.</li>
+        <li>
+          Call <code>glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW)</code>
+          to transfer the vertex array into GPU memory.
+        </li>
+      </ol>
+<pre><code class="language-cpp">// TODO: declare unsigned int vbo
+// TODO: generate one buffer object and store its ID in vbo
+// TODO: bind it as GL_ARRAY_BUFFER
+// TODO: upload the vertex data with GL_STATIC_DRAW</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 5 - Describe the Vertex Layout</h3>
+      <p>
+        Tell the GPU how to interpret the bytes in the VBO. Each vertex is three tightly
+        packed floats (x, y, z), so the stride is <code>3 * sizeof(float)</code> and the
+        offset is zero. In Compatibility Profile, generic attribute slot
+        <code>0</code> is aliased to the vertex position used by the fixed-function pipeline,
+        so no shader is needed to make this work.
+      </p>
+      <ol>
+        <li>
+          Call <code>glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0)</code>.
+          <ul>
+            <li>Index <code>0</code> - attribute slot (position)</li>
+            <li>Size <code>3</code> - three components per vertex (x, y, z)</li>
+            <li>Type <code>GL_FLOAT</code></li>
+            <li>Normalised <code>GL_FALSE</code> - values are already in NDC, do not rescale</li>
+            <li>Stride <code>3 * sizeof(float)</code> - 12 bytes between consecutive vertices</li>
+            <li>Offset <code>(void*)0</code> - position data starts at byte 0</li>
+          </ul>
+        </li>
+        <li>Call <code>glEnableVertexAttribArray(0)</code> to activate attribute slot 0.</li>
+        <li>Call <code>glBindVertexArray(0)</code> to unbind the VAO now that setup is complete.</li>
+      </ol>
+<pre><code class="language-cpp">// TODO: call glVertexAttribPointer with index 0, size 3, type GL_FLOAT,
+//       normalised GL_FALSE, stride 3*sizeof(float), offset (void*)0
+// TODO: enable attribute slot 0
+// TODO: unbind the VAO</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 6 - Issue the Draw Call</h3>
+      <p>
+        Inside the render loop, after <code>glClear</code> and before
+        <code>glfwSwapBuffers</code>, bind the VAO and draw the triangle. There is no
+        <code>glUseProgram</code> call here. The absence of a shader program is intentional:
+        the fixed-function pipeline takes over automatically.
+      </p>
+      <ol>
+        <li>Call <code>glBindVertexArray(vao)</code> to restore the vertex layout.</li>
+        <li>
+          Call <code>glDrawArrays(GL_TRIANGLES, 0, 3)</code>.
+          <ul>
+            <li><code>GL_TRIANGLES</code> - assemble every 3 vertices into one triangle</li>
+            <li><code>0</code> - start from vertex index 0</li>
+            <li><code>3</code> - consume 3 vertices in total</li>
+          </ul>
+        </li>
+      </ol>
+<pre><code class="language-cpp">// TODO: bind the VAO
+// TODO: call glDrawArrays(GL_TRIANGLES, 0, 3)</code></pre>
+      <p>After the render loop exits, add cleanup before the existing <code>glfwDestroyWindow</code> call:</p>
+<pre><code class="language-cpp">// file: src/main.cpp -- after the render loop -- provided for reference
+glDeleteVertexArrays(1, &amp;vao);
+glDeleteBuffers(1, &amp;vbo);</code></pre>
+    </div>
+
+  </section>
+
+  <!-- 8. Solution -->
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try to complete the tasks above before reading this section.</p>
+    <div class="task-block">
+<pre><code class="language-cpp">// file: src/main.cpp -- complete solution for Lab 02
+
+#include &lt;GL/glew.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;iostream&gt;
+
+int main()
+{
+    // initialise GLFW
+    if (!glfwInit()) { std::cerr &lt;&lt; "GLFW init failed\n"; return -1; }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    // Compatibility Profile gives access to the fixed-function pipeline (no shader required)
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+
+    // create window and bind its OpenGL context to this thread
+    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Window", nullptr, nullptr);
+    if (!window) { glfwTerminate(); return -1; }
+    glfwMakeContextCurrent(window);
+
+    // load OpenGL function pointers via GLEW
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) { glfwTerminate(); return -1; }
+    std::cout &lt;&lt; "OpenGL: " &lt;&lt; glGetString(GL_VERSION) &lt;&lt; '\n';
+    glfwSwapInterval(1);
+
+    // triangle in NDC: x and y range from -1.0 to 1.0, z = 0.0 (on the near plane)
+    float vertices[] = {
+         0.0f,  0.5f, 0.0f,   // top centre
+        -0.5f, -0.5f, 0.0f,   // bottom left
+         0.5f, -0.5f, 0.0f    // bottom right
+    };
+
+    // create the VAO first so it records everything set up below
+    unsigned int vao;
+    glGenVertexArrays(1, &amp;vao);
+    glBindVertexArray(vao);
+
+    // create a VBO and upload the vertex data to the GPU
+    unsigned int vbo;
+    glGenBuffers(1, &amp;vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // describe the layout: attribute 0 holds a vec3 position, tightly packed
+    // in Compatibility Profile, attribute 0 maps to the fixed-function vertex position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
+
+    // render loop
+    while (!glfwWindowShouldClose(window))
+    {
+        glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // no glUseProgram: the fixed-function pipeline renders the triangle white
+        glBindVertexArray(vao);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    // release GPU resources before exit
+    glDeleteVertexArrays(1, &amp;vao);
+    glDeleteBuffers(1, &amp;vbo);
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}</code></pre>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+
+</body>
+</html>
