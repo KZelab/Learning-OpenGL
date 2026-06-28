@@ -4,52 +4,30 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import { z } from 'zod';
+import { ArgsSchema } from './schema.js';
 import { buildAndWriteLab } from './assembler.js';
+import type { LabSpec } from './schema.js';
 
-const PackageSchema = z.object({
-  name: z.string(),
-  description: z.string(),
-  docs_url: z.string(),
-});
-
-const TaskSchema = z.object({
-  title: z.string(),
-  steps_html: z.string(),
-  code: z.object({
-    lang: z.enum(['cpp', 'glsl', 'bash', 'json']),
-    content: z.string(),
-  }).optional(),
-  code_type: z.enum(['skeleton', 'reference', 'bug']).optional(),
-});
-
-const ArgsSchema = z.object({
-  module_code: z.string(),
-  module_title: z.string(),
-  lab_number: z.string(),
-  lab_title: z.string(),
-  overview_html: z.string(),
-  objectives: z.array(z.string()),
-  concept_html: z.string(),
-  prerequisites: z.array(z.string()).optional(),
-  packages: z.array(PackageSchema).optional(),
-  tasks: z.array(TaskSchema),
-  solution_code: z.string().optional(),
-  languages: z.array(z.string()),
-  output_path: z.string(),
-});
-
+// ── MCP tool JSON schema ──────────────────────────────────────────────────────
 const TOOL_INPUT_SCHEMA = {
   type: 'object',
   properties: {
-    module_code:    { type: 'string', description: 'Module code, e.g. ACCA6014' },
+    options: {
+      type: 'object',
+      description: 'Document-level options (all optional; defaults shown)',
+      properties: {
+        solution:       { type: 'boolean', description: 'Include solution section (default true)' },
+        copy_protect:   { type: 'boolean', description: 'Render solution on canvas to resist copy-paste (default true)' },
+        print_friendly: { type: 'boolean', description: 'Add extra print CSS for page breaks (default false)' },
+      },
+    },
+    module_code:    { type: 'string', description: 'Module code, e.g. ACCA6021' },
     module_title:   { type: 'string', description: 'Full module name, e.g. Graphics Programming' },
     lab_number:     { type: 'string', description: 'Zero-padded two-digit lab number, e.g. 03' },
     lab_title:      { type: 'string', description: 'Short lab title, e.g. Shaders' },
     overview_html:  { type: 'string', description: 'HTML for the Overview section body (one or more <p> tags)' },
-    objectives:     { type: 'array',  items: { type: 'string' }, description: 'Learning objective strings (plain text)' },
+    objectives:     { type: 'array', items: { type: 'string' }, description: 'Learning objective strings (plain text)' },
     concept_html:   { type: 'string', description: 'HTML for the Concept section body (prose paragraphs)' },
-    prerequisites:  { type: 'array',  items: { type: 'string' }, description: 'Optional prerequisite plain-text strings' },
     packages: {
       type: 'array',
       items: {
@@ -68,24 +46,58 @@ const TOOL_INPUT_SCHEMA = {
       items: {
         type: 'object',
         properties: {
-          title:      { type: 'string', description: 'Task heading, e.g. Task 1 - Create the VAO' },
-          steps_html: { type: 'string', description: 'Full HTML body of the task: ol, p, inline pre/code, platform tabs, expected-result div, etc. Code inside pre/code must be HTML-escaped.' },
-          code: {
-            type: 'object',
-            properties: {
-              lang:    { type: 'string', enum: ['cpp', 'glsl', 'bash', 'json'] },
-              content: { type: 'string', description: 'Raw source code appended as a trailing code block (server HTML-escapes this)' },
+          title:  { type: 'string', description: 'Task heading, e.g. Task 1 - Create the VAO' },
+          blocks: {
+            type: 'array',
+            description: 'Ordered content blocks for this task',
+            items: {
+              type: 'object',
+              properties: {
+                type: {
+                  type: 'string',
+                  enum: ['prose', 'code', 'fill_blanks', 'multiple_choice', 'short_answer', 'math', 'visualization'],
+                  description: 'Block type',
+                },
+                // prose
+                html: { type: 'string', description: '(prose) HTML body' },
+                // code
+                lang:      { type: 'string', enum: ['cpp', 'glsl', 'bash', 'json', 'javascript', 'typescript', 'python', 'java', 'sql', 'html', 'css'], description: '(code) language' },
+                content:   { type: 'string', description: '(code) raw source; server HTML-escapes this' },
+                filename:  { type: 'string', description: '(code) optional filename shown as title bar' },
+                code_type: { type: 'string', enum: ['skeleton', 'reference', 'bug'], description: '(code) starter type' },
+                // question blocks
+                interactive: { type: 'boolean', description: '(fill_blanks|multiple_choice|short_answer) render as interactive widget (default true)' },
+                questions:   { type: 'array', description: '(fill_blanks|multiple_choice|short_answer) array of question objects' },
+                // math
+                latex:   { type: 'string', description: '(math) LaTeX source string, e.g. "\\\\frac{1}{2}mv^2"' },
+                display: { type: 'boolean', description: '(math) block-level equation (default true); false for inline' },
+                // visualization
+                id:     { type: 'string', description: '(visualization) unique id for the container div, e.g. "clip-space-viz"' },
+                height: { type: 'number', description: '(visualization) container height in pixels (default 400)' },
+                script: { type: 'string', description: '(visualization) D3 JavaScript; `d3` and `container` (the div) are pre-bound' },
+              },
+              required: ['type'],
             },
-            required: ['lang', 'content'],
           },
-          code_type: { type: 'string', enum: ['skeleton', 'reference', 'bug'] },
         },
-        required: ['title', 'steps_html'],
+        required: ['title', 'blocks'],
       },
     },
-    solution_code: { type: 'string', description: 'Complete merged solution source (raw, not HTML-escaped). Omit to suppress the Solution section.' },
-    languages:     { type: 'array',  items: { type: 'string' }, description: 'Prism language keys used: cpp, glsl, bash, json' },
-    output_path:   { type: 'string', description: 'Output file path relative to project root, e.g. labs/lab_03_shaders.html' },
+    solution_code:  { type: 'string', description: 'Single-file solution source (raw). Use solution_files for multi-file.' },
+    solution_files: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          filename: { type: 'string', description: 'Filename shown as title bar in canvas, e.g. src/main.cpp' },
+          content:  { type: 'string', description: 'Raw source for this file' },
+        },
+        required: ['content'],
+      },
+      description: 'Multi-file solution; each entry renders as a separate copy-resistant canvas',
+    },
+    languages:   { type: 'array', items: { type: 'string' }, description: 'Prism language keys used: cpp, glsl, bash, json, javascript, typescript, python, java, sql, html, css' },
+    output_path: { type: 'string', description: 'Output path relative to project root, e.g. labs/acca6021/lab_03_shaders.html' },
   },
   required: [
     'module_code', 'module_title', 'lab_number', 'lab_title',
@@ -94,8 +106,9 @@ const TOOL_INPUT_SCHEMA = {
   ],
 } as const;
 
+// ── Server ────────────────────────────────────────────────────────────────────
 const server = new Server(
-  { name: 'lab-assembler', version: '1.0.0' },
+  { name: 'lab-assembler', version: '2.1.0' },
   { capabilities: { tools: {} } },
 );
 
@@ -104,7 +117,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     name: 'assemble_lab',
     description:
       'Assembles a complete UWTSD-branded lab HTML file from structured content and writes it to disk. ' +
-      'Handles all CSS, JS, Prism syntax highlighting, UWTSD branding, and the solution reveal button. ' +
+      'Handles all CSS, JS, Prism syntax highlighting (inlined, no CDN), KaTeX math (pre-rendered server-side, no CDN), ' +
+      'D3.js visualizations (inlined, no CDN), UWTSD branding, solution reveal, ' +
+      'fill-in-the-blank, multiple choice, and short-answer blocks. ' +
       'Returns the output path and byte count; the HTML never enters the conversation context.',
     inputSchema: TOOL_INPUT_SCHEMA,
   }],
@@ -117,7 +132,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   const args = ArgsSchema.parse(request.params.arguments);
   const { output_path, ...spec } = args;
-  const result = buildAndWriteLab(spec, output_path);
+  const result = buildAndWriteLab(spec as LabSpec, output_path);
 
   return {
     content: [{

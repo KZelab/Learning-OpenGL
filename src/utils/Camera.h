@@ -59,8 +59,25 @@ public:
     void Update(float deltaTime);
     float getFOV() const { return fov; }
     glm::vec3 getPosition() const { return position; }
+    glm::vec3 getFront() const { return front; }
     bool isDetached() const { return detached; }
     void cameraGUI();
+
+    /**
+     * GROUNDED (FPS) MODE:
+     * When enabled, WASD movement is projected onto the XZ plane and the
+     * camera is locked to a fixed eye height - looking up/down no longer
+     * makes W/S fly into the sky or floor. Mouse look is unaffected.
+     * Defaults to off, so existing free-fly tests behave exactly as before.
+     */
+    void setGrounded(bool grounded, float eyeHeight = 1.6f);
+
+    // Teleports the camera (also syncs the smooth-interpolation target so the
+    // camera doesn't lerp back to its old position when detached).
+    void setPosition(const glm::vec3& pos);
+
+    // Sets the look angles directly and rebuilds the basis vectors.
+    void setYawPitch(float newYaw, float newPitch);
 
 private:
     GLFWwindow* m_window;
@@ -155,4 +172,9 @@ private:
     void UpdateCameraVectors();
 
     bool m_invertPitch;
+
+    // Grounded/FPS mode state (see setGrounded). Off by default so the camera
+    // remains a free-fly camera for every test that doesn't opt in.
+    bool m_Grounded = false;
+    float m_EyeHeight = 1.6f;
 };

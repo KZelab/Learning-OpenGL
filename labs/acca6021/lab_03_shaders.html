@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shaders | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+  </style>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img { height: 48px; filter: brightness(0) invert(1); }
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 { font-size: 1.4rem; font-weight: 700; margin-top: 0.2rem; }
+
+    main { max-width: 960px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 { font-size: 1rem; font-weight: 600; color: var(--uwtsd-navy); margin: 1.25rem 0 0.5rem; }
+    .lab-section p { margin-bottom: 0.75rem; }
+    .lab-section ul, .lab-section ol { padding-left: 1.4rem; margin-bottom: 0.75rem; }
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code { background: none !important; color: inherit !important; padding: 0; font-size: inherit; }
+
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 { font-size: 0.95rem; color: var(--uwtsd-navy); margin-bottom: 0.5rem; }
+
+.solution-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.55rem 1.2rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #00254d; }
+    .solution-panel { display: none; margin-top: 1rem; }
+    .solution-panel.open { display: block; }
+
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn, .solution-panel { display: none; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 03 - Shaders</h1>
+  </div>
+</header>
+
+<main>
+
+  <!-- 1. Overview -->
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>
+      In the First Triangle lab (Lab 02) you relied on OpenGL's built-in fixed-function
+      pipeline to colour the triangle white. This lab replaces that with your own
+      <strong>GLSL shader program</strong>. You will write a vertex shader and a fragment
+      shader, store them together in a single <code>.shader</code> file, write a C++
+      parser to load them, compile both stages with error checking, and link them into a
+      program that drives every pixel of the triangle.
+    </p>
+    <p>
+      The project also returns to <strong>Core Profile</strong>, which disables the
+      fixed-function fallback entirely. From Lab 03 onward, all rendering requires an
+      explicit shader program.
+    </p>
+  </section>
+
+  <!-- 3. Learning Objectives -->
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Describe the roles of the vertex shader and fragment shader within the OpenGL pipeline.</li>
+      <li>Write basic GLSL for both stages and explain the purpose of <code>gl_Position</code> and a fragment output variable.</li>
+      <li>Parse a custom <code>.shader</code> file format to separate vertex and fragment source at runtime.</li>
+      <li>Compile shader stages and read driver error messages using <code>glGetShaderInfoLog</code>.</li>
+      <li>Link a shader program and activate it before a draw call with <code>glUseProgram</code>.</li>
+    </ul>
+  </section>
+
+  <!-- 4. Concept -->
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>
+      Switching back to Core Profile removes the fixed-function pipeline entirely. Every
+      draw call now requires an active <strong>shader program</strong> or nothing renders.
+      A program contains at minimum two stages. The <strong>vertex shader</strong> runs
+      once for each vertex the draw call submits. It receives the position from attribute
+      slot 0 and must write a clip-space position to the built-in output
+      <code>gl_Position</code>. OpenGL then determines which screen pixels the assembled
+      triangle covers.
+    </p>
+    <p>
+      The <strong>fragment shader</strong> runs once for each of those covered pixels. It
+      must write a colour to a user-declared <code>out vec4</code> variable. Both shaders
+      are written in <strong>GLSL</strong> and compiled at runtime by the GPU driver via
+      <code>glCreateShader</code>, <code>glShaderSource</code>, and
+      <code>glCompileShader</code>. Compile errors are returned as strings via
+      <code>glGetShaderInfoLog</code>. The two compiled shaders are attached to a program
+      object with <code>glAttachShader</code> and linked with <code>glLinkProgram</code>.
+      Calling <code>glUseProgram</code> before a draw call activates that program for the
+      pipeline.
+    </p>
+    <p>
+      Rather than managing two separate source files per shader, this project uses a single
+      <code>.shader</code> file with custom section markers. The lines
+      <code>#shader vertex</code> and <code>#shader fragment</code> are not valid GLSL.
+      They are directives read by a C++ parser that distributes each subsequent line to the
+      correct source string. The OpenGL compile API receives two clean GLSL strings with no
+      trace of the markers.
+    </p>
+  </section>
+
+  <!-- 5. Tasks -->
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Switch Back to Core Profile</h3>
+      <p>
+        Open <code>src/main.cpp</code> and revert the profile hint you changed in the First
+        Triangle lab (Lab 02). Core Profile is required from this lab onward.
+      </p>
+      <ol>
+        <li>Find the line: <code>glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);</code></li>
+        <li>Change it back to <code>GLFW_OPENGL_CORE_PROFILE</code> as shown below.</li>
+      </ol>
+<div class="code-file-header">src/main.cpp</div>
+<pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);</code></pre>
+      <p>
+        If you run the project now, the window opens but the triangle disappears.
+        That is expected: Core Profile demands a shader program, and none is bound yet.
+      </p>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Create the Shader File</h3>
+      <p>
+        In the project root, create a new text file at <code>res/shaders/triangle.shader</code>.
+        Copy the content below exactly. The <code>#shader vertex</code> and
+        <code>#shader fragment</code> lines are custom markers read by the C++ parser you
+        will write in Task 3. They are never passed to the GLSL compiler.
+      </p>
+      <p>
+        The fragment shader outputs a flat blue colour. Change the
+        <code>vec4</code> values to any colour you prefer.
+      </p>
+<pre><code class="language-glsl">#shader vertex
+#version 430 core
+layout (location = 0) in vec3 aPos;
+void main() {
+    gl_Position = vec4(aPos, 1.0);
+}
+
+#shader fragment
+#version 430 core
+out vec4 FragColour;
+void main() {
+    FragColour = vec4(0.2, 0.6, 1.0, 1.0);
+}</code></pre>
+
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Write the Shader File Parser</h3>
+      <p>
+        Add the includes and the <code>parseShader</code> function to
+        <code>src/main.cpp</code>, above <code>main()</code>. The function reads the
+        <code>.shader</code> file line by line and routes each line to either the vertex or
+        fragment string depending on which <code>#shader</code> marker was seen most recently.
+      </p>
+      <ol>
+        <li>Add <code>#include &lt;fstream&gt;</code> and <code>#include &lt;sstream&gt;</code> at the top of the file.</li>
+        <li>Copy the struct and function signature below, then implement the loop body marked with <code>// TODO</code>.</li>
+      </ol>
+<div class="code-file-header">src/main.cpp</div>
+<pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &lt;fstream&gt;
+#include &lt;sstream&gt;
+
+struct ShaderSource {
+    std::string vertex;
+    std::string fragment;
+};
+
+ShaderSource parseShader(const std::string&amp; filepath) {
+    std::ifstream file(filepath);
+    std::stringstream ss[2];
+    int type = -1;
+    std::string line;
+    while (std::getline(file, line)) {
+        // TODO: if line contains "#shader vertex",   set type = 0
+        // TODO: if line contains "#shader fragment", set type = 1
+        // TODO: otherwise if type is 0 or 1, write line + '\n' to ss[type]
+    }
+    return { ss[0].str(), ss[1].str() };
+}</code></pre>
+      <p>
+        Hint: use <code>line.find("#shader vertex") != std::string::npos</code> to test
+        whether the marker appears anywhere in the current line.
+      </p>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 4 - Add the Shader Compiler with Error Checking</h3>
+      <p>
+        Copy the function below into <code>src/main.cpp</code>, above <code>main()</code>
+        and after the parser. It compiles one shader stage and prints any GLSL error message
+        the driver reports. This is provided in full because the error-checking API is
+        boilerplate you will reuse unchanged in every project.
+      </p>
+<div class="code-file-header">src/main.cpp</div>
+<pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">static unsigned int compileShader(unsigned int type, const std::string&amp; source) {
+    unsigned int id = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(id, 1, &amp;src, nullptr);
+    glCompileShader(id);
+
+    int result;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &amp;result);
+    if (!result) {
+        int length;
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &amp;length);
+        char* message = new char[length];
+        glGetShaderInfoLog(id, length, &amp;length, message);
+        std::cerr &lt;&lt; "Shader compile error: " &lt;&lt; message &lt;&lt; '\n';
+        delete[] message;
+        return 0;
+    }
+    return id;
+}</code></pre>
+      <p>
+        To test the error reporting, introduce a deliberate typo in the fragment shader
+        (for example, remove the semicolon after <code>FragColour = ...</code>), run the
+        project, and read the console output. Fix the typo before continuing.
+      </p>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 5 - Write the Program Linker</h3>
+      <p>
+        Add the <code>createProgram</code> function below the compiler. It takes the two
+        GLSL source strings, compiles each stage, attaches them to a program object, links
+        the program, then deletes the now-redundant shader objects.
+      </p>
+      <ol>
+        <li>Create a program object with <code>glCreateProgram()</code>.</li>
+        <li>Compile the vertex shader with <code>compileShader(GL_VERTEX_SHADER, vertSrc)</code>.</li>
+        <li>Compile the fragment shader with <code>compileShader(GL_FRAGMENT_SHADER, fragSrc)</code>.</li>
+        <li>Attach both to the program with <code>glAttachShader</code>.</li>
+        <li>Link with <code>glLinkProgram</code>.</li>
+        <li>Delete both shader objects with <code>glDeleteShader</code> (the linked program retains its own compiled copy).</li>
+        <li>Return the program ID.</li>
+      </ol>
+<div class="code-file-header">src/main.cpp</div>
+<pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">static unsigned int createProgram(const std::string&amp; vertSrc, const std::string&amp; fragSrc) {
+    // TODO: create a program with glCreateProgram
+    // TODO: compile vertex shader using compileShader(GL_VERTEX_SHADER, vertSrc)
+    // TODO: compile fragment shader using compileShader(GL_FRAGMENT_SHADER, fragSrc)
+    // TODO: attach both shaders to the program with glAttachShader
+    // TODO: call glLinkProgram
+    // TODO: delete both shader objects with glDeleteShader
+    // TODO: return the program ID
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 6 - Load and Use the Shader Program</h3>
+      <p>
+        Wire everything together in <code>main()</code>. Call the parser and linker after
+        the VAO and VBO setup, then activate the program each frame before drawing.
+      </p>
+      <ol>
+        <li>After the VAO and VBO setup code and before the render loop, parse the shader file and create the program:</li>
+      </ol>
+<div class="code-file-header">src/main.cpp</div>
+<pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">ShaderSource src = parseShader("res/shaders/triangle.shader");
+unsigned int shader = createProgram(src.vertex, src.fragment);</code></pre>
+      <ol start="2">
+        <li>Inside the render loop, add <code>glUseProgram(shader)</code> before <code>glBindVertexArray</code> and <code>glDrawArrays</code>:</li>
+      </ol>
+<pre><code class="language-cpp">// TODO: call glUseProgram(shader)
+// TODO: call glBindVertexArray(vao)      - already present from Lab 02
+// TODO: call glDrawArrays(GL_TRIANGLES, 0, 3)  - already present from Lab 02</code></pre>
+      <ol start="3">
+        <li>In the cleanup section after the render loop, add <code>glDeleteProgram(shader)</code> alongside the existing <code>glDeleteVertexArrays</code> and <code>glDeleteBuffers</code> calls.</li>
+      </ol>
+
+    </div>
+
+  </section>
+
+  <!-- 6. Solution -->
+  <section class="lab-section">
+    <h2>Solution</h2>
+    <p>Click the button below once you have attempted all tasks. The solution shows <code>src/main.cpp</code> followed by <code>res/shaders/triangle.shader</code>.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+<div class="solution-canvas-wrap"><canvas data-filename="src/main.cpp" data-code="
+#include &lt;GL/glew.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;sstream&gt;
+
+struct ShaderSource { std::string vertex; std::string fragment; };
+
+ShaderSource parseShader(const std::string&amp; filepath) {
+    std::ifstream file(filepath);
+    std::stringstream ss[2];
+    int type = -1;
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.find(&quot;#shader vertex&quot;)   != std::string::npos) type = 0;
+        else if (line.find(&quot;#shader fragment&quot;) != std::string::npos) type = 1;
+        else if (type == 0 || type == 1) ss[type] &lt;&lt; line &lt;&lt; '\n';
+    }
+    return { ss[0].str(), ss[1].str() };
+}
+
+static unsigned int compileShader(unsigned int type, const std::string&amp; source) {
+    unsigned int id = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(id, 1, &amp;src, nullptr);
+    glCompileShader(id);
+    int result;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &amp;result);
+    if (!result) {
+        int length;
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &amp;length);
+        char* message = new char[length];
+        glGetShaderInfoLog(id, length, &amp;length, message);
+        std::cerr &lt;&lt; &quot;Shader compile error: &quot; &lt;&lt; message &lt;&lt; '\n';
+        delete[] message;
+        return 0;
+    }
+    return id;
+}
+
+static unsigned int createProgram(const std::string&amp; vertSrc, const std::string&amp; fragSrc) {
+    unsigned int program = glCreateProgram();
+    unsigned int vs = compileShader(GL_VERTEX_SHADER,   vertSrc);
+    unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragSrc);
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+    return program;
+}
+
+int main()
+{
+    if (!glfwInit()) { return -1; }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // back to Core Profile
+
+    GLFWwindow* window = glfwCreateWindow(800, 600, &quot;OpenGL Window&quot;, nullptr, nullptr);
+    if (!window) { glfwTerminate(); return -1; }
+    glfwMakeContextCurrent(window);
+
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) { glfwTerminate(); return -1; }
+    glfwSwapInterval(1);
+
+    float vertices[] = {
+         0.0f,  0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f
+    };
+
+    unsigned int vao;
+    glGenVertexArrays(1, &amp;vao);
+    glBindVertexArray(vao);
+
+    unsigned int vbo;
+    glGenBuffers(1, &amp;vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
+
+    ShaderSource src = parseShader(&quot;res/shaders/triangle.shader&quot;);
+    unsigned int shader = createProgram(src.vertex, src.fragment);
+
+    while (!glfwWindowShouldClose(window)) {
+        glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glUseProgram(shader);
+        glBindVertexArray(vao);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    glDeleteVertexArrays(1, &amp;vao);
+    glDeleteBuffers(1, &amp;vbo);
+    glDeleteProgram(shader);
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}" style="display:block;width:100%;border-radius:6px"></canvas></div>
+<div class="solution-canvas-wrap"><canvas data-filename="res/shaders/triangle.shader" data-code="
+#shader vertex
+#version 430 core
+layout (location = 0) in vec3 aPos;
+void main() {
+    gl_Position = vec4(aPos, 1.0);
+}
+
+#shader fragment
+#version 430 core
+out vec4 FragColour;
+void main() {
+    FragColour = vec4(0.2, 0.6, 1.0, 1.0);
+}" style="display:block;width:100%;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-glsl.min.js"></script>
+
+</body>
+</html>

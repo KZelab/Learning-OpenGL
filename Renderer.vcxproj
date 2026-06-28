@@ -44,6 +44,10 @@
     <ClCompile Include="src\tests\testProceduralArt.cpp" />
     <ClCompile Include="src\tests\testTexture2D.cpp" />
     <ClCompile Include="src\tests\testRayCasting.cpp" />
+    <ClCompile Include="src\tests\maze\MazeGenerator.cpp" />
+    <ClCompile Include="src\tests\maze\MazeMap.cpp" />
+    <ClCompile Include="src\tests\maze\Player.cpp" />
+    <ClCompile Include="src\tests\maze\TestMaze.cpp" />
     <ClCompile Include="src\utils\Camera.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
@@ -91,6 +95,10 @@
     <ClInclude Include="src\tests\testProceduralArt.h" />
     <ClInclude Include="src\tests\testTexture2D.h" />
     <ClInclude Include="src\tests\testRayCasting.h" />
+    <ClInclude Include="src\tests\maze\MazeGenerator.h" />
+    <ClInclude Include="src\tests\maze\MazeMap.h" />
+    <ClInclude Include="src\tests\maze\Player.h" />
+    <ClInclude Include="src\tests\maze\TestMaze.h" />
     <ClInclude Include="src\utils\Camera.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\IndexBuffer.h" />

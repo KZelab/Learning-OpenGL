@@ -31,6 +31,7 @@
 #include "vendor/imgui/imgui_impl_opengl3.h" // ImGui OpenGL backend
 #include "tests/testCamera.h"
 #include "tests/TestHighDensityMesh.h"
+#include "tests/maze/TestMaze.h"
 
 
 
@@ -111,6 +112,7 @@ int main() {
 		TestMenu->RegisterTest<test::TestHighDensityMesh>("High Density Mesh", window);
 		TestMenu->RegisterTest<test::TestCamera>("Camera", window);
 		TestMenu->RegisterTest<test::TestMSAA>("MSAA", window);
+		TestMenu->RegisterTest<test::TestMaze>("Maze Game", window);
         float lastTimeFrame = 0.0f;
         float deltaTime = 0.0f;
 

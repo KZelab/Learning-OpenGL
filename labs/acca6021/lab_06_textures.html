@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 06 - Textures | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 06 - Textures</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>
+    The Index Buffers and Uniforms lab (Lab 05) gave the quad a runtime colour through a
+    <code>uniform vec4</code>. The colour was still a flat solid. This lab replaces that
+    flat colour with a sampled image by introducing the <strong>texture pipeline</strong>:
+    UV coordinates stored per vertex, an image loaded from disk with
+    <strong>stb_image</strong>, an OpenGL texture object on the GPU, and a
+    <code>sampler2D</code> uniform that lets the fragment shader look up the right pixel
+    for each fragment.
+  </p>
+  <p>
+    By the end of the lab your quad will display a loaded PNG with correct orientation
+    and alpha blending.
+  </p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Extend vertex data with UV coordinates and configure a second vertex attribute pointer for them.</li>
+      <li>Write a GLSL vertex shader that passes UV coordinates to the fragment stage as a varying.</li>
+      <li>Load an image from disk using stb_image and upload it to the GPU with glTexImage2D.</li>
+      <li>Configure texture filtering and wrapping parameters with glTexParameteri.</li>
+      <li>Sample a texture in a fragment shader using a sampler2D uniform and the texture() function.</li>
+      <li>Enable alpha blending so transparent pixels in the image render correctly.</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>
+    So far every fragment has been coloured by a value computed entirely in the shader.
+    A <strong>texture</strong> is a 2D image stored on the GPU that the fragment shader
+    can query to retrieve colour data. Without textures, representing surface detail
+    such as wood grain, skin, or printed labels would require thousands of extra vertices.
+    With textures, a single quad can display an arbitrarily detailed image while remaining
+    just four vertices in the VBO.
+  </p>
+  <p>
+    The connection between vertices and image pixels is made through
+    <strong>UV coordinates</strong> (also called texture coordinates). Each vertex carries
+    a <code>vec2</code> UV value in addition to its position. UV coordinates range from
+    <code>0.0</code> to <code>1.0</code> across each axis regardless of the image
+    resolution: <code>(0,0)</code> is the bottom-left corner and <code>(1,1)</code> is
+    the top-right. The GPU interpolates the UV across each triangle so that every fragment
+    receives a unique coordinate, which the shader uses to look up the correct texel.
+    This lookup is performed with the built-in GLSL function
+    <code>texture(sampler, uv)</code>, where <code>sampler</code> is a
+    <code>sampler2D</code> uniform bound to a texture unit.
+  </p>
+  <p>
+    On the C++ side, <strong>stb_image</strong> is a single-header library that decodes
+    common image formats (PNG, JPG, BMP) into a raw byte array. You call
+    <code>stbi_set_flip_vertically_on_load(1)</code> before loading because OpenGL
+    expects the first row of pixel data to be the bottom of the image, while most image
+    files store rows top-to-bottom. The decoded bytes are uploaded to the GPU with
+    <code>glTexImage2D</code>. You then configure how OpenGL samples the texture when it
+    is displayed at a different size with <code>glTexParameteri</code>: the
+    <code>GL_TEXTURE_MIN_FILTER</code> and <code>GL_TEXTURE_MAG_FILTER</code> parameters
+    control interpolation, and the <code>GL_TEXTURE_WRAP_S</code> and
+    <code>GL_TEXTURE_WRAP_T</code> parameters control what happens when UV coordinates
+    fall outside the 0-1 range. Once the texture is on the GPU, the CPU-side image data
+    can be freed with <code>stbi_image_free</code>.
+  </p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Add UV Coordinates to Vertex Data</h3>
+      <p>
+        The vertex array currently stores 3 floats per vertex (x, y, z). Extend each
+        vertex to 4 floats by appending a U and V coordinate. These will map the corners
+        of the quad to the corners of the image.
+      </p>
+      <ol>
+        <li>
+          Replace the <code>vertices</code> array in <code>src/main.cpp</code> with the
+          4-float-per-vertex layout below. Each row contains <code>x, y, u, v</code>.
+        </li>
+        <li>
+          Update the <code>glBufferData</code> call so the size argument still uses
+          <code>sizeof(vertices)</code> rather than a hard-coded number.
+        </li>
+        <li>
+          The existing <code>glVertexAttribPointer</code> for attribute 0 (position)
+          must now declare a <strong>stride</strong> of <code>4 * sizeof(float)</code>
+          (16 bytes) because each vertex now occupies 4 floats, not 3.
+          Update the stride and change the component count from <code>3</code> to
+          <code>2</code> (the position is now 2D).
+        </li>
+        <li>
+          After the position attribute call, add a second
+          <code>glVertexAttribPointer</code> for attribute 1 (UV). The offset is
+          <code>(void*)(2 * sizeof(float))</code> because the UV data starts 2 floats
+          into each vertex.
+        </li>
+        <li>Enable attribute 1 with <code>glEnableVertexAttribArray(1)</code>.</li>
+      </ol>
+      <div class="code-file-header">src/main.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">// Each vertex: position (x, y) followed by UV coordinates (u, v)
+float vertices[] = {
+    -0.5f, -0.5f,  0.0f, 0.0f,  // bottom-left
+     0.5f, -0.5f,  1.0f, 0.0f,  // bottom-right
+     0.5f,  0.5f,  1.0f, 1.0f,  // top-right
+    -0.5f,  0.5f,  0.0f, 1.0f   // top-left
+};
+
+// ... (keep the indices array and IBO setup from Lab 05 unchanged)
+
+// Attribute 0: position - 2 floats, stride = 4 floats, offset = 0
+glEnableVertexAttribArray(0);
+glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+// TODO: declare and enable attribute 1 for UV coordinates
+//       2 components, same stride, offset = 2 * sizeof(float)</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Write a Texture Shader</h3>
+      <p>
+        Create a new shader file <code>res/shaders/texture.shader</code>. The vertex
+        section must accept the UV attribute and pass it to the fragment section as a
+        <strong>varying</strong>. The fragment section must sample a
+        <code>sampler2D</code> uniform and output the result as the fragment colour.
+      </p>
+      <ol>
+        <li>Create the file <code>res/shaders/texture.shader</code>.</li>
+        <li>
+          In the <code>#shader vertex</code> section, add a second input attribute
+          at location 1: <code>layout(location = 1) in vec2 texCoords;</code>.
+        </li>
+        <li>
+          Declare <code>out vec2 v_TexCoords</code> and assign
+          <code>texCoords</code> to it in <code>main()</code>. The GPU interpolates
+          this across the triangle for every fragment.
+        </li>
+        <li>
+          In the <code>#shader fragment</code> section, declare
+          <code>in vec2 v_TexCoords</code> and <code>uniform sampler2D u_Texture</code>.
+        </li>
+        <li>
+          In the fragment <code>main()</code>, call
+          <code>texture(u_Texture, v_TexCoords)</code> and assign the result to
+          <code>FragColour</code>.
+        </li>
+        <li>
+          Update the <code>parseShader</code> call in <code>main.cpp</code> to load
+          <code>"res/shaders/texture.shader"</code>.
+        </li>
+      </ol>
+      <div class="code-file-header">res/shaders/texture.shader</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-glsl">#shader vertex
+#version 430 core
+layout(location = 0) in vec2 position;
+// TODO: declare layout(location = 1) in vec2 texCoords
+
+// TODO: declare out vec2 v_TexCoords
+
+void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+    // TODO: pass texCoords to the fragment stage via v_TexCoords
+}
+
+#shader fragment
+#version 430 core
+out vec4 FragColour;
+
+// TODO: declare in vec2 v_TexCoords
+// TODO: declare uniform sampler2D u_Texture
+
+void main() {
+    // TODO: assign texture(u_Texture, v_TexCoords) to FragColour
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Load a Texture with stb_image</h3>
+      <p>
+        Before the render loop, load the image from disk and upload it to the GPU as
+        an OpenGL texture object. Place any PNG or JPG at <code>res/Textures/1.png</code>.
+      </p>
+      <ol>
+        <li>
+          Add <code>#include "vendor/stb_image.h"</code> near the top of
+          <code>src/main.cpp</code>. The implementation is already compiled in
+          <code>src/vendor/stb_image.cpp</code>, so you do not need the
+          <code>#define STB_IMAGE_IMPLEMENTATION</code> guard here.
+        </li>
+        <li>
+          After the VAO and shader setup, call
+          <code>stbi_set_flip_vertically_on_load(1)</code>. This corrects the vertical
+          flip because OpenGL reads rows bottom-up while PNG files store rows top-down.
+        </li>
+        <li>
+          Call <code>stbi_load</code> with the path and <code>4</code> as the
+          channel count to force RGBA output regardless of the source format.
+        </li>
+        <li>
+          Generate and configure an OpenGL texture using the skeleton below.
+          <code>GL_CLAMP_TO_EDGE</code> prevents a thin border artifact at the quad
+          edges. <code>GL_LINEAR</code> blends neighbouring texels for a smooth result
+          when the quad is scaled.
+        </li>
+        <li>Free the CPU-side image data: <code>if (imgData) stbi_image_free(imgData);</code></li>
+        <li>Add <code>glDeleteTextures(1, &amp;texture)</code> to the cleanup section after the render loop.</li>
+      </ol>
+      <div class="code-file-header">src/main.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">stbi_set_flip_vertically_on_load(1);
+int imgWidth, imgHeight, imgChannels;
+unsigned char* imgData = stbi_load(&quot;res/Textures/1.png&quot;, &amp;imgWidth, &amp;imgHeight, &amp;imgChannels, 4);
+
+unsigned int texture;
+glGenTextures(1, &amp;texture);
+glBindTexture(GL_TEXTURE_2D, texture);
+
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+// TODO: call glTexImage2D to upload imgData to the GPU
+//       target: GL_TEXTURE_2D, level: 0, internal format: GL_RGBA8
+//       width/height: imgWidth/imgHeight, border: 0
+//       format: GL_RGBA, type: GL_UNSIGNED_BYTE, data: imgData
+
+glBindTexture(GL_TEXTURE_2D, 0);
+if (imgData) stbi_image_free(imgData);</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 4 - Bind the Texture and Set the Sampler Uniform</h3>
+      <p>
+        OpenGL uses <strong>texture units</strong> to let a single shader sample multiple
+        textures simultaneously. You activate a unit with
+        <code>glActiveTexture(GL_TEXTURE0)</code>, bind your texture to it, and tell the
+        shader which unit to read from by setting the <code>sampler2D</code> uniform to
+        the unit index (0 for <code>GL_TEXTURE0</code>).
+      </p>
+      <ol>
+        <li>
+          After the shader program is created but before the render loop, enable alpha
+          blending so transparent pixels render correctly:
+          <pre><code class="language-cpp">glEnable(GL_BLEND);
+glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);</code></pre>
+        </li>
+        <li>
+          Still before the loop, link the sampler uniform to texture unit 0. The
+          uniform must be set while the program is active:
+          <pre><code class="language-cpp">glUseProgram(shader);
+int texLoc = glGetUniformLocation(shader, "u_Texture");
+glUniform1i(texLoc, 0);
+glUseProgram(0);</code></pre>
+        </li>
+        <li>
+          Inside the render loop, before the draw call, activate unit 0 and bind
+          your texture:
+          <pre><code class="language-cpp">glActiveTexture(GL_TEXTURE0);
+glBindTexture(GL_TEXTURE_2D, texture);</code></pre>
+        </li>
+        <li>
+          Build and run. Your image should appear on the quad. If it is upside-down,
+          confirm that <code>stbi_set_flip_vertically_on_load(1)</code> is called
+          before <code>stbi_load</code>.
+        </li>
+      </ol>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#shader vertex
+#version 430 core
+layout(location = 0) in vec2 position;
+layout(location = 1) in vec2 texCoords;
+
+out vec2 v_TexCoords;
+
+void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+    v_TexCoords = texCoords;
+}
+
+#shader fragment
+#version 430 core
+out vec4 FragColour;
+
+in vec2 v_TexCoords;
+uniform sampler2D u_Texture;
+
+void main() {
+    FragColour = texture(u_Texture, v_TexCoords);
+}" data-filename="res/shaders/texture.shader" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &lt;GL/glew.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+#include &quot;vendor/stb_image.h&quot;
+
+struct ShaderSource { std::string vertex; std::string fragment; };
+
+ShaderSource parseShader(const std::string&amp; filepath) {
+    std::ifstream file(filepath);
+    std::stringstream ss[2];
+    int type = -1;
+    std::string line;
+    while (std::getline(file, line)) {
+        if      (line.find(&quot;#shader vertex&quot;)   != std::string::npos) type = 0;
+        else if (line.find(&quot;#shader fragment&quot;) != std::string::npos) type = 1;
+        else if (type == 0 || type == 1) ss[type] &lt;&lt; line &lt;&lt; '\n';
+    }
+    return { ss[0].str(), ss[1].str() };
+}
+
+static unsigned int compileShader(unsigned int type, const std::string&amp; source) {
+    unsigned int id = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(id, 1, &amp;src, nullptr);
+    glCompileShader(id);
+    int result;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &amp;result);
+    if (!result) {
+        int len;
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &amp;len);
+        char* msg = new char[len];
+        glGetShaderInfoLog(id, len, &amp;len, msg);
+        std::cerr &lt;&lt; &quot;Shader compile error: &quot; &lt;&lt; msg &lt;&lt; &quot;\n&quot;;
+        delete[] msg;
+        glDeleteShader(id);
+        return 0;
+    }
+    return id;
+}
+
+unsigned int createProgram(const std::string&amp; vertSrc, const std::string&amp; fragSrc) {
+    unsigned int program = glCreateProgram();
+    unsigned int vs = compileShader(GL_VERTEX_SHADER,   vertSrc);
+    unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragSrc);
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+    return program;
+}
+
+int main() {
+    if (!glfwInit()) { std::cerr &lt;&lt; &quot;Failed to initialise GLFW\n&quot;; return -1; }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(800, 600, &quot;Textures&quot;, nullptr, nullptr);
+    if (!window) { glfwTerminate(); return -1; }
+    glfwMakeContextCurrent(window);
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) {
+        std::cerr &lt;&lt; &quot;Failed to initialise GLEW\n&quot;;
+        glfwTerminate();
+        return -1;
+    }
+    glfwSwapInterval(1);
+
+    // Each vertex: 2D position (x, y) + UV coordinates (u, v)
+    float vertices[] = {
+        -0.5f, -0.5f,  0.0f, 0.0f,  // bottom-left
+         0.5f, -0.5f,  1.0f, 0.0f,  // bottom-right
+         0.5f,  0.5f,  1.0f, 1.0f,  // top-right
+        -0.5f,  0.5f,  0.0f, 1.0f   // top-left
+    };
+
+    unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+
+    unsigned int vao, vbo, ibo;
+    glGenVertexArrays(1, &amp;vao);
+    glBindVertexArray(vao);
+
+    glGenBuffers(1, &amp;vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Attribute 0: position (2 floats, stride = 4 floats, offset = 0)
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+    // Attribute 1: UV coordinates (2 floats, stride = 4 floats, offset = 2 floats)
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    glGenBuffers(1, &amp;ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
+    ShaderSource src = parseShader(&quot;res/shaders/texture.shader&quot;);
+    unsigned int shader = createProgram(src.vertex, src.fragment);
+
+    // Load image from disk; flip vertically so row 0 is the bottom (OpenGL convention)
+    stbi_set_flip_vertically_on_load(1);
+    int imgWidth, imgHeight, imgChannels;
+    unsigned char* imgData = stbi_load(&quot;res/Textures/1.png&quot;, &amp;imgWidth, &amp;imgHeight, &amp;imgChannels, 4);
+
+    unsigned int texture;
+    glGenTextures(1, &amp;texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    if (imgData) stbi_image_free(imgData);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Link the sampler uniform to texture unit 0
+    glUseProgram(shader);
+    int texLoc = glGetUniformLocation(shader, &quot;u_Texture&quot;);
+    glUniform1i(texLoc, 0);
+    glUseProgram(0);
+
+    while (!glfwWindowShouldClose(window)) {
+        glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glUseProgram(shader);
+        glBindVertexArray(vao);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    glDeleteTextures(1, &amp;texture);
+    glDeleteBuffers(1, &amp;ibo);
+    glDeleteBuffers(1, &amp;vbo);
+    glDeleteVertexArrays(1, &amp;vao);
+    glDeleteProgram(shader);
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}" data-filename="src/main.cpp" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-glsl.min.js"></script>
+
+</body>
+</html>

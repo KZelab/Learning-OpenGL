@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 10 - Vertex and Index Buffers | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 10 - Vertex and Index Buffers</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>Building on the GlCall error system from Lab 09 (GlCall Error System), this lab wraps two of the most fundamental OpenGL objects in C++ classes. The <strong>Vertex Buffer Object</strong> (VBO) holds your vertex data on the GPU - positions, colours, UVs, normals. The <strong>Index Buffer Object</strong> (IBO) holds integer indices that tell the GPU which vertices to connect into triangles, allowing a four-vertex quad to be drawn with six indices instead of six duplicated vertices. Both follow the same RAII pattern introduced in the previous lab: the constructor calls <code>glGenBuffers</code> and uploads data, and the destructor calls <code>glDeleteBuffers</code> so GPU memory is released automatically when the object goes out of scope.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Explain what a GPU buffer object is and why vertex data must be uploaded before the render loop</li>
+      <li>Distinguish between GL_STATIC_DRAW (data set once) and GL_DYNAMIC_DRAW (data updated per frame)</li>
+      <li>Implement the VertexBuffer class following the RAII pattern: generate in the constructor, delete in the destructor</li>
+      <li>Explain why IndexBuffer stores m_Count and how glDrawElements uses it instead of glDrawArrays</li>
+      <li>Use ASSERT to confirm that unsigned int and GLuint have the same size before uploading index data</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>When you called <code>glBufferData</code> directly in <code>main.cpp</code>, the GPU-side memory management was entirely your responsibility. You had to remember the buffer ID in a raw <code>unsigned int</code>, call <code>glDeleteBuffers</code> manually before the program exited, and repeat the same four-line setup everywhere you needed a new buffer. A <strong>Vertex Buffer Object</strong> is simply a named region of GPU memory. <code>glGenBuffers</code> allocates it and returns an integer handle. <code>glBindBuffer(GL_ARRAY_BUFFER, id)</code> makes it the current target for vertex data. <code>glBufferData</code> uploads bytes from a CPU pointer to that region. The <code>GL_STATIC_DRAW</code> hint tells the driver to place the data in fast, read-only VRAM because you will not change it. <code>GL_DYNAMIC_DRAW</code> tells the driver to keep the buffer in a region that supports frequent rewrites, suited for particle systems or animated geometry.</p>
+
+<p>An <strong>Index Buffer Object</strong> (also called an Element Buffer Object or EBO) works like a lookup table for vertices. A quad has four unique corners but needs six vertex references to draw two triangles. Without an IBO you would repeat two vertices and waste bandwidth. With an IBO you upload four vertices to the VBO and an index array <code>{ 0, 1, 2, 2, 3, 0 }</code> to the IBO. The GPU reads the indices and fetches vertices in that order. <code>glDrawElements</code> replaces <code>glDrawArrays</code> and takes the number of indices as its second argument - which is why the <code>IndexBuffer</code> class stores <code>m_Count</code>. The <strong>portability check</strong> <code>ASSERT(sizeof(unsigned int) == sizeof(GLuint))</code> confirms that the C++ type you are using to build the index array is the same width as what OpenGL expects. On all modern desktop platforms they match, but the assertion makes the assumption explicit and will break loudly if it ever fails.</p>
+
+<p>Both classes include <code>Renderer.h</code> in their <code>.cpp</code> files so every OpenGL call is wrapped in <code>GlCall</code>. The header files do not include <code>Renderer.h</code> - only the implementations need it, and keeping includes out of headers avoids cascading recompilation. The constructor takes a raw <code>const void*</code> for vertex data rather than a typed pointer because vertices can hold floats, unsigned bytes, or packed structs - a void pointer accepts all of them without a cast at the call site.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Implement the Vertex Buffer Class</h3>
+      <p>Create <code>src/VertexBuffer.h</code> and <code>src/VertexBuffer.cpp</code>. The header declares the class; the implementation uploads data and wraps every OpenGL call in <code>GlCall</code>.</p>
+<ol>
+  <li>Create <code>src/VertexBuffer.h</code>. The skeleton below gives you the class shape with <code>// TODO:</code> comments. Fill in the member variable and function implementations.</li>
+  <li>Create <code>src/VertexBuffer.cpp</code>. Include <code>"VertexBuffer.h"</code> and <code>"Renderer.h"</code> (for <code>GlCall</code>).</li>
+  <li>In the static-data constructor, call <code>glGenBuffers</code>, <code>glBindBuffer(GL_ARRAY_BUFFER, ...)</code>, then <code>glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW)</code>. Wrap all three in <code>GlCall</code>.</li>
+  <li>In the dynamic-data constructor, follow the same sequence but pass <code>nullptr</code> as the data pointer and use <code>GL_DYNAMIC_DRAW</code>.</li>
+  <li>In the destructor, call <code>glDeleteBuffers(1, &amp;m_RendererID)</code> inside <code>GlCall</code>.</li>
+  <li>Implement <code>Bind()</code> as <code>glBindBuffer(GL_ARRAY_BUFFER, m_RendererID)</code> and <code>Unbind()</code> as <code>glBindBuffer(GL_ARRAY_BUFFER, 0)</code>.</li>
+  <li>Implement <code>Update()</code> with <code>glBindBuffer</code> followed by <code>glBufferSubData(GL_ARRAY_BUFFER, offset, size, data)</code>.</li>
+  <li>Add both files to your Visual Studio project and build. No visual change is expected yet.</li>
+</ol>
+      <div class="code-file-header">src/VertexBuffer.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+
+class VertexBuffer
+{
+private:
+    // TODO: declare m_RendererID as an unsigned int to store the OpenGL buffer handle
+public:
+    // TODO: constructor for static data - takes a pointer to vertex data and its size in bytes
+    VertexBuffer(const void* data, unsigned int size);
+
+    // TODO: constructor for dynamic data - takes only the size; data uploaded later via Update()
+    VertexBuffer(unsigned int size);
+
+    // TODO: destructor - releases the GPU buffer
+    ~VertexBuffer();
+
+    // TODO: bind this buffer as GL_ARRAY_BUFFER
+    void Bind() const;
+
+    // TODO: unbind by binding 0 to GL_ARRAY_BUFFER
+    void Unbind() const;
+
+    // TODO: overwrite a region of a dynamic buffer using glBufferSubData
+    void Update(const void* data, unsigned int size, unsigned int offset = 0) const;
+};</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Implement the Vertex Buffer .cpp</h3>
+      <p>Implement <code>src/VertexBuffer.cpp</code> following the pattern from the header skeleton in Task 1. Every OpenGL call must be wrapped in <code>GlCall()</code>.</p>
+<ol>
+  <li>The skeleton below shows all the function stubs with <code>// TODO:</code> markers. Replace each TODO with the corresponding OpenGL call.</li>
+  <li>Confirm the class compiles cleanly. The build output should show no errors.</li>
+</ol>
+      <div class="code-file-header">src/VertexBuffer.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &quot;VertexBuffer.h&quot;
+#include &quot;Renderer.h&quot;   // provides GlCall
+
+VertexBuffer::VertexBuffer(const void* data, unsigned int size)
+{
+    // TODO: glGenBuffers(1, &amp;m_RendererID)
+    // TODO: glBindBuffer(GL_ARRAY_BUFFER, m_RendererID)
+    // TODO: glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW)
+}
+
+VertexBuffer::VertexBuffer(unsigned int size)
+{
+    // TODO: glGenBuffers(1, &amp;m_RendererID)
+    // TODO: glBindBuffer(GL_ARRAY_BUFFER, m_RendererID)
+    // TODO: glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW)
+}
+
+VertexBuffer::~VertexBuffer()
+{
+    // TODO: glDeleteBuffers(1, &amp;m_RendererID)
+}
+
+void VertexBuffer::Bind() const
+{
+    // TODO: glBindBuffer(GL_ARRAY_BUFFER, m_RendererID)
+}
+
+void VertexBuffer::Unbind() const
+{
+    // TODO: glBindBuffer(GL_ARRAY_BUFFER, 0)
+}
+
+void VertexBuffer::Update(const void* data, unsigned int size, unsigned int offset) const
+{
+    // TODO: glBindBuffer then glBufferSubData
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Implement the Index Buffer Class</h3>
+      <p>Create <code>src/IndexBuffer.h</code> and <code>src/IndexBuffer.cpp</code>. The IBO follows the same RAII pattern as the VBO but targets <code>GL_ELEMENT_ARRAY_BUFFER</code> and stores the index count.</p>
+<ol>
+  <li>Create <code>src/IndexBuffer.h</code> using the skeleton below. Note the two private members: <code>m_RendererID</code> for the GL handle and <code>m_Count</code> for the number of indices.</li>
+  <li>Create <code>src/IndexBuffer.cpp</code>. Include <code>"IndexBuffer.h"</code> and <code>"Renderer.h"</code>.</li>
+  <li>In the constructor, initialise <code>m_Count</code> in the member-initialiser list, then add the portability check: <code>ASSERT(sizeof(unsigned int) == sizeof(GLuint))</code>.</li>
+  <li>Call <code>glGenBuffers</code>, <code>glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ...)</code>, and <code>glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW)</code>.</li>
+  <li>Implement <code>Bind()</code> and <code>Unbind()</code> targeting <code>GL_ELEMENT_ARRAY_BUFFER</code> instead of <code>GL_ARRAY_BUFFER</code>.</li>
+  <li>Add both files to your project and rebuild. Confirm no errors.</li>
+</ol>
+      <div class="code-file-header">src/IndexBuffer.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+
+class IndexBuffer
+{
+private:
+    // TODO: declare m_RendererID (unsigned int)
+    // TODO: declare m_Count (unsigned int) - stores the number of indices
+public:
+    // TODO: constructor - takes a pointer to unsigned int array and the number of indices
+    IndexBuffer(const unsigned int* data, unsigned int count);
+
+    // TODO: destructor - release the GPU buffer
+    ~IndexBuffer();
+
+    void Bind() const;
+    void Unbind() const;
+
+    // TODO: return m_Count so Renderer::Draw can pass it to glDrawElements
+    inline unsigned int GetCount() const { return m_Count; }
+};</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 4 - Implement the Index Buffer .cpp</h3>
+      <p>Implement <code>src/IndexBuffer.cpp</code> from the skeleton. The key differences from <code>VertexBuffer.cpp</code> are the buffer target (<code>GL_ELEMENT_ARRAY_BUFFER</code>), the size calculation (<code>count * sizeof(unsigned int)</code>), and the portability assert.</p>
+<ol>
+  <li>Fill in every <code>// TODO:</code> in the skeleton below.</li>
+  <li>Build and confirm no errors.</li>
+  <li>In your main render loop, replace the raw <code>glGenBuffers</code> calls for your VBO and IBO with instances of these new classes. Verify the scene still renders correctly.</li>
+</ol>
+      <div class="code-file-header">src/IndexBuffer.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &quot;IndexBuffer.h&quot;
+#include &quot;Renderer.h&quot;
+
+IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
+    : m_Count(count)
+{
+    // TODO: ASSERT that sizeof(unsigned int) == sizeof(GLuint) for portability
+    // TODO: glGenBuffers(1, &amp;m_RendererID)
+    // TODO: glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID)
+    // TODO: glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW)
+}
+
+IndexBuffer::~IndexBuffer()
+{
+    // TODO: glDeleteBuffers(1, &amp;m_RendererID)
+}
+
+void IndexBuffer::Bind() const
+{
+    // TODO: glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID)
+}
+
+void IndexBuffer::Unbind() const
+{
+    // TODO: glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+}</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+
+// A Vertex Buffer Object (VBO) stores vertex data on the GPU.
+// The constructor uploads data once; the destructor releases the GPU memory automatically.
+// a vertex buffer (VBO) is used to store vertex data, such as position, color, normals,
+// or texture coordinates, on the GPU for rendering. When you create and bind a VBO,
+// you upload your vertex data from the CPU to the GPU memory. The VBO works in conjunction
+// with vertex shaders to process each vertex. By storing vertex data in GPU memory,
+// OpenGL minimises the overhead of repeatedly sending data from the CPU.
+class VertexBuffer
+{
+private:
+    unsigned int m_RendererID;
+public:
+    // Upload static vertex data to the GPU (GL_STATIC_DRAW)
+    VertexBuffer(const void* data, unsigned int size);
+
+    // Allocate an empty buffer of the given size for dynamic updates (GL_DYNAMIC_DRAW)
+    VertexBuffer(unsigned int size);
+
+    // Releases the GPU buffer
+    ~VertexBuffer();
+
+    // Bind this buffer as the active GL_ARRAY_BUFFER
+    void Bind() const;
+
+    // Unbind by binding 0 to GL_ARRAY_BUFFER
+    void Unbind() const;
+
+    // Overwrite a region of an existing dynamic buffer with new data
+    void Update(const void* data, unsigned int size, unsigned int offset = 0) const;
+};" data-filename="src/VertexBuffer.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;VertexBuffer.h&quot;
+#include &quot;Renderer.h&quot;
+
+// Upload static data: generate a buffer, bind it, and fill it once
+VertexBuffer::VertexBuffer(const void* data, unsigned int size)
+{
+    GlCall(glGenBuffers(1, &amp;m_RendererID));
+    GlCall(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
+    GlCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
+}
+
+// Allocate an empty buffer for data that changes every frame
+VertexBuffer::VertexBuffer(unsigned int size)
+{
+    GlCall(glGenBuffers(1, &amp;m_RendererID));
+    GlCall(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
+    GlCall(glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW));
+}
+
+void VertexBuffer::Update(const void* data, unsigned int size, unsigned int offset) const
+{
+    GlCall(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
+    GlCall(glBufferSubData(GL_ARRAY_BUFFER, offset, size, data));
+}
+
+VertexBuffer::~VertexBuffer()
+{
+    GlCall(glDeleteBuffers(1, &amp;m_RendererID));
+}
+
+void VertexBuffer::Bind() const
+{
+    GlCall(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
+}
+
+void VertexBuffer::Unbind() const
+{
+    GlCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+}" data-filename="src/VertexBuffer.cpp" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+
+// An Index Buffer Object (IBO) stores indices that reference vertices in a VBO.
+// Instead of repeating shared vertices, the IBO holds draw order so the GPU can
+// reuse vertex data. The count is stored so Renderer::Draw can call glDrawElements
+// without the caller needing to track it.
+// In OpenGL, an index buffer (also known as an element buffer or EBO) is used to
+// store indices that reference vertices in a vertex buffer. Instead of sending
+// redundant vertex data multiple times for shapes that share vertices, the index
+// buffer holds the order in which vertices should be drawn to form triangles.
+class IndexBuffer
+{
+private:
+    unsigned int m_RendererID;
+    unsigned int m_Count;       // number of indices (not bytes)
+public:
+    IndexBuffer(const unsigned int* data, unsigned int count);
+    ~IndexBuffer();
+
+    void Bind() const;
+    void Unbind() const;
+
+    // Returns the number of indices stored (used by glDrawElements)
+    inline unsigned int GetCount() const { return m_Count; }
+};" data-filename="src/IndexBuffer.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;IndexBuffer.h&quot;
+#include &quot;Renderer.h&quot;
+
+IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
+    : m_Count(count)
+{
+    // Confirm unsigned int and GLuint are the same width on this platform
+    ASSERT(sizeof(unsigned int) == sizeof(GLuint));
+
+    GlCall(glGenBuffers(1, &amp;m_RendererID));
+    GlCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID));
+    GlCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW));
+}
+
+IndexBuffer::~IndexBuffer()
+{
+    GlCall(glDeleteBuffers(1, &amp;m_RendererID));
+}
+
+void IndexBuffer::Bind() const
+{
+    GlCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID));
+}
+
+void IndexBuffer::Unbind() const
+{
+    GlCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+}" data-filename="src/IndexBuffer.cpp" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+
+</body>
+</html>

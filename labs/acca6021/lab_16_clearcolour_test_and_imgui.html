@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 16 - ClearColour Test and ImGui | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 16 - ClearColour Test and ImGui</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>This lab implements <code>testClearColour</code> - the first concrete test scene in the project. Building on the Test Template lab (Lab 16), you will override all three virtual methods, add a Dear ImGui colour picker widget, and register the test in the application menu. When complete, selecting the test from the menu will display an interactive colour picker that changes the window background colour in real time with no recompile needed.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Understand how Dear ImGui's immediate-mode model works and why RenderGUI is called every frame</li>
+      <li>Use ImGui::ColorEdit4 to bind a float[4] array to an interactive colour picker widget</li>
+      <li>Override Update, Render, and RenderGUI in a concrete Tests subclass</li>
+      <li>Register a new test scene with TestMenu::RegisterTest in Main.cpp</li>
+      <li>Trace the data flow from an ImGui widget interaction through to a live glClearColor call</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>Without a way to change parameters at runtime, every tweak to a colour, size, or position requires a recompile. For a complex renderer this quickly becomes slow and disruptive. <strong>Dear ImGui</strong> solves this by providing an <strong>immediate-mode GUI</strong> framework that lets you expose any C++ variable as an interactive widget, rebuilt every frame.</p>
+<p>In the <strong>immediate-mode model</strong>, there are no persistent widget objects. Instead, <code>RenderGUI()</code> is called every frame and you call ImGui functions directly inside it. ImGui reads the current value of the bound variable, draws the widget, and if the user interacts with it, writes the new value back before the function returns. The application then reads that updated variable on the very next <code>Render()</code> call - no callbacks, no events, no signal/slot wiring.</p>
+<p><code>ImGui::ColorEdit4</code> takes a label string and a pointer to a <code>float[4]</code> array holding red, green, blue, and alpha in the range 0.0 to 1.0. In <code>Render()</code>, <code>glClearColor</code> reads from that same array and <code>glClear(GL_COLOR_BUFFER_BIT)</code> applies the colour. The pattern - expose a member variable to ImGui in <code>RenderGUI()</code>, read it in <code>Render()</code> - is how every future test scene in this project will work.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Declare the testClearColour class</h3>
+      <ol>
+  <li>Create the file <code>src/tests/testClearColour.h</code>.</li>
+  <li>Use <code>#pragma once</code> and include <code>"Tests.h"</code>.</li>
+  <li>Inside <code>namespace test</code>, declare a class <code>testClearColour</code> that publicly inherits from <code>Tests</code>.</li>
+  <li>Declare the constructor and destructor, then override the three virtual methods: <code>Update(float deltaTime)</code>, <code>Render()</code>, and <code>RenderGUI()</code>.</li>
+  <li>Add a <code>private</code> member <code>float m_ClearColour[4]</code> to hold the RGBA values.</li>
+  <li>Also add the new file to your <code>Renderer.vcxproj</code> and <code>Renderer.vcxproj.filters</code> so Visual Studio includes it in the build.</li>
+</ol>
+      <div class="code-file-header">src/tests/testClearColour.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+#include &quot;Tests.h&quot;
+
+namespace test
+{
+    class testClearColour : public Tests
+    {
+    public:
+        testClearColour();
+        ~testClearColour();
+
+        // TODO: override Update(float deltaTime)
+        // TODO: override Render()
+        // TODO: override RenderGUI()
+
+    private:
+        // TODO: declare float m_ClearColour[4]
+    };
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Implement testClearColour</h3>
+      <ol>
+  <li>Create the file <code>src/tests/testClearColour.cpp</code>.</li>
+  <li>Include <code>"testClearColour.h"</code>, <code>"../Renderer.h"</code> (for the <code>GlCall</code> macro), and <code>"../vendor/imgui/imgui.h"</code>.</li>
+  <li>In the constructor, initialise <code>m_ClearColour</code> to a default blue using a member initialiser list: <code>m_ClearColour{ 0.2f, 0.3f, 0.8f, 1.0f }</code>. The four values are red, green, blue, and alpha.</li>
+  <li>Leave the destructor and <code>Update</code> bodies empty - there is nothing to clean up or simulate yet.</li>
+  <li>In <code>Render()</code>, call <code>glClearColor</code> passing the four elements of <code>m_ClearColour</code> as separate arguments. Wrap the call in <code>GlCall()</code>. Then call <code>GlCall(glClear(GL_COLOR_BUFFER_BIT))</code> to apply it.</li>
+  <li>In <code>RenderGUI()</code>, call <code>ImGui::ColorEdit4("Pick a colour:", m_ClearColour)</code>. ImGui reads the current colour and writes back any user change directly into the array.</li>
+  <li>Build the project and confirm it compiles with no errors before moving on.</li>
+</ol>
+      <div class="code-file-header">src/tests/testClearColour.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &quot;testClearColour.h&quot;
+#include &quot;../Renderer.h&quot;
+#include &quot;../vendor/imgui/imgui.h&quot;
+
+namespace test
+{
+    // TODO: initialise m_ClearColour with a default blue (0.2, 0.3, 0.8, 1.0)
+    testClearColour::testClearColour() : m_ClearColour{ /* your values here */ }
+    {
+    }
+
+    testClearColour::~testClearColour()
+    {
+    }
+
+    void testClearColour::Update(float deltaTime)
+    {
+        // Nothing to update - leave empty
+    }
+
+    void testClearColour::Render()
+    {
+        // TODO: GlCall(glClearColor( ... four elements of m_ClearColour ... ))
+        // TODO: GlCall(glClear(GL_COLOR_BUFFER_BIT))
+    }
+
+    void testClearColour::RenderGUI()
+    {
+        // TODO: ImGui::ColorEdit4 - expose m_ClearColour as a colour picker
+    }
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Register the test in Main.cpp</h3>
+      <ol>
+  <li>Open <code>src/Main.cpp</code> and find the block where other tests are registered with <code>TestMenu->RegisterTest</code>.</li>
+  <li>Add this include near the top of the file, alongside the other test includes:
+    <pre><code class="language-cpp">#include "tests/testClearColour.h"</code></pre>
+  </li>
+  <li>Add this line in the test registration block:
+    <pre><code class="language-cpp">TestMenu-&gt;RegisterTest&lt;test::testClearColour&gt;("Test Clear Colour");</code></pre>
+  </li>
+  <li>Build and run. Select <strong>Test Clear Colour</strong> from the menu. You should see an ImGui colour picker widget - drag the sliders or click the colour swatch and watch the background update live.</li>
+  <li>Click <strong>Back</strong> to return to the menu and confirm other tests still work correctly.</li>
+</ol>
+      <div class="code-file-header">src/Main.cpp (relevant lines)</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">// Add near the top with the other test includes:
+#include &quot;tests/testClearColour.h&quot;
+
+// Add in the registration block alongside the other RegisterTest calls:
+TestMenu-&gt;RegisterTest&lt;test::testClearColour&gt;(&quot;Test Clear Colour&quot;);</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &quot;Tests.h&quot;
+
+namespace test
+{
+    class testClearColour : public Tests
+    {
+    public:
+        testClearColour();
+        ~testClearColour();
+
+        void Update(float deltaTime) override;
+        void Render() override;
+        void RenderGUI() override;
+
+    private:
+        float m_ClearColour[4];
+    };
+}" data-filename="src/tests/testClearColour.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;testClearColour.h&quot;
+#include &quot;../Renderer.h&quot;
+#include &quot;../vendor/imgui/imgui.h&quot;
+
+namespace test
+{
+    // Default blue: R=0.2, G=0.3, B=0.8, A=1.0
+    testClearColour::testClearColour() : m_ClearColour{ 0.2f, 0.3f, 0.8f, 1.0f }
+    {
+    }
+
+    testClearColour::~testClearColour()
+    {
+    }
+
+    void testClearColour::Update(float deltaTime)
+    {
+    }
+
+    void testClearColour::Render()
+    {
+        // Apply whatever colour the ImGui widget last set
+        GlCall(glClearColor(m_ClearColour[0], m_ClearColour[1], m_ClearColour[2], m_ClearColour[3]));
+        GlCall(glClear(GL_COLOR_BUFFER_BIT));
+    }
+
+    void testClearColour::RenderGUI()
+    {
+        // ImGui reads m_ClearColour, draws the picker, and writes back on interaction
+        ImGui::ColorEdit4(&quot;Pick a colour:&quot;, m_ClearColour);
+    }
+}" data-filename="src/tests/testClearColour.cpp" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="// Add near the top with the other test includes:
+#include &quot;tests/testClearColour.h&quot;
+
+// Add in the registration block alongside the other RegisterTest calls:
+TestMenu-&gt;RegisterTest&lt;test::testClearColour&gt;(&quot;Test Clear Colour&quot;);" data-filename="src/Main.cpp (relevant lines)" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+
+</body>
+</html>

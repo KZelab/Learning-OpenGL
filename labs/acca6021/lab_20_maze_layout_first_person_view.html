@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 20 - Maze Layout and First-Person View | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 20 - Maze Layout and First-Person View</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>
+    In this lab you build the foundation of a first-person maze game. You will
+    construct a single unit cube mesh and use it to render an entire 3D world
+    by iterating a 2D character grid, positioning the cube differently for each
+    tile. A grounded first-person <code>Camera</code> gives you WASD movement
+    and mouse look from the moment the test loads. By the end of the lab you
+    will be able to walk through textured corridors and look around freely.
+    Wall collision is added in the Maze Collision lab (Lab 21), and the full
+    game - timer, collectibles, and exit door - follows in Labs 22 and 23.
+  </p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Build a 24-vertex unit cube mesh with per-face flat normals and 0-to-1 UV coordinates using VertexArray, VertexBuffer, and IndexBuffer.</li>
+      <li>Render a 3D world by iterating a 2D character grid and positioning a shared cube with translate and scale model matrices.</li>
+      <li>Configure a grounded first-person Camera with WASD movement and mouse look using setGrounded().</li>
+      <li>Apply the Model-View-Projection pipeline and Phong lighting uniforms to a scene that draws many objects from one VAO.</li>
+      <li>Register the new TestMaze class and verify it appears in the test selection menu.</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>
+    Without a reuse strategy, a maze with hundreds of wall tiles would need
+    hundreds of separate VAOs - one mesh per tile. That wastes GPU memory and
+    makes the rendering loop complicated. The solution is to build
+    <strong>one unit cube</strong> and draw it many times, supplying a different
+    <strong>model matrix</strong> each time. OpenGL draws the same triangles
+    but transforms them to a new position and scale because the vertex shader
+    reads <code>u_Model</code> per draw call. This pattern - one shared mesh,
+    many model matrices - is sometimes called <em>instancing</em>, though here
+    we use a simple per-object uniform rather than a GPU instanced draw.
+  </p>
+  <p>
+    The cube uses <strong>24 vertices</strong> rather than the minimum 8. Each
+    face needs its own four vertices so each can carry a different flat outward
+    <strong>normal</strong> and a full 0-to-1 <strong>UV range</strong>. A
+    corner shared between three faces would need three different normals at the
+    same position, which a single vertex cannot express. The vertex data is
+    laid out as position (3 floats), normal (3 floats), and texture coordinate
+    (2 floats), matching the layout expected by <code>Maze.shader</code>.
+    Indices (36 in total: 6 faces times 2 triangles times 3 vertices) are
+    generated with a loop rather than typed by hand.
+  </p>
+  <p>
+    The <code>MazeMap</code> class owns the tile grid. It exposes
+    <code>At(col, row)</code> to read a character, and
+    <code>TileCenter(col, row)</code> to get the world-space XZ centre of that
+    tile. Tile <code>'#'</code> is a wall and gets a full-height block.
+    Every other character is open floor and gets a thin slab. The
+    <code>Camera</code> is put into grounded mode via
+    <code>setGrounded(true, 1.6f)</code>, which locks the Y position to eye
+    height and projects WASD movement onto the horizontal plane.
+  </p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Declare the TestMaze class</h3>
+      <ol>
+  <li>
+    Create the file <code>src/tests/maze/TestMaze.h</code>. Add the pragma
+    guard and the includes listed in the skeleton below.
+  </li>
+  <li>
+    Inside <code>namespace test</code>, declare <code>class TestMaze : public Tests</code>.
+  </li>
+  <li>
+    In the <strong>public</strong> section, declare the constructor
+    <code>TestMaze(GLFWwindow* window)</code> and override the three virtual
+    methods: <code>Update</code>, <code>Render</code>, and <code>RenderGUI</code>.
+  </li>
+  <li>
+    In the <strong>private</strong> section, declare the two helpers
+    <code>BuildCubeMesh()</code> and <code>DrawCube()</code>, then add
+    the member variables listed in the comments. Use
+    <code>std::unique_ptr</code> for all heap-allocated objects.
+  </li>
+  <li>
+    The <code>MazeMap</code> class is already complete in
+    <code>src/tests/maze/MazeMap.h</code>. The key methods you will use
+    in later tasks are:
+    <ul>
+      <li><code>Load(int level, unsigned int seed)</code> - generate and store the tile grid</li>
+      <li><code>At(int col, int row)</code> - read the character at a tile (e.g. <code>'#'</code> for wall)</li>
+      <li><code>TileCenter(int col, int row)</code> - world-space XZ centre of that tile</li>
+      <li><code>TileSize()</code> - width and depth of each tile in world units</li>
+      <li><code>Cols()</code>, <code>Rows()</code> - grid dimensions</li>
+      <li><code>PlayerStart()</code>, <code>StartYaw()</code> - where the player spawns</li>
+    </ul>
+  </li>
+</ol>
+      <div class="code-file-header">src/tests/maze/TestMaze.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+#include &quot;../Tests.h&quot;
+#include &quot;../../Renderer.h&quot;
+#include &quot;../../Shader.h&quot;
+#include &quot;../../Texture.h&quot;
+#include &quot;../../VertexArray.h&quot;
+#include &quot;../../VertexBuffer.h&quot;
+#include &quot;../../IndexBuffer.h&quot;
+#include &quot;../../utils/Camera.h&quot;
+#include &quot;MazeMap.h&quot;
+
+#include &lt;memory&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;glm/glm.hpp&gt;
+
+namespace test {
+    class TestMaze : public Tests {
+    public:
+        // TODO: Declare the constructor (takes a GLFWwindow* parameter)
+
+        // TODO: Override the three virtual methods from Tests:
+        //   Update(float deltaTime), Render(), RenderGUI()
+
+    private:
+        // TODO: Declare private helpers:
+        //   void BuildCubeMesh();
+        //   void DrawCube(const glm::mat4&amp; model,
+        //                 const glm::vec3&amp; colour,
+        //                 const Texture* texture);
+
+        // TODO: Declare member variables:
+        //   GLFWwindow*                m_window;
+        //   Renderer                   m_Renderer;
+        //   std::unique_ptr&lt;Camera&gt;    m_Camera;
+        //   MazeMap                    m_Map;
+        //   std::unique_ptr&lt;Shader&gt;    m_Shader;
+        //   std::unique_ptr&lt;Texture&gt;   m_WallTexture;
+        //   std::unique_ptr&lt;Texture&gt;   m_FloorTexture;
+        //   std::unique_ptr&lt;VertexArray&gt;  m_CubeVAO;
+        //   std::unique_ptr&lt;VertexBuffer&gt; m_CubeVBO;
+        //   std::unique_ptr&lt;IndexBuffer&gt;  m_CubeIBO;
+    };
+}
+</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Build the unit cube mesh</h3>
+      <ol>
+  <li>
+    Create <code>src/tests/maze/TestMaze.cpp</code>. At the top, copy the
+    include block from the skeleton below - you will add more functions to
+    this file in later tasks.
+  </li>
+  <li>
+    Implement <code>BuildCubeMesh()</code>. Declare a <code>float vertices[192]</code>
+    array (24 vertices times 8 floats each). For each of the 6 faces, write 4 rows of
+    8 floats: <strong>x, y, z, nx, ny, nz, u, v</strong>.
+    <ul>
+      <li>Positions span -0.5 to +0.5 on each axis, centred on the origin.</li>
+      <li>Each face's normal points directly outward (e.g. front face: <code>0, 0, 1</code>).</li>
+      <li>UV runs from <code>(0,0)</code> at the bottom-left corner to <code>(1,1)</code> at the top-right.</li>
+      <li>Winding is counter-clockwise viewed from outside the cube.</li>
+    </ul>
+  </li>
+  <li>
+    Generate 36 indices programmatically. Loop from <code>face = 0</code> to
+    <code>5</code>. For each face, compute <code>base = face * 4</code> and
+    write two triangles into <code>indices[face * 6 .. face * 6 + 5]</code>:
+    <ul>
+      <li>Triangle 1: <code>base+0, base+1, base+2</code></li>
+      <li>Triangle 2: <code>base+2, base+3, base+0</code></li>
+    </ul>
+  </li>
+  <li>
+    Create a <code>VertexArray</code> and <code>VertexBuffer</code>. Build a
+    <code>VertexBufferLayout</code>, push <code>float(3)</code> (position),
+    <code>float(3)</code> (normal), and <code>float(2)</code> (texCoord).
+    Call <code>AddBuffer</code> then create the <code>IndexBuffer</code> with
+    36 indices.
+  </li>
+</ol>
+      <div class="code-file-header">src/tests/maze/TestMaze.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">void TestMaze::BuildCubeMesh()
+{
+    // TODO: Declare a float array for 24 vertices.
+    // Each vertex has 8 floats: position (3), normal (3), texCoord (2).
+    // You need 6 faces x 4 unique vertices = 24 vertices total.
+    //
+    // Each face needs its OWN 4 vertices because each face has a different
+    // flat outward normal. A shared corner vertex cannot simultaneously carry
+    // three different normals (one per adjacent face).
+    //
+    // Vertex layout:
+    //   x, y, z,       &lt;- position (centred on origin, spans -0.5 to +0.5)
+    //   nx, ny, nz,    &lt;- outward-facing normal, normalised
+    //   u, v           &lt;- UV: (0,0) bottom-left of face, (1,1) top-right
+    //
+    // Faces in CCW winding viewed from outside:
+    //   Front (+Z):  normal = ( 0,  0,  1)
+    //   Back  (-Z):  normal = ( 0,  0, -1)
+    //   Left  (-X):  normal = (-1,  0,  0)
+    //   Right (+X):  normal = ( 1,  0,  0)
+    //   Top   (+Y):  normal = ( 0,  1,  0)
+    //   Bottom(-Y):  normal = ( 0, -1,  0)
+    const float vertices[] = {
+        // pos (x, y, z)        normal (nx, ny, nz)   uv (u, v)
+        // Front face (+Z)
+        // TODO: 4 vertices...
+
+        // Back face (-Z)
+        // TODO: 4 vertices...
+
+        // Left face (-X)
+        // TODO: 4 vertices...
+
+        // Right face (+X)
+        // TODO: 4 vertices...
+
+        // Top face (+Y)
+        // TODO: 4 vertices...
+
+        // Bottom face (-Y)
+        // TODO: 4 vertices...
+    };
+
+    // TODO: Generate 36 indices (6 faces x 2 triangles x 3 vertices = 36).
+    // For each face, the base vertex index is face * 4.
+    // The two CCW triangles per face use:
+    //   triangle 1: base+0, base+1, base+2
+    //   triangle 2: base+2, base+3, base+0
+    unsigned int indices[36];
+    for (unsigned int face = 0; face &lt; 6; face++)
+    {
+        unsigned int base = face * 4;
+        unsigned int* tri = &amp;indices[face * 6];
+        // TODO: Fill tri[0], tri[1], tri[2] with triangle 1
+        // TODO: Fill tri[3], tri[4], tri[5] with triangle 2
+    }
+
+    // TODO: Create the VAO and VBO
+    // TODO: Build a VertexBufferLayout and push: float(3), float(3), float(2)
+    // TODO: Call m_CubeVAO-&gt;AddBuffer(*m_CubeVBO, layout)
+    // TODO: Create the IBO with 36 indices
+}
+</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Initialise the scene</h3>
+      <ol>
+  <li>
+    Still in <code>TestMaze.cpp</code>, add the constructor and the
+    <code>Update</code> and <code>RenderGUI</code> method bodies using the
+    skeleton below as your starting point.
+  </li>
+  <li>
+    In the constructor, create <code>m_Camera</code> with
+    <code>std::make_unique&lt;Camera&gt;</code>. Pass the window, start
+    position <code>(0, 1.6, 0)</code>, world-up <code>(0,1,0)</code>, yaw 0,
+    pitch 0, FOV 60. Immediately call
+    <code>m_Camera-&gt;setGrounded(true, 1.6f)</code>. This locks Y to eye
+    height and projects WASD onto the horizontal plane. Without it, looking
+    up while pressing W would fly the camera into the ceiling.
+  </li>
+  <li>
+    Load the shader from <code>"res/Shaders/Maze.shader"</code> and the two
+    textures from <code>"res/Textures/maze/wall.png"</code> and
+    <code>"res/Textures/maze/floor.png"</code>. (These are placeholder images
+    you can replace later.)
+  </li>
+  <li>
+    Call <code>BuildCubeMesh()</code>, enable depth testing with
+    <code>glEnable(GL_DEPTH_TEST)</code>, then load the level:
+    <code>m_Map.Load(0, 1337u)</code>. Teleport the camera to the player
+    start using <code>setPosition</code> and <code>setYawPitch</code>.
+  </li>
+  <li>
+    In <code>Update</code>, forward input to the camera each frame:
+    call <code>processInput(deltaTime)</code> then <code>Update(deltaTime)</code>.
+  </li>
+  <li>
+    In <code>RenderGUI</code>, call <code>m_Camera-&gt;cameraGUI()</code> and
+    add an <code>ImGui::TextWrapped</code> controls hint.
+  </li>
+</ol>
+      <div class="code-file-header">src/tests/maze/TestMaze.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &quot;TestMaze.h&quot;
+
+#include &quot;../../VertexBufferLayout.h&quot;
+#include &quot;../../vendor/imgui/imgui.h&quot;
+
+#include &lt;glm/gtc/matrix_transform.hpp&gt;
+
+namespace test {
+
+    static const float WallHeight = 2.5f;
+
+    TestMaze::TestMaze(GLFWwindow* window)
+        : m_window(window)
+    {
+        // TODO: Create m_Camera using std::make_unique&lt;Camera&gt;.
+        //   Pass: window, start position (0, 1.6, 0), world-up (0,1,0),
+        //         yaw = 0, pitch = 0, FOV = 60.
+        //   Then call m_Camera-&gt;setGrounded(true, 1.6f) to lock Y movement.
+
+        // TODO: Load the Maze shader from &quot;res/Shaders/Maze.shader&quot;
+        // TODO: Load m_WallTexture  from &quot;res/Textures/maze/wall.png&quot;
+        // TODO: Load m_FloorTexture from &quot;res/Textures/maze/floor.png&quot;
+
+        // TODO: Call BuildCubeMesh()
+        // TODO: Enable depth testing with glEnable(GL_DEPTH_TEST)
+
+        // TODO: Load level 0 with a fixed seed (e.g. 1337u):
+        //   m_Map.Load(0, 1337u);
+        // TODO: Teleport the camera to the map's player start:
+        //   m_Camera-&gt;setPosition(m_Map.PlayerStart());
+        //   m_Camera-&gt;setYawPitch(m_Map.StartYaw(), 0.0f);
+    }
+
+    void TestMaze::Update(float deltaTime)
+    {
+        // TODO: Forward input to the camera each frame
+        //   m_Camera-&gt;processInput(deltaTime);
+        //   m_Camera-&gt;Update(deltaTime);
+    }
+
+    void TestMaze::RenderGUI()
+    {
+        // TODO: Show the camera debug GUI and a controls hint
+        //   m_Camera-&gt;cameraGUI();
+        //   ImGui::TextWrapped(&quot;WASD: move | Mouse: look | ESC: pause + cursor&quot;);
+    }
+
+} // namespace test
+</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 4 - Render the tile grid</h3>
+      <ol>
+  <li>
+    Add <code>DrawCube</code> and <code>Render</code> to
+    <code>TestMaze.cpp</code> using the skeleton below.
+  </li>
+  <li>
+    In <code>DrawCube</code>, bind the shader and set <code>u_Model</code>
+    and <code>u_ObjectColour</code> uniforms. If a texture is supplied,
+    bind it to slot 0, set <code>u_Texture = 0</code> and
+    <code>u_UseTexture = 1</code>. Otherwise set <code>u_UseTexture = 0</code>.
+    Call <code>m_Renderer.Draw</code> at the end.
+  </li>
+  <li>
+    In <code>Render</code>, clear the framebuffer, compute the framebuffer
+    aspect ratio, and build the perspective projection matrix with
+    <code>glm::perspective</code> (FOV from <code>m_Camera-&gt;getFOV()</code>,
+    near 0.1, far 100). Retrieve the view matrix from the camera.
+  </li>
+  <li>
+    Bind the shader once and set all the frame-constant uniforms:
+    <code>u_View</code>, <code>u_Projection</code>,
+    <code>u_Light.Position</code> (above the maze centre at y = 8),
+    <code>u_Light.Colour</code> (white), <code>u_CameraPosition</code>,
+    and the four Phong scalars (ambient 0.35, diffuse 0.8, specular 0.2,
+    shininess 32).
+  </li>
+  <li>
+    Write the tile loop: iterate every <code>(row, col)</code> pair.
+    Get the world-space centre with <code>m_Map.TileCenter(col, row)</code>
+    and the tile character with <code>m_Map.At(col, row)</code>. For
+    <code>'#'</code>, translate up by half the wall height and scale to
+    <code>(tile, WallHeight, tile)</code>. For everything else, translate
+    down slightly and scale to <code>(tile, 0.1f, tile)</code> for a floor
+    slab.
+  </li>
+  <li>
+    Register the test in <code>src/Main.cpp</code>:
+    <pre><code class="language-cpp">#include "tests/maze/TestMaze.h"
+// ...
+TestMenu-&gt;RegisterTest&lt;test::TestMaze&gt;("Maze", window);</code></pre>
+    Build and run. Select "Maze" in the menu. You should see a first-person
+    view of a textured maze. WASD moves along the floor, mouse look rotates
+    freely. You will be able to walk through walls - that is expected. Collision
+    is added in the next lab.
+  </li>
+</ol>
+      <div class="code-file-header">src/tests/maze/TestMaze.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">    // Add DrawCube and Render inside the namespace test { ... } block
+    // in TestMaze.cpp, after RenderGUI().
+
+    void TestMaze::DrawCube(const glm::mat4&amp; model,
+                            const glm::vec3&amp; colour,
+                            const Texture*   texture)
+    {
+        m_Shader-&gt;Bind();
+
+        // TODO: Set the model matrix uniform &quot;u_Model&quot;
+        // TODO: Set the colour uniform &quot;u_ObjectColour&quot; (r, g, b components)
+
+        if (texture)
+        {
+            // TODO: Bind the texture to slot 0
+            // TODO: Set &quot;u_Texture&quot; = 0  and  &quot;u_UseTexture&quot; = 1
+        }
+        else
+        {
+            // TODO: Set &quot;u_UseTexture&quot; = 0 (flat colour, no texture)
+        }
+
+        // TODO: Call m_Renderer.Draw(*m_CubeVAO, *m_CubeIBO, *m_Shader)
+    }
+
+    void TestMaze::Render()
+    {
+        m_Renderer.ClearColour_Black();
+        m_Renderer.Clear();
+
+        // TODO: Get framebuffer size with glfwGetFramebufferSize.
+        //   Compute aspect ratio (cast to float before dividing).
+
+        // TODO: Build a perspective projection matrix (FOV from m_Camera-&gt;getFOV(),
+        //   near = 0.1f, far = 100.0f) and retrieve the view matrix.
+
+        // TODO: Compute the maze centre tile and camera position for uniforms.
+
+        // TODO: Bind the shader and set these frame-constant uniforms:
+        //   &quot;u_View&quot;           &lt;- view matrix
+        //   &quot;u_Projection&quot;     &lt;- projection matrix
+        //   &quot;u_Light.Position&quot; &lt;- mazeCenter.x, 8.0f, mazeCenter.z
+        //   &quot;u_Light.Colour&quot;   &lt;- 1, 1, 1 (white)
+        //   &quot;u_CameraPosition&quot; &lt;- camera world position
+        //   &quot;u_AmbientIntensity&quot;  = 0.35f
+        //   &quot;u_DiffuseIntensity&quot;  = 0.8f
+        //   &quot;u_SpecularIntensity&quot; = 0.2f
+        //   &quot;u_Shininess&quot;         = 32.0f
+
+        float tile = m_Map.TileSize();
+
+        // TODO: Iterate every (row, col) in the grid.
+        //   Get the tile's world-space centre with m_Map.TileCenter(col, row).
+        //   Read the tile character with m_Map.At(col, row).
+        //
+        //   '#' -&gt; wall cube:
+        //     Translate to center + (0, WallHeight * 0.5f, 0)
+        //     Scale by        (tile, WallHeight, tile)
+        //     DrawCube(..., glm::vec3(1.0f), m_WallTexture.get())
+        //
+        //   anything else -&gt; floor slab:
+        //     Translate to center + (0, -0.05f, 0)
+        //     Scale by        (tile, 0.1f, tile)
+        //     DrawCube(..., glm::vec3(1.0f), m_FloorTexture.get())
+    }
+</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &quot;../Tests.h&quot;
+#include &quot;../../Renderer.h&quot;
+#include &quot;../../Shader.h&quot;
+#include &quot;../../Texture.h&quot;
+#include &quot;../../VertexArray.h&quot;
+#include &quot;../../VertexBuffer.h&quot;
+#include &quot;../../IndexBuffer.h&quot;
+#include &quot;../../utils/Camera.h&quot;
+#include &quot;MazeMap.h&quot;
+
+#include &lt;memory&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;glm/glm.hpp&gt;
+
+namespace test {
+    class TestMaze : public Tests {
+    public:
+        TestMaze(GLFWwindow* window);
+
+        void Update(float deltaTime) override;
+        void Render() override;
+        void RenderGUI() override;
+
+    private:
+        void BuildCubeMesh();
+        void DrawCube(const glm::mat4&amp; model, const glm::vec3&amp; colour, const Texture* texture);
+
+        GLFWwindow* m_window;
+        Renderer m_Renderer;
+
+        std::unique_ptr&lt;Camera&gt; m_Camera;
+        MazeMap m_Map;
+
+        std::unique_ptr&lt;Shader&gt;  m_Shader;
+        std::unique_ptr&lt;Texture&gt; m_WallTexture;
+        std::unique_ptr&lt;Texture&gt; m_FloorTexture;
+
+        std::unique_ptr&lt;VertexArray&gt;  m_CubeVAO;
+        std::unique_ptr&lt;VertexBuffer&gt; m_CubeVBO;
+        std::unique_ptr&lt;IndexBuffer&gt;  m_CubeIBO;
+    };
+}
+" data-filename="src/tests/maze/TestMaze.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;TestMaze.h&quot;
+
+#include &quot;../../VertexBufferLayout.h&quot;
+#include &quot;../../vendor/imgui/imgui.h&quot;
+
+#include &lt;glm/gtc/matrix_transform.hpp&gt;
+
+namespace test {
+
+    static const float WallHeight = 2.5f;
+
+    // =========================================================================
+    // CONSTRUCTOR
+    // =========================================================================
+    TestMaze::TestMaze(GLFWwindow* window)
+        : m_window(window)
+    {
+        // Grounded FPS camera: Y is locked to eye height, WASD moves on XZ.
+        // The Player class (Lab 21) will add wall collision on top of this.
+        m_Camera = std::make_unique&lt;Camera&gt;(
+            window,
+            glm::vec3(0.0f, 1.6f, 0.0f),
+            glm::vec3(0.0f, 1.0f, 0.0f),
+            0.0f, 0.0f, 60.0f
+        );
+        m_Camera-&gt;setGrounded(true, 1.6f);
+
+        m_Shader       = std::make_unique&lt;Shader&gt;(&quot;res/Shaders/Maze.shader&quot;);
+        m_WallTexture  = std::make_unique&lt;Texture&gt;(&quot;res/Textures/maze/wall.png&quot;);
+        m_FloorTexture = std::make_unique&lt;Texture&gt;(&quot;res/Textures/maze/floor.png&quot;);
+
+        BuildCubeMesh();
+        glEnable(GL_DEPTH_TEST);
+
+        // Load level 0 with a fixed seed so the maze is always the same.
+        m_Map.Load(0, 1337u);
+        m_Camera-&gt;setPosition(m_Map.PlayerStart());
+        m_Camera-&gt;setYawPitch(m_Map.StartYaw(), 0.0f);
+    }
+
+    // =========================================================================
+    // GEOMETRY - unit cube with 24 unique vertices (6 faces x 4)
+    // =========================================================================
+    void TestMaze::BuildCubeMesh()
+    {
+        const float vertices[] = {
+            // pos (x, y, z)        normal (nx, ny, nz)   uv (u, v)
+            // Front face (+Z)
+            -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,   0.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,   1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,   1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,   0.0f, 1.0f,
+            // Back face (-Z)
+             0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,   0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,   1.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,   1.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,   0.0f, 1.0f,
+            // Left face (-X)
+            -0.5f, -0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+            // Right face (+X)
+             0.5f, -0.5f,  0.5f,    1.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,    1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,    1.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,    1.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+            // Top face (+Y)
+            -0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,   0.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,   1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,   1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,   0.0f, 1.0f,
+            // Bottom face (-Y)
+            -0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,   0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,   1.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,   1.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,   0.0f, 1.0f,
+        };
+
+        // Two CCW triangles per face: 0-1-2 and 2-3-0 (offset by face base)
+        unsigned int indices[36];
+        for (unsigned int face = 0; face &lt; 6; face++)
+        {
+            unsigned int base = face * 4;
+            unsigned int* tri = &amp;indices[face * 6];
+            tri[0] = base;     tri[1] = base + 1; tri[2] = base + 2;
+            tri[3] = base + 2; tri[4] = base + 3; tri[5] = base;
+        }
+
+        m_CubeVAO = std::make_unique&lt;VertexArray&gt;();
+        m_CubeVBO = std::make_unique&lt;VertexBuffer&gt;(vertices, sizeof(vertices));
+
+        VertexBufferLayout layout;
+        layout.Push&lt;float&gt;(3); // position
+        layout.Push&lt;float&gt;(3); // normal
+        layout.Push&lt;float&gt;(2); // texCoord
+        m_CubeVAO-&gt;AddBuffer(*m_CubeVBO, layout);
+
+        m_CubeIBO = std::make_unique&lt;IndexBuffer&gt;(indices, 36);
+    }
+
+    // =========================================================================
+    // UPDATE
+    // =========================================================================
+    void TestMaze::Update(float deltaTime)
+    {
+        // Camera handles WASD + mouse look. Wall collision is added in Lab 21.
+        m_Camera-&gt;processInput(deltaTime);
+        m_Camera-&gt;Update(deltaTime);
+    }
+
+    // =========================================================================
+    // RENDERING
+    // =========================================================================
+    void TestMaze::DrawCube(const glm::mat4&amp; model,
+                            const glm::vec3&amp; colour,
+                            const Texture*   texture)
+    {
+        m_Shader-&gt;Bind();
+        m_Shader-&gt;setUniformMat4f(&quot;u_Model&quot;, model);
+        m_Shader-&gt;setUniform3f(&quot;u_ObjectColour&quot;, colour.r, colour.g, colour.b);
+
+        if (texture)
+        {
+            texture-&gt;Bind(0);
+            m_Shader-&gt;setUniform1i(&quot;u_Texture&quot;, 0);
+            m_Shader-&gt;setUniform1i(&quot;u_UseTexture&quot;, 1);
+        }
+        else
+        {
+            m_Shader-&gt;setUniform1i(&quot;u_UseTexture&quot;, 0);
+        }
+
+        m_Renderer.Draw(*m_CubeVAO, *m_CubeIBO, *m_Shader);
+    }
+
+    void TestMaze::Render()
+    {
+        m_Renderer.ClearColour_Black();
+        m_Renderer.Clear();
+
+        int fbWidth, fbHeight;
+        glfwGetFramebufferSize(m_window, &amp;fbWidth, &amp;fbHeight);
+        float aspect = fbHeight &gt; 0 ? (float)fbWidth / (float)fbHeight : 16.0f / 9.0f;
+
+        glm::mat4 projection = glm::perspective(
+            glm::radians(m_Camera-&gt;getFOV()), aspect, 0.1f, 100.0f);
+        glm::mat4 view = m_Camera-&gt;getViewMatrix();
+
+        // Place a single white overhead light above the maze centre
+        glm::vec3 mazeCenter = m_Map.TileCenter(m_Map.Cols() / 2, m_Map.Rows() / 2);
+        glm::vec3 cameraPos  = m_Camera-&gt;getPosition();
+
+        m_Shader-&gt;Bind();
+        m_Shader-&gt;setUniformMat4f(&quot;u_View&quot;,           view);
+        m_Shader-&gt;setUniformMat4f(&quot;u_Projection&quot;,     projection);
+        m_Shader-&gt;setUniform3f(&quot;u_Light.Position&quot;,    mazeCenter.x, 8.0f, mazeCenter.z);
+        m_Shader-&gt;setUniform3f(&quot;u_Light.Colour&quot;,      1.0f, 1.0f, 1.0f);
+        m_Shader-&gt;setUniform3f(&quot;u_CameraPosition&quot;,    cameraPos.x, cameraPos.y, cameraPos.z);
+        m_Shader-&gt;setUniform1f(&quot;u_AmbientIntensity&quot;,  0.35f);
+        m_Shader-&gt;setUniform1f(&quot;u_DiffuseIntensity&quot;,  0.8f);
+        m_Shader-&gt;setUniform1f(&quot;u_SpecularIntensity&quot;, 0.2f);
+        m_Shader-&gt;setUniform1f(&quot;u_Shininess&quot;,         32.0f);
+
+        float tile = m_Map.TileSize();
+
+        for (int row = 0; row &lt; m_Map.Rows(); row++)
+        {
+            for (int col = 0; col &lt; m_Map.Cols(); col++)
+            {
+                glm::vec3 center   = m_Map.TileCenter(col, row);
+                char      tileChar = m_Map.At(col, row);
+
+                if (tileChar == '#')
+                {
+                    // Wall: a full-height block scaled to WallHeight
+                    glm::mat4 model = glm::translate(
+                        glm::mat4(1.0f),
+                        center + glm::vec3(0.0f, WallHeight * 0.5f, 0.0f));
+                    model = glm::scale(model, glm::vec3(tile, WallHeight, tile));
+                    DrawCube(model, glm::vec3(1.0f), m_WallTexture.get());
+                }
+                else
+                {
+                    // Floor: a thin slab whose top sits exactly at y = 0
+                    glm::mat4 model = glm::translate(
+                        glm::mat4(1.0f),
+                        center + glm::vec3(0.0f, -0.05f, 0.0f));
+                    model = glm::scale(model, glm::vec3(tile, 0.1f, tile));
+                    DrawCube(model, glm::vec3(1.0f), m_FloorTexture.get());
+                }
+            }
+        }
+    }
+
+    // =========================================================================
+    // HUD
+    // =========================================================================
+    void TestMaze::RenderGUI()
+    {
+        m_Camera-&gt;cameraGUI();
+        ImGui::TextWrapped(&quot;WASD: move | Mouse: look | ESC: pause + cursor&quot;);
+    }
+
+} // namespace test
+" data-filename="src/tests/maze/TestMaze.cpp" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+
+</body>
+</html>

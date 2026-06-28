@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 21 - AABB Player-Wall Collision | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 21 - AABB Player-Wall Collision</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>
+    In the Maze Layout lab (Lab 20) you built a navigable first-person maze,
+    but the camera passes through walls. This lab fixes that by introducing the
+    <code>Player</code> class. Player wraps the Camera in a small
+    Axis-Aligned Bounding Box (AABB) and resolves collisions using a technique
+    called <strong>move and slide</strong>: the frame's WASD movement is
+    applied one axis at a time, and any wall overlap is corrected after each
+    axis independently. The result is that walking diagonally into a wall
+    cancels the blocked component of the motion but keeps the free component,
+    so the player slides smoothly along the surface rather than sticking to it.
+  </p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Explain what an AABB is and how two AABB objects are tested for overlap on a single axis.</li>
+      <li>Implement the move-and-slide algorithm: snapshot the previous position, apply WASD input, then resolve X and Z independently.</li>
+      <li>Implement ResolveAxis: a 3x3 broad-phase neighbourhood check that pushes the player out of overlapping wall tiles.</li>
+      <li>Wire the Player class into TestMaze by delegating Update and Respawn, removing the direct camera-grounded call from the constructor.</li>
+      <li>Verify that the player slides along walls when moving diagonally and cannot pass through any wall tile.</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>
+    Without collision, the camera moves wherever the input directs it - through
+    walls and all. The standard game-development fix is to give the player a
+    <strong>bounding volume</strong> and test it against the world each frame.
+    Here the player is an <strong>AABB</strong>: a box whose sides are
+    aligned to the world axes. An AABB is defined by a centre position and a
+    half-extent (half the box's width) on each axis. Two AABBs overlap on one
+    axis when the distance between their centres is less than the sum of their
+    half-extents. If they overlap on <em>every</em> axis simultaneously, they
+    are colliding.
+  </p>
+  <p>
+    Resolving the collision naively - just push the player back to their
+    previous position - causes them to stick to the wall when moving
+    diagonally. The correct approach is <strong>move and slide</strong>: save
+    the position before input, let the camera apply this frame's movement to
+    get the desired position, then re-apply the movement one axis at a time
+    and resolve any overlap after each axis separately. If the X axis is
+    blocked the player is pushed back on X, but the Z movement (which may be
+    clear) is still applied, so the player slides along the wall face.
+  </p>
+  <p>
+    Testing every tile in the maze for overlap each frame would be expensive.
+    The <strong>broad-phase optimisation</strong> exploits the fact that the
+    player box is much smaller than one tile: only the 3x3 block of tiles
+    around the player's current tile can possibly touch the bounding box.
+    <code>MazeMap::WorldToTile</code> converts the player's world position to
+    a tile index, and the 3x3 loop uses <code>MazeMap::IsWall</code> and
+    <code>MazeMap::TileCenter</code> to check and position each candidate tile.
+    Both methods are already implemented and ready to use.
+  </p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Study the Player interface</h3>
+      <ol>
+  <li>
+    Read <code>src/tests/maze/Player.h</code> below. This file is already
+    complete - you do not need to edit it.
+  </li>
+  <li>
+    Note the three public methods you will implement in the next tasks:
+    <ul>
+      <li><code>Player(Camera*, MazeMap*)</code> - stores pointers and enables grounded mode</li>
+      <li><code>Update(float deltaTime)</code> - runs move-and-slide each frame</li>
+      <li><code>Respawn(const glm::vec3&amp; start, float yaw)</code> - teleports to a spawn point</li>
+    </ul>
+  </li>
+  <li>
+    Note the private <code>ResolveAxis(glm::vec3&amp; position, int axis)</code>
+    helper. It takes a position <strong>by reference</strong> and modifies it
+    in place. The <code>axis</code> parameter selects which component of
+    <code>glm::vec3</code> to test and push: <code>0</code> for X, <code>2</code> for Z.
+  </li>
+  <li>
+    Note <code>m_HalfExtent = 0.3f</code>: the player is a 0.6 x 0.6 unit
+    box on the XZ plane, centred on the camera position. This is narrow enough
+    to fit through a corridor but wide enough to prevent the near clipping plane
+    from clipping into a wall.
+  </li>
+</ol>
+      <div class="code-file-header">src/tests/maze/Player.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">/**
+ * Player.h
+ *
+ * First-person player: wraps the Camera in grounded mode and stops it
+ * walking through maze walls.
+ *
+ * KEY CONCEPTS:
+ * 1. AABB (Axis-Aligned Bounding Box) overlap testing
+ * 2. AXIS-SEPARATED collision resolution (&quot;move and slide&quot;):
+ *    movement is applied one axis at a time; each axis is resolved
+ *    independently. Walking diagonally into a wall cancels the blocked
+ *    component but keeps the parallel one - so you slide along the wall.
+ * 3. Broad-phase optimisation: only the 3x3 tiles around the player are
+ *    tested, not the whole grid.
+ */
+
+#pragma once
+#include &lt;glm/glm.hpp&gt;
+
+#include &quot;../../utils/Camera.h&quot;
+#include &quot;MazeMap.h&quot;
+
+namespace test
+{
+    class Player
+    {
+    public:
+        Player(Camera* camera, MazeMap* map);
+
+        // Runs camera input for this frame, then corrects the resulting
+        // position so the player's bounding box never overlaps a wall tile.
+        void Update(float deltaTime);
+
+        // Teleport to a level's start tile, facing along its corridor.
+        void Respawn(const glm::vec3&amp; start, float yaw);
+
+        float EyeHeight() const { return m_EyeHeight; }
+
+    private:
+        // Resolves one axis of movement.
+        // @param position - player position with the axis already moved;
+        //                   pushed back out of any overlapping wall IN PLACE
+        // @param axis     - 0 = X, 2 = Z  (glm::vec3 component index)
+        void ResolveAxis(glm::vec3&amp; position, int axis) const;
+
+        Camera*   m_Camera;
+        MazeMap*  m_Map;
+
+        // Half-size of the player's AABB in the XZ plane.
+        // 0.6 x 0.6 box: small enough to fit corridors, big enough that
+        // walls never clip through the camera near plane.
+        float m_HalfExtent = 0.3f;
+
+        float m_EyeHeight  = 1.6f;
+    };
+}
+</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Implement construction and Respawn</h3>
+      <ol>
+  <li>
+    Create <code>src/tests/maze/Player.cpp</code> with the skeleton below.
+  </li>
+  <li>
+    In the constructor, call <code>m_Camera-&gt;setGrounded(true, m_EyeHeight)</code>.
+    This tells the Camera to lock its Y position to eye height and project
+    WASD movement onto the horizontal XZ plane. Because Player owns this call,
+    TestMaze must <strong>not</strong> call <code>setGrounded</code> directly
+    (you will remove that call in Task 4).
+  </li>
+  <li>
+    In <code>Respawn</code>, teleport the camera to the spawn point. Use
+    <code>m_EyeHeight</code> for the Y coordinate - the spawn position passed
+    in has Y at floor level (0), but the camera eye sits 1.6 units above the
+    floor.
+  </li>
+  <li>
+    After filling in both methods, leave the rest of the file open - you will
+    add <code>Update</code> and <code>ResolveAxis</code> in Task 3.
+  </li>
+</ol>
+      <div class="code-file-header">src/tests/maze/Player.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &quot;Player.h&quot;
+
+#include &lt;cmath&gt;
+
+namespace test
+{
+    Player::Player(Camera* camera, MazeMap* map)
+        : m_Camera(camera),
+          m_Map(map)
+    {
+        // TODO: Enable grounded FPS mode so the camera stays at eye height
+        // and WASD movement projects onto the horizontal XZ plane.
+        // Use: m_Camera-&gt;setGrounded(true, m_EyeHeight);
+        //
+        // After this call, looking up while pressing W will no longer
+        // make the camera fly into the ceiling.
+    }
+
+    void Player::Respawn(const glm::vec3&amp; start, float yaw)
+    {
+        // TODO: Teleport the camera to the level start position.
+        //
+        // IMPORTANT: use m_EyeHeight for Y, not start.y.
+        // start.y is at floor level (y = 0); the camera eye sits 1.6 units up.
+        //
+        // Use: m_Camera-&gt;setPosition(glm::vec3(start.x, m_EyeHeight, start.z));
+        //      m_Camera-&gt;setYawPitch(yaw, 0.0f);
+    }
+
+} // namespace test
+</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Implement move and slide</h3>
+      <ol>
+  <li>
+    Add <code>Update</code> and <code>ResolveAxis</code> to
+    <code>src/tests/maze/Player.cpp</code> inside the <code>namespace test</code>
+    block, after <code>Respawn</code>.
+  </li>
+  <li>
+    In <code>Update</code>:
+    <ol type="a">
+      <li>Save the camera's current position as <code>previous</code>.</li>
+      <li>Call <code>m_Camera-&gt;processInput(deltaTime)</code> to apply WASD.</li>
+      <li>Save the result as <code>desired</code>.</li>
+      <li>Build <code>resolved = previous</code>, then apply each axis in turn:
+        <pre><code class="language-cpp">resolved.x = desired.x;  ResolveAxis(resolved, 0);
+resolved.z = desired.z;  ResolveAxis(resolved, 2);
+resolved.y = desired.y;  // grounded camera pins this already</code></pre>
+      </li>
+      <li>Write <code>resolved</code> back with <code>m_Camera-&gt;setPosition(resolved)</code>.</li>
+    </ol>
+  </li>
+  <li>
+    In <code>ResolveAxis</code>:
+    <ol type="a">
+      <li>
+        Compute the player's current tile with
+        <code>m_Map-&gt;WorldToTile(position, playerCol, playerRow)</code>.
+      </li>
+      <li>
+        Loop over the 3x3 neighbourhood
+        (<code>row = playerRow - 1</code> to <code>playerRow + 1</code>,
+        same for col). Skip tiles where <code>m_Map-&gt;IsWall</code> returns false.
+      </li>
+      <li>
+        For each wall tile, compute the AABB overlap on X and Z:
+        <pre><code class="language-cpp">float overlapX = (m_HalfExtent + wallHalf) - std::abs(position.x - wallCenter.x);
+float overlapZ = (m_HalfExtent + wallHalf) - std::abs(position.z - wallCenter.z);</code></pre>
+        If either overlap is zero or negative there is a gap - skip with <code>continue</code>.
+      </li>
+      <li>
+        Push the player out along the <code>axis</code> parameter only. If
+        <code>position[axis] &gt; wallCenter[axis]</code>, push to the positive
+        face; otherwise push to the negative face. Add a small epsilon nudge
+        to avoid floating-point re-entry next frame.
+      </li>
+    </ol>
+  </li>
+</ol>
+      <div class="code-file-header">src/tests/maze/Player.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">    // Add these two methods inside namespace test { ... } in Player.cpp,
+    // after the Respawn implementation.
+
+    void Player::Update(float deltaTime)
+    {
+        // MOVE AND SLIDE - the core idea:
+        //   1. Record where the player WAS this frame (before input)
+        //   2. Let the Camera apply WASD movement (desired position)
+        //   3. Start a &quot;resolved&quot; position equal to the PREVIOUS position
+        //   4. Apply the X component of the desired move, then push out
+        //      of any wall overlap on X only
+        //   5. Apply the Z component of the desired move, then push out
+        //      of any wall overlap on Z only
+        //   6. Apply Y (the grounded camera already pins this to eye height)
+        //   7. Write the resolved position back to the camera
+        //
+        // Resolving axes separately is what produces SLIDING: if you walk
+        // diagonally into a wall the blocked axis is cancelled but the free
+        // axis continues moving.
+
+        // TODO: Save the camera's current position as 'previous'
+        // TODO: Call m_Camera-&gt;processInput(deltaTime) to apply WASD
+        // TODO: Save the resulting position as 'desired'
+
+        // TODO: glm::vec3 resolved = previous;
+        // TODO: resolved.x = desired.x;  ResolveAxis(resolved, 0);
+        // TODO: resolved.z = desired.z;  ResolveAxis(resolved, 2);
+        // TODO: resolved.y = desired.y;
+
+        // TODO: m_Camera-&gt;setPosition(resolved);
+    }
+
+    void Player::ResolveAxis(glm::vec3&amp; position, int axis) const
+    {
+        // Each wall tile is tileSize wide; the wall surface is tileSize/2
+        // from the tile centre on each side.
+        const float wallHalf = m_Map-&gt;TileSize() * 0.5f;
+
+        // Epsilon nudge prevents floating-point error leaving the player
+        // microscopically overlapping a wall surface after resolution.
+        const float epsilon  = 0.001f;
+
+        // BROAD PHASE: the player box is much smaller than a tile, so only
+        // the 3x3 block of tiles around the player's current tile can
+        // possibly touch the bounding box.
+        int playerCol, playerRow;
+        m_Map-&gt;WorldToTile(position, playerCol, playerRow);
+
+        for (int row = playerRow - 1; row &lt;= playerRow + 1; row++)
+        {
+            for (int col = playerCol - 1; col &lt;= playerCol + 1; col++)
+            {
+                if (!m_Map-&gt;IsWall(col, row))
+                    continue;
+
+                glm::vec3 wallCenter = m_Map-&gt;TileCenter(col, row);
+
+                // AABB OVERLAP TEST:
+                // Two axis-aligned boxes overlap when the distance between
+                // their centres is LESS than the sum of their half-extents,
+                // on EVERY axis simultaneously. If either axis has a gap,
+                // there is no collision and we skip this tile.
+                //
+                // overlap = (halfA + halfB) - |centreA - centreB|
+                // overlap &gt; 0  =&gt;  boxes overlap on that axis
+                //
+                // TODO: float overlapX = (m_HalfExtent + wallHalf)
+                //                        - std::abs(position.x - wallCenter.x);
+                // TODO: float overlapZ = (m_HalfExtent + wallHalf)
+                //                        - std::abs(position.z - wallCenter.z);
+                // TODO: if (overlapX &lt;= 0.0f || overlapZ &lt;= 0.0f) continue;
+
+                // PUSH OUT along the axis being resolved:
+                // If the player centre is to the POSITIVE side of the wall
+                // centre, push to the positive face; otherwise push negative.
+                //
+                // TODO: if (position[axis] &gt; wallCenter[axis])
+                //           position[axis] = wallCenter[axis]
+                //                            + wallHalf + m_HalfExtent + epsilon;
+                //       else
+                //           position[axis] = wallCenter[axis]
+                //                            - wallHalf - m_HalfExtent - epsilon;
+            }
+        }
+    }
+</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 4 - Wire Player into TestMaze</h3>
+      <ol>
+  <li>
+    Open <code>src/tests/maze/TestMaze.h</code>. Add the Player include after
+    the MazeMap include, and add <code>m_Player</code> as a private member:
+    <pre><code class="language-cpp">#include "Player.h"   // add this line
+
+// in the private section, after m_Camera:
+std::unique_ptr&lt;Player&gt; m_Player;</code></pre>
+  </li>
+  <li>
+    Open <code>src/tests/maze/TestMaze.cpp</code>. In the constructor,
+    <strong>remove</strong> the <code>setGrounded</code> call (Player does
+    this internally). Create <code>m_Player</code> immediately after
+    <code>m_Camera</code>:
+    <pre><code class="language-cpp">// REMOVE: m_Camera-&gt;setGrounded(true, 1.6f);
+m_Player = std::make_unique&lt;Player&gt;(m_Camera.get(), &amp;m_Map);</code></pre>
+  </li>
+  <li>
+    Still in the constructor, replace the two camera-position calls at the
+    end with a single Respawn call:
+    <pre><code class="language-cpp">// REMOVE: m_Camera-&gt;setPosition(m_Map.PlayerStart());
+// REMOVE: m_Camera-&gt;setYawPitch(m_Map.StartYaw(), 0.0f);
+m_Player-&gt;Respawn(m_Map.PlayerStart(), m_Map.StartYaw());</code></pre>
+  </li>
+  <li>
+    In <code>TestMaze::Update</code>, replace the <code>processInput</code>
+    call with <code>m_Player-&gt;Update</code>. Keep the
+    <code>m_Camera-&gt;Update</code> call - it handles smooth interpolation
+    and the ESC detach toggle:
+    <pre><code class="language-cpp">// REPLACE: m_Camera-&gt;processInput(deltaTime);
+m_Player-&gt;Update(deltaTime);
+m_Camera-&gt;Update(deltaTime); // keep this line</code></pre>
+  </li>
+  <li>
+    Build and run the project. Select the Maze test. Walk towards a wall -
+    the camera should stop at the surface. Walking diagonally into a corner
+    should slide along whichever face is parallel to the movement direction
+    rather than stopping dead.
+  </li>
+</ol>
+      <div class="code-file-header">src/tests/maze/TestMaze.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">// === Changes to TestMaze.h ===
+// 1. Add the Player include (after MazeMap.h):
+//      #include &quot;Player.h&quot;
+//
+// 2. Add a Player member in the private section (after m_Camera):
+//      std::unique_ptr&lt;Player&gt; m_Player;
+//
+// No other changes to TestMaze.h are needed.
+
+// === Changes to TestMaze.cpp - constructor ===
+// Replace the grounded-mode call and the two camera-position calls:
+
+TestMaze::TestMaze(GLFWwindow* window)
+    : m_window(window)
+{
+    m_Camera = std::make_unique&lt;Camera&gt;(
+        window,
+        glm::vec3(0.0f, 1.6f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f),
+        0.0f, 0.0f, 60.0f
+    );
+    // REMOVED: m_Camera-&gt;setGrounded(true, 1.6f);
+    // The Player constructor calls setGrounded internally.
+
+    // TODO: Create m_Player AFTER m_Camera:
+    //   m_Player = std::make_unique&lt;Player&gt;(m_Camera.get(), &amp;m_Map);
+
+    m_Shader       = std::make_unique&lt;Shader&gt;(&quot;res/Shaders/Maze.shader&quot;);
+    m_WallTexture  = std::make_unique&lt;Texture&gt;(&quot;res/Textures/maze/wall.png&quot;);
+    m_FloorTexture = std::make_unique&lt;Texture&gt;(&quot;res/Textures/maze/floor.png&quot;);
+
+    BuildCubeMesh();
+    glEnable(GL_DEPTH_TEST);
+
+    m_Map.Load(0, 1337u);
+
+    // REMOVED: m_Camera-&gt;setPosition(m_Map.PlayerStart());
+    // REMOVED: m_Camera-&gt;setYawPitch(m_Map.StartYaw(), 0.0f);
+    // TODO: Replace both lines with:
+    //   m_Player-&gt;Respawn(m_Map.PlayerStart(), m_Map.StartYaw());
+}
+
+// === Changes to TestMaze.cpp - Update() ===
+
+void TestMaze::Update(float deltaTime)
+{
+    // REMOVED: m_Camera-&gt;processInput(deltaTime);
+    // TODO: Replace with m_Player-&gt;Update(deltaTime);
+    //       Player::Update calls processInput internally AND resolves collisions.
+
+    m_Camera-&gt;Update(deltaTime); // keep this: handles smooth interp and GUI detach
+}
+</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;Player.h&quot;
+
+#include &lt;cmath&gt;
+
+namespace test
+{
+    Player::Player(Camera* camera, MazeMap* map)
+        : m_Camera(camera),
+          m_Map(map)
+    {
+        // Grounded mode: Y locked to eye height; WASD projects onto XZ plane.
+        m_Camera-&gt;setGrounded(true, m_EyeHeight);
+    }
+
+    void Player::Respawn(const glm::vec3&amp; start, float yaw)
+    {
+        // start.y is at floor level (y=0); camera eye sits above it.
+        m_Camera-&gt;setPosition(glm::vec3(start.x, m_EyeHeight, start.z));
+        m_Camera-&gt;setYawPitch(yaw, 0.0f);
+    }
+
+    void Player::Update(float deltaTime)
+    {
+        /**
+         * MOVE AND SLIDE:
+         * Let the camera move first (desired position), then re-apply each
+         * axis of movement from the previous position, resolving collisions
+         * after each one. Resolving axes separately is what produces sliding.
+         */
+        glm::vec3 previous = m_Camera-&gt;getPosition();
+
+        m_Camera-&gt;processInput(deltaTime);
+        glm::vec3 desired = m_Camera-&gt;getPosition();
+
+        glm::vec3 resolved = previous;
+
+        resolved.x = desired.x;
+        ResolveAxis(resolved, 0); // push out of any wall on X
+
+        resolved.z = desired.z;
+        ResolveAxis(resolved, 2); // push out of any wall on Z
+
+        resolved.y = desired.y;  // grounded camera already pins this
+
+        m_Camera-&gt;setPosition(resolved);
+    }
+
+    void Player::ResolveAxis(glm::vec3&amp; position, int axis) const
+    {
+        const float wallHalf = m_Map-&gt;TileSize() * 0.5f;
+        const float epsilon  = 0.001f;
+
+        // Broad phase: only the 3x3 neighbourhood around the player's tile
+        int playerCol, playerRow;
+        m_Map-&gt;WorldToTile(position, playerCol, playerRow);
+
+        for (int row = playerRow - 1; row &lt;= playerRow + 1; row++)
+        {
+            for (int col = playerCol - 1; col &lt;= playerCol + 1; col++)
+            {
+                if (!m_Map-&gt;IsWall(col, row))
+                    continue;
+
+                glm::vec3 wallCenter = m_Map-&gt;TileCenter(col, row);
+
+                // AABB overlap test: gap on either axis means no collision
+                float overlapX = (m_HalfExtent + wallHalf) - std::abs(position.x - wallCenter.x);
+                float overlapZ = (m_HalfExtent + wallHalf) - std::abs(position.z - wallCenter.z);
+
+                if (overlapX &lt;= 0.0f || overlapZ &lt;= 0.0f)
+                    continue;
+
+                // Push out along the axis being resolved
+                if (position[axis] &gt; wallCenter[axis])
+                    position[axis] = wallCenter[axis] + wallHalf + m_HalfExtent + epsilon;
+                else
+                    position[axis] = wallCenter[axis] - wallHalf - m_HalfExtent - epsilon;
+            }
+        }
+    }
+
+} // namespace test
+" data-filename="src/tests/maze/Player.cpp" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &quot;../Tests.h&quot;
+#include &quot;../../Renderer.h&quot;
+#include &quot;../../Shader.h&quot;
+#include &quot;../../Texture.h&quot;
+#include &quot;../../VertexArray.h&quot;
+#include &quot;../../VertexBuffer.h&quot;
+#include &quot;../../IndexBuffer.h&quot;
+#include &quot;../../utils/Camera.h&quot;
+#include &quot;MazeMap.h&quot;
+#include &quot;Player.h&quot;
+
+#include &lt;memory&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;glm/glm.hpp&gt;
+
+namespace test {
+    class TestMaze : public Tests {
+    public:
+        TestMaze(GLFWwindow* window);
+
+        void Update(float deltaTime) override;
+        void Render() override;
+        void RenderGUI() override;
+
+    private:
+        void BuildCubeMesh();
+        void DrawCube(const glm::mat4&amp; model, const glm::vec3&amp; colour, const Texture* texture);
+
+        GLFWwindow* m_window;
+        Renderer m_Renderer;
+
+        std::unique_ptr&lt;Camera&gt;  m_Camera;
+        std::unique_ptr&lt;Player&gt;  m_Player;
+        MazeMap m_Map;
+
+        std::unique_ptr&lt;Shader&gt;  m_Shader;
+        std::unique_ptr&lt;Texture&gt; m_WallTexture;
+        std::unique_ptr&lt;Texture&gt; m_FloorTexture;
+
+        std::unique_ptr&lt;VertexArray&gt;  m_CubeVAO;
+        std::unique_ptr&lt;VertexBuffer&gt; m_CubeVBO;
+        std::unique_ptr&lt;IndexBuffer&gt;  m_CubeIBO;
+    };
+}
+" data-filename="src/tests/maze/TestMaze.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;TestMaze.h&quot;
+
+#include &quot;../../VertexBufferLayout.h&quot;
+#include &quot;../../vendor/imgui/imgui.h&quot;
+
+#include &lt;glm/gtc/matrix_transform.hpp&gt;
+
+namespace test {
+
+    static const float WallHeight = 2.5f;
+
+    // =========================================================================
+    // CONSTRUCTOR
+    // =========================================================================
+    TestMaze::TestMaze(GLFWwindow* window)
+        : m_window(window)
+    {
+        m_Camera = std::make_unique&lt;Camera&gt;(
+            window,
+            glm::vec3(0.0f, 1.6f, 0.0f),
+            glm::vec3(0.0f, 1.0f, 0.0f),
+            0.0f, 0.0f, 60.0f
+        );
+        // Player constructor calls setGrounded internally; do NOT call it here.
+        m_Player = std::make_unique&lt;Player&gt;(m_Camera.get(), &amp;m_Map);
+
+        m_Shader       = std::make_unique&lt;Shader&gt;(&quot;res/Shaders/Maze.shader&quot;);
+        m_WallTexture  = std::make_unique&lt;Texture&gt;(&quot;res/Textures/maze/wall.png&quot;);
+        m_FloorTexture = std::make_unique&lt;Texture&gt;(&quot;res/Textures/maze/floor.png&quot;);
+
+        BuildCubeMesh();
+        glEnable(GL_DEPTH_TEST);
+
+        m_Map.Load(0, 1337u);
+        m_Player-&gt;Respawn(m_Map.PlayerStart(), m_Map.StartYaw());
+    }
+
+    // =========================================================================
+    // GEOMETRY
+    // =========================================================================
+    void TestMaze::BuildCubeMesh()
+    {
+        const float vertices[] = {
+            // pos (x, y, z)        normal (nx, ny, nz)   uv (u, v)
+            // Front face (+Z)
+            -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,   0.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,   1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,   1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,   0.0f, 1.0f,
+            // Back face (-Z)
+             0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,   0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,   1.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,   1.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,   0.0f, 1.0f,
+            // Left face (-X)
+            -0.5f, -0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+            // Right face (+X)
+             0.5f, -0.5f,  0.5f,    1.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,    1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,    1.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,    1.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+            // Top face (+Y)
+            -0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,   0.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,   1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,   1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,   0.0f, 1.0f,
+            // Bottom face (-Y)
+            -0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,   0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,   1.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,   1.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,   0.0f, 1.0f,
+        };
+
+        unsigned int indices[36];
+        for (unsigned int face = 0; face &lt; 6; face++)
+        {
+            unsigned int base = face * 4;
+            unsigned int* tri = &amp;indices[face * 6];
+            tri[0] = base;     tri[1] = base + 1; tri[2] = base + 2;
+            tri[3] = base + 2; tri[4] = base + 3; tri[5] = base;
+        }
+
+        m_CubeVAO = std::make_unique&lt;VertexArray&gt;();
+        m_CubeVBO = std::make_unique&lt;VertexBuffer&gt;(vertices, sizeof(vertices));
+
+        VertexBufferLayout layout;
+        layout.Push&lt;float&gt;(3); // position
+        layout.Push&lt;float&gt;(3); // normal
+        layout.Push&lt;float&gt;(2); // texCoord
+        m_CubeVAO-&gt;AddBuffer(*m_CubeVBO, layout);
+
+        m_CubeIBO = std::make_unique&lt;IndexBuffer&gt;(indices, 36);
+    }
+
+    // =========================================================================
+    // UPDATE
+    // =========================================================================
+    void TestMaze::Update(float deltaTime)
+    {
+        // Player::Update calls processInput internally then resolves collisions.
+        m_Player-&gt;Update(deltaTime);
+        m_Camera-&gt;Update(deltaTime); // smooth interpolation + GUI detach
+    }
+
+    // =========================================================================
+    // RENDERING
+    // =========================================================================
+    void TestMaze::DrawCube(const glm::mat4&amp; model,
+                            const glm::vec3&amp; colour,
+                            const Texture*   texture)
+    {
+        m_Shader-&gt;Bind();
+        m_Shader-&gt;setUniformMat4f(&quot;u_Model&quot;, model);
+        m_Shader-&gt;setUniform3f(&quot;u_ObjectColour&quot;, colour.r, colour.g, colour.b);
+
+        if (texture)
+        {
+            texture-&gt;Bind(0);
+            m_Shader-&gt;setUniform1i(&quot;u_Texture&quot;, 0);
+            m_Shader-&gt;setUniform1i(&quot;u_UseTexture&quot;, 1);
+        }
+        else
+        {
+            m_Shader-&gt;setUniform1i(&quot;u_UseTexture&quot;, 0);
+        }
+
+        m_Renderer.Draw(*m_CubeVAO, *m_CubeIBO, *m_Shader);
+    }
+
+    void TestMaze::Render()
+    {
+        m_Renderer.ClearColour_Black();
+        m_Renderer.Clear();
+
+        int fbWidth, fbHeight;
+        glfwGetFramebufferSize(m_window, &amp;fbWidth, &amp;fbHeight);
+        float aspect = fbHeight &gt; 0 ? (float)fbWidth / (float)fbHeight : 16.0f / 9.0f;
+
+        glm::mat4 projection = glm::perspective(
+            glm::radians(m_Camera-&gt;getFOV()), aspect, 0.1f, 100.0f);
+        glm::mat4 view = m_Camera-&gt;getViewMatrix();
+
+        glm::vec3 mazeCenter = m_Map.TileCenter(m_Map.Cols() / 2, m_Map.Rows() / 2);
+        glm::vec3 cameraPos  = m_Camera-&gt;getPosition();
+
+        m_Shader-&gt;Bind();
+        m_Shader-&gt;setUniformMat4f(&quot;u_View&quot;,           view);
+        m_Shader-&gt;setUniformMat4f(&quot;u_Projection&quot;,     projection);
+        m_Shader-&gt;setUniform3f(&quot;u_Light.Position&quot;,    mazeCenter.x, 8.0f, mazeCenter.z);
+        m_Shader-&gt;setUniform3f(&quot;u_Light.Colour&quot;,      1.0f, 1.0f, 1.0f);
+        m_Shader-&gt;setUniform3f(&quot;u_CameraPosition&quot;,    cameraPos.x, cameraPos.y, cameraPos.z);
+        m_Shader-&gt;setUniform1f(&quot;u_AmbientIntensity&quot;,  0.35f);
+        m_Shader-&gt;setUniform1f(&quot;u_DiffuseIntensity&quot;,  0.8f);
+        m_Shader-&gt;setUniform1f(&quot;u_SpecularIntensity&quot;, 0.2f);
+        m_Shader-&gt;setUniform1f(&quot;u_Shininess&quot;,         32.0f);
+
+        float tile = m_Map.TileSize();
+
+        for (int row = 0; row &lt; m_Map.Rows(); row++)
+        {
+            for (int col = 0; col &lt; m_Map.Cols(); col++)
+            {
+                glm::vec3 center   = m_Map.TileCenter(col, row);
+                char      tileChar = m_Map.At(col, row);
+
+                if (tileChar == '#')
+                {
+                    glm::mat4 model = glm::translate(
+                        glm::mat4(1.0f),
+                        center + glm::vec3(0.0f, WallHeight * 0.5f, 0.0f));
+                    model = glm::scale(model, glm::vec3(tile, WallHeight, tile));
+                    DrawCube(model, glm::vec3(1.0f), m_WallTexture.get());
+                }
+                else
+                {
+                    glm::mat4 model = glm::translate(
+                        glm::mat4(1.0f),
+                        center + glm::vec3(0.0f, -0.05f, 0.0f));
+                    model = glm::scale(model, glm::vec3(tile, 0.1f, tile));
+                    DrawCube(model, glm::vec3(1.0f), m_FloorTexture.get());
+                }
+            }
+        }
+    }
+
+    // =========================================================================
+    // HUD
+    // =========================================================================
+    void TestMaze::RenderGUI()
+    {
+        m_Camera-&gt;cameraGUI();
+        ImGui::TextWrapped(&quot;WASD: move | Mouse: look | ESC: pause + cursor&quot;);
+    }
+
+} // namespace test
+" data-filename="src/tests/maze/TestMaze.cpp" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+
+</body>
+</html>

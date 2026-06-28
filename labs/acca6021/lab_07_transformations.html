@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 07 - Transformations | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 07 - Transformations</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>Building on the Textures lab (Lab 06), this lab introduces <strong>transformation matrices</strong> using the GLM library. You will upgrade the textured quad from 2D to 3D vertex positions, write a new shader that accepts a <code>mat4</code> uniform, and use GLM's transform functions to make the quad rotate continuously. By the end of this lab the GPU is applying a matrix to every vertex each frame, which is the foundation for everything that follows.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Upgrade vertex data from 2D to 3D coordinates and update the corresponding vertex attribute pointers</li>
+      <li>Declare and apply a <code>mat4</code> transformation uniform in a GLSL vertex shader</li>
+      <li>Build a rotation matrix using <code>glm::rotate</code> and understand how <code>glm::translate</code> and <code>glm::scale</code> follow the same pattern</li>
+      <li>Upload a matrix to the GPU with <code>glUniformMatrix4fv</code> and <code>glm::value_ptr</code></li>
+      <li>Drive continuous animation by reading elapsed time with <code>glfwGetTime()</code></li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>Without transformation matrices, every vertex must be placed manually in <strong>Normalised Device Coordinates</strong> (NDC). Moving or rotating an object means recalculating and re-uploading every vertex on the CPU each frame. As a scene grows this becomes unworkable.</p>
+
+<p>The solution is to encode the transformation as a 4x4 matrix and let the GPU apply it to every vertex inside the shader. The vertex shader receives the matrix as a <code>uniform mat4</code> and multiplies it by each incoming position: <code>gl_Position = u_Transform * vec4(position, 1.0)</code>. The fourth component <code>1.0</code> marks the vertex as a point so that translation takes effect correctly. A value of <code>0.0</code> would mark a direction vector, which is unaffected by translation.</p>
+
+<p>GLM provides the C++ types and functions for this on the application side. <code>glm::mat4</code> stores a 4x4 floating-point matrix in <strong>column-major order</strong>, which is the layout OpenGL expects. <code>glm::mat4(1.0f)</code> constructs an <strong>identity matrix</strong> that leaves vertices unchanged and is the safe starting value for any transform. <code>glm::rotate(mat, angle, axis)</code> returns a new matrix with a rotation appended around the given axis vector. <code>glm::translate</code> and <code>glm::scale</code> follow exactly the same pattern. To send the finished matrix to the shader, call <code>glGetUniformLocation(shader, "u_Transform")</code> to find the uniform slot, then <code>glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model))</code> to transfer the 16 floats. Pass <code>GL_FALSE</code> for the transpose argument because GLM already stores data in column-major order.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Upgrade to 3D Vertex Positions</h3>
+      <p>The textured quad from the Textures lab (Lab 06) stores each vertex as two position floats followed by two UV floats. Adding a z coordinate upgrades the format to five floats per vertex and makes the positions compatible with a 4x4 transformation matrix. The vertex attribute pointers must be updated to reflect the new stride and offset.</p>
+<ol>
+  <li>Open <code>src/main.cpp</code> and find the <code>vertices</code> array. Insert <code>0.0f</code> as a third coordinate after each x, y pair so every vertex has the layout: x, y, z, u, v.</li>
+  <li>Locate the <code>glVertexAttribPointer</code> call for attribute 0 (position). Change the component count from <code>2</code> to <code>3</code>. Update the stride from <code>4 * sizeof(float)</code> to <code>5 * sizeof(float)</code>.</li>
+  <li>For attribute 1 (UV), the component count stays at <code>2</code>. Update the stride to <code>5 * sizeof(float)</code> and the offset to <code>(void*)(3 * sizeof(float))</code>. The UV data now starts three floats into each vertex instead of two.</li>
+  <li>Build and run. The textured quad should display exactly as it did in the Textures lab (Lab 06) before any rotation is added.</li>
+</ol>
+      <div class="code-file-header">src/main.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">// Each vertex now has 3D position (x, y, z) followed by UV coordinates (u, v)
+float vertices[] = {
+    -0.5f, -0.5f,  0.0f,  0.0f, 0.0f,  // bottom-left
+     0.5f, -0.5f,  0.0f,  1.0f, 0.0f,  // bottom-right
+     0.5f,  0.5f,  0.0f,  1.0f, 1.0f,  // top-right
+    -0.5f,  0.5f,  0.0f,  0.0f, 1.0f   // top-left
+};
+
+// TODO: update glVertexAttribPointer for attribute 0
+//       change component count from 2 to 3
+//       update stride from 4 * sizeof(float) to 5 * sizeof(float)
+glEnableVertexAttribArray(0);
+glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+// TODO: update glVertexAttribPointer for attribute 1
+//       update stride to 5 * sizeof(float)
+//       update byte offset to (void*)(3 * sizeof(float))
+glEnableVertexAttribArray(1);
+glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Write the Transformation Shader</h3>
+      <p>The vertex shader needs a <code>uniform mat4 u_Transform</code> input. Multiplying this matrix by the homogeneous vertex position replaces the fixed NDC output with a transformed clip-space coordinate, allowing the GPU to move and rotate the geometry each frame without touching the vertex buffer.</p>
+<ol>
+  <li>Create a new file <code>res/shaders/transform.shader</code>.</li>
+  <li>In the <code>#shader vertex</code> section, change the position attribute type from <code>vec2</code> to <code>vec3</code> at location 0.</li>
+  <li>Before <code>main()</code>, declare <code>uniform mat4 u_Transform;</code>.</li>
+  <li>In <code>main()</code>, replace <code>vec4(position, 0.0, 1.0)</code> with <code>u_Transform * vec4(position, 1.0)</code>. The fourth component <code>1.0</code> marks the vertex as a point so translation is applied correctly.</li>
+  <li>Copy the <code>#shader fragment</code> section from <code>res/shaders/texture.shader</code> unchanged. The fragment stage does not need to know about the transformation.</li>
+  <li>In <code>src/main.cpp</code>, update the <code>parseShader</code> call to load <code>"res/shaders/transform.shader"</code>.</li>
+</ol>
+      <div class="code-file-header">res/shaders/transform.shader</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-glsl">#shader vertex
+#version 430 core
+// TODO: change vec2 to vec3 for the position attribute
+layout(location = 0) in vec2 position;
+layout(location = 1) in vec2 texCoords;
+
+out vec2 v_TexCoords;
+
+// TODO: declare uniform mat4 u_Transform
+
+void main() {
+    // TODO: replace vec4(position, 0.0, 1.0) with u_Transform * vec4(position, 1.0)
+    gl_Position = vec4(position, 0.0, 1.0);
+    v_TexCoords = texCoords;
+}
+
+#shader fragment
+#version 430 core
+out vec4 FragColour;
+
+in vec2 v_TexCoords;
+uniform sampler2D u_Texture;
+
+void main() {
+    FragColour = texture(u_Texture, v_TexCoords);
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Animate with the Rotation Matrix</h3>
+      <p>With the shader ready, the C++ side must build a rotation matrix each frame and upload it as the <code>u_Transform</code> uniform. GLM provides the matrix types and transform functions. The animation is driven by <code>glfwGetTime()</code>, which returns elapsed seconds as a <code>double</code>.</p>
+<ol>
+  <li>Add three GLM includes near the top of <code>src/main.cpp</code>, after the existing headers:
+    <pre><code class="language-cpp">#include &lt;glm/glm.hpp&gt;
+#include &lt;glm/gtc/matrix_transform.hpp&gt;
+#include &lt;glm/gtc/type_ptr.hpp&gt;</code></pre>
+  </li>
+  <li>Inside the render loop, before the draw call, read the elapsed time and build the rotation matrix. The angle increases by one radian per second:
+    <pre><code class="language-cpp">float angle = (float)glfwGetTime();
+glm::mat4 model = glm::mat4(1.0f);
+model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));</code></pre>
+  </li>
+  <li>Upload the matrix to the shader. Pass <code>GL_FALSE</code> for the transpose argument. GLM stores data in column-major order, which is exactly the layout OpenGL expects:
+    <pre><code class="language-cpp">glUseProgram(shader);
+glUniformMatrix4fv(glGetUniformLocation(shader, "u_Transform"), 1, GL_FALSE, glm::value_ptr(model));</code></pre>
+  </li>
+  <li>Build and run. The textured quad should spin continuously around the Z axis.</li>
+  <li>Experiment: try changing the rotation axis to <code>glm::vec3(1.0f, 0.0f, 0.0f)</code> to spin around X, or add a <code>glm::translate</code> call before <code>glm::rotate</code> to orbit the quad around the centre of the screen.</li>
+</ol>
+      <div class="code-file-header">src/main.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">// --- Inside the render loop, before the draw call ---
+
+float angle = (float)glfwGetTime();
+
+// TODO: create an identity matrix as the starting point
+glm::mat4 model = glm::mat4(1.0f);
+
+// TODO: apply a rotation around the Z axis
+//       model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
+
+// TODO: upload model to the u_Transform uniform
+//       glUseProgram(shader);
+//       glUniformMatrix4fv(glGetUniformLocation(shader, &quot;u_Transform&quot;), 1, GL_FALSE, glm::value_ptr(model));
+glUseProgram(shader);
+int loc = glGetUniformLocation(shader, &quot;u_Transform&quot;);
+// glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model));</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#shader vertex
+#version 430 core
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec2 texCoords;
+
+out vec2 v_TexCoords;
+
+uniform mat4 u_Transform;
+
+void main() {
+    gl_Position = u_Transform * vec4(position, 1.0);
+    v_TexCoords = texCoords;
+}
+
+#shader fragment
+#version 430 core
+out vec4 FragColour;
+
+in vec2 v_TexCoords;
+uniform sampler2D u_Texture;
+
+void main() {
+    FragColour = texture(u_Texture, v_TexCoords);
+}" data-filename="res/shaders/transform.shader" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &lt;GL/glew.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;glm/glm.hpp&gt;
+#include &lt;glm/gtc/matrix_transform.hpp&gt;
+#include &lt;glm/gtc/type_ptr.hpp&gt;
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+#include &quot;vendor/stb_image.h&quot;
+
+struct ShaderSource { std::string vertex; std::string fragment; };
+
+ShaderSource parseShader(const std::string&amp; filepath) {
+    std::ifstream file(filepath);
+    std::stringstream ss[2];
+    int type = -1;
+    std::string line;
+    while (std::getline(file, line)) {
+        if      (line.find(&quot;#shader vertex&quot;)   != std::string::npos) type = 0;
+        else if (line.find(&quot;#shader fragment&quot;) != std::string::npos) type = 1;
+        else if (type == 0 || type == 1) ss[type] &lt;&lt; line &lt;&lt; '\n';
+    }
+    return { ss[0].str(), ss[1].str() };
+}
+
+static unsigned int compileShader(unsigned int type, const std::string&amp; source) {
+    unsigned int id = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(id, 1, &amp;src, nullptr);
+    glCompileShader(id);
+    int result;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &amp;result);
+    if (!result) {
+        int len;
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &amp;len);
+        char* msg = new char[len];
+        glGetShaderInfoLog(id, len, &amp;len, msg);
+        std::cerr &lt;&lt; &quot;Shader compile error: &quot; &lt;&lt; msg &lt;&lt; &quot;\n&quot;;
+        delete[] msg;
+        glDeleteShader(id);
+        return 0;
+    }
+    return id;
+}
+
+unsigned int createProgram(const std::string&amp; vertSrc, const std::string&amp; fragSrc) {
+    unsigned int program = glCreateProgram();
+    unsigned int vs = compileShader(GL_VERTEX_SHADER,   vertSrc);
+    unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragSrc);
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+    return program;
+}
+
+int main() {
+    if (!glfwInit()) { std::cerr &lt;&lt; &quot;Failed to initialise GLFW\n&quot;; return -1; }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(800, 600, &quot;Transformations&quot;, nullptr, nullptr);
+    if (!window) { glfwTerminate(); return -1; }
+    glfwMakeContextCurrent(window);
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) {
+        std::cerr &lt;&lt; &quot;Failed to initialise GLEW\n&quot;;
+        glfwTerminate();
+        return -1;
+    }
+    glfwSwapInterval(1);
+
+    // Each vertex: 3D position (x, y, z) followed by UV coordinates (u, v)
+    float vertices[] = {
+        -0.5f, -0.5f,  0.0f,  0.0f, 0.0f,  // bottom-left
+         0.5f, -0.5f,  0.0f,  1.0f, 0.0f,  // bottom-right
+         0.5f,  0.5f,  0.0f,  1.0f, 1.0f,  // top-right
+        -0.5f,  0.5f,  0.0f,  0.0f, 1.0f   // top-left
+    };
+
+    unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+
+    unsigned int vao, vbo, ibo;
+    glGenVertexArrays(1, &amp;vao);
+    glBindVertexArray(vao);
+
+    glGenBuffers(1, &amp;vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Attribute 0: position (3 floats), stride = 5 floats
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
+    // Attribute 1: UV coordinates (2 floats), stride = 5 floats, offset = 3 floats
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+    glGenBuffers(1, &amp;ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
+    ShaderSource src = parseShader(&quot;res/shaders/transform.shader&quot;);
+    unsigned int shader = createProgram(src.vertex, src.fragment);
+
+    // Load image and flip vertically (OpenGL reads rows bottom-up)
+    stbi_set_flip_vertically_on_load(1);
+    int imgWidth, imgHeight, imgChannels;
+    unsigned char* imgData = stbi_load(&quot;res/Textures/1.png&quot;, &amp;imgWidth, &amp;imgHeight, &amp;imgChannels, 4);
+
+    unsigned int texture;
+    glGenTextures(1, &amp;texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    if (imgData) stbi_image_free(imgData);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Link u_Texture sampler to texture unit 0
+    glUseProgram(shader);
+    glUniform1i(glGetUniformLocation(shader, &quot;u_Texture&quot;), 0);
+    glUseProgram(0);
+
+    while (!glfwWindowShouldClose(window)) {
+        glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        // Build the rotation matrix: angle increases by one radian per second
+        float angle = (float)glfwGetTime();
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
+
+        // Upload the transformation matrix to the shader
+        glUseProgram(shader);
+        glUniformMatrix4fv(glGetUniformLocation(shader, &quot;u_Transform&quot;), 1, GL_FALSE, glm::value_ptr(model));
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glBindVertexArray(vao);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    glDeleteTextures(1, &amp;texture);
+    glDeleteBuffers(1, &amp;ibo);
+    glDeleteBuffers(1, &amp;vbo);
+    glDeleteVertexArrays(1, &amp;vao);
+    glDeleteProgram(shader);
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}" data-filename="src/main.cpp" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-glsl.min.js"></script>
+
+</body>
+</html>

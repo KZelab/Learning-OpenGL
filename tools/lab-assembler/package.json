@@ -1,18 +1,23 @@
 {
   "name": "lab-assembler",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "description": "MCP server: assembles UWTSD lab HTML files from structured content",
   "type": "module",
   "scripts": {
+    "vendor": "node scripts/bundle-prism.mjs && node scripts/bundle-katex.mjs && node scripts/bundle-d3.mjs",
+    "prebuild": "npm run vendor",
     "build": "tsc",
     "start": "node dist/index.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
+    "katex": "^0.16.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
+    "@types/katex": "^0.16.0",
     "@types/node": "^22.0.0",
+    "d3": "^7.9.0",
     "typescript": "^5.0.0"
   }
 }

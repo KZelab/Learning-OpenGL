@@ -13,7 +13,7 @@ namespace test
         useOrthographic = true;
 
 
-        m_Shader = std::make_unique<Shader>(R"(res/Shaders/ProjectionsShader.shader)");
+        m_Shader = std::make_unique<Shader>(R"(res/Shaders/MVPVertexColour.shader)");
 
 
         m_Cube = GeometryFactory::CreateCube();

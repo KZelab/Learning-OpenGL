@@ -23,7 +23,7 @@ namespace test {
             45.0f                          // FOV
         );
 
-        m_Shader = std::make_unique<Shader>(R"(res/Shaders/ProjectionsShader.shader)");
+        m_Shader = std::make_unique<Shader>(R"(res/Shaders/MVPVertexColour.shader)");
 
         // Enable depth testing
         glEnable(GL_DEPTH_TEST);

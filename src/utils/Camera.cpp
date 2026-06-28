@@ -302,11 +302,65 @@ void Camera::ProcessKeyboard(float deltaTime)
     // Calculate frame-rate independent velocity
     float velocity = movementSpeed * deltaTime;
 
+    /**
+     * GROUNDED MODE - PROJECTING ONTO THE XZ PLANE:
+     * A free-fly camera moves along the raw front vector, so looking down
+     * and pressing W flies you into the floor. An FPS character instead moves
+     * along the front vector's "shadow" on the ground plane:
+     *
+     *   moveFront = normalize( (front.x, 0, front.z) )
+     *
+     * Zeroing Y removes the vertical component; renormalizing restores unit
+     * length so movement speed doesn't slow down as you look up or down
+     * (cos(pitch) would otherwise scale the horizontal component).
+     */
+    glm::vec3 moveFront = m_Grounded ? glm::normalize(glm::vec3(front.x, 0.0f, front.z)) : front;
+    glm::vec3 moveRight = m_Grounded ? glm::normalize(glm::vec3(right.x, 0.0f, right.z)) : right;
+
     // Movement along camera axes (not world axes)
-    if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS) position += front * velocity;  // Forward
-    if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS) position -= front * velocity;  // Backward
-    if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS) position -= right * velocity;  // Strafe left
-    if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS) position += right * velocity;  // Strafe right
+    if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS) position += moveFront * velocity;  // Forward
+    if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS) position -= moveFront * velocity;  // Backward
+    if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS) position -= moveRight * velocity;  // Strafe left
+    if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS) position += moveRight * velocity;  // Strafe right
+
+    // Lock the camera to eye height - an FPS player can't fly
+    if (m_Grounded) position.y = m_EyeHeight;
+}
+
+// =============================================================================
+// GROUNDED MODE AND DIRECT STATE SETTERS
+// =============================================================================
+void Camera::setGrounded(bool grounded, float eyeHeight)
+{
+    m_Grounded = grounded;
+    m_EyeHeight = eyeHeight;
+
+    if (m_Grounded)
+    {
+        position.y = m_EyeHeight;
+        targetPosition = position;
+    }
+}
+
+void Camera::setPosition(const glm::vec3& pos)
+{
+    position = pos;
+
+    // Keep the smooth-interpolation target in sync, otherwise Update() would
+    // lerp the camera back toward its old position while detached.
+    targetPosition = pos;
+}
+
+void Camera::setYawPitch(float newYaw, float newPitch)
+{
+    yaw = newYaw;
+    pitch = newPitch;
+
+    // Same gimbal-lock clamp as ProcessMouse
+    if (pitch > 89.0f) pitch = 89.0f;
+    if (pitch < -89.0f) pitch = -89.0f;
+
+    UpdateCameraVectors();
 }
 
 // =============================================================================

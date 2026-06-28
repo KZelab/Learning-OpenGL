@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 09 - GlCall Error System | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 09 - GlCall Error System</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>In every lab so far, OpenGL errors have gone completely unreported. The OpenGL API does not throw exceptions or write to the console when something goes wrong. It stores error codes in an internal queue. If you never call <code>glGetError</code>, a misconfigured buffer or invalid enum will cause corrupted rendering with no indication of where the problem is. 
+      This lab creates the error-checking foundation that every subsequent class will build on. 
+      You will write the <code>ASSERT</code> and <code>GlCall</code> macros, implement the <code>glClearError</code> and <code>glLogCall</code> utility functions, and begin <code>src/Renderer.h</code> - 
+      the shared header that every buffer and resource class in the project will include.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Explain why OpenGL stores errors in a queue and why that queue must be drained before each call</li>
+      <li>Write the GlCall macro that wraps any OpenGL call with a clear-before and check-after sequence</li>
+      <li>Use __debugbreak to pause the debugger at the exact source line where an OpenGL error occurred</li>
+      <li>Implement glLogCall to print the GL error code, function name, file path, and line number</li>
+      <li>Identify which header every subsequent buffer class will include to access GlCall</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>OpenGL is a state machine that communicates errors through a queue of error codes. When a function receives an invalid argument or is called in the wrong state, it pushes a <strong>GL error code</strong> onto that queue and returns without doing anything. The queue can hold multiple errors at once. Because OpenGL never crashes and never prints to the console on its own, these errors are completely invisible unless your code explicitly calls <code>glGetError</code> to inspect them. In practice this means a typo in a buffer size or an invalid texture format can silently corrupt every frame with no hint of where the problem is.</p>
+
+<p>The standard solution is to wrap every OpenGL call in a two-step pattern: drain the error queue <em>before</em> the call so it is empty, then check the queue <em>after</em> the call to see whether that specific call produced any error. The <strong>GlCall macro</strong> encodes this pattern. It expands to three lines - a call to <code>glClearError</code>, the original OpenGL call unchanged, and an <code>ASSERT</code> that invokes <code>glLogCall</code>. The preprocessor operators <code>#x</code>, <code>__FILE__</code>, and <code>__LINE__</code> capture the call site as strings at compile time, so <code>glLogCall</code> can print exactly which function failed, in which file, on which line. The <strong>ASSERT macro</strong> calls <code>__debugbreak()</code> - a compiler intrinsic that pauses the running process and hands control to the attached debugger, freezing execution at the exact instruction that triggered the failure.</p>
+
+<p><code>glClearError</code> drains the queue by calling <code>glGetError</code> in a loop until it returns <code>GL_NO_ERROR</code>. <code>glLogCall</code> reads the queue with the same loop and prints each error code alongside the function name, file path, and line number passed in from the macro, then returns <code>false</code> to trigger the ASSERT. Both functions live in <code>src/Renderer.cpp</code>, and their declarations live in <code>src/Renderer.h</code> alongside the macros. Every other class in the project will include <code>Renderer.h</code> in its <code>.cpp</code> file so <code>GlCall</code> is available everywhere without repeating any boilerplate. This header also contains a stub <code>Renderer</code> class with <code>Clear()</code> methods. The <code>Draw()</code> methods that reference <code>VertexArray</code>, <code>IndexBuffer</code>, and <code>Shader</code> are added in Lab 14 once those classes exist.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Create the Error-Checking Header</h3>
+      <p>Create <code>src/Renderer.h</code>. This header is the foundation - every subsequent class includes it for access to <code>GlCall</code>.</p>
+<ol>
+  <li>Create a new file <code>src/Renderer.h</code> and add a <code>#pragma once</code> guard. Include <code>&lt;GL/glew.h&gt;</code> (needed for the <code>GLenum</code> type used by <code>glGetError</code>), <code>&lt;iostream&gt;</code>, and <code>&lt;string&gt;</code>.</li>
+  <li>Write the <code>ASSERT</code> macro. It takes a condition <code>x</code> and calls <code>__debugbreak()</code> if that condition is false:
+    <pre><code class="language-cpp">#define ASSERT(x) if (!(x)) __debugbreak();</code></pre>
+  </li>
+  <li>Write the <code>GlCall</code> macro. It wraps a single OpenGL call <code>x</code> and expands to three lines. The backslash at the end of each line is a line-continuation character:
+    <pre><code class="language-cpp">#define GlCall(x) glClearError();    x;    ASSERT(glLogCall(#x, __FILE__, __LINE__))</code></pre>
+    The <code>#x</code> token stringifies the call so its name can be printed by <code>glLogCall</code>.
+  </li>
+  <li>Declare the two utility functions that the macro calls:
+    <pre><code class="language-cpp">void glClearError();
+bool glLogCall(const char* function, const char* file, int line);</code></pre>
+  </li>
+  <li>Add the <code>Renderer</code> class stub. It exposes <code>Clear()</code> methods now. The <code>Draw()</code> methods that reference buffer classes will be added in Lab 14.</li>
+  <li>The reference block below shows the complete <code>Renderer.h</code> at this stage.</li>
+</ol>
+      <div class="code-file-header">src/Renderer.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+#include &lt;GL/glew.h&gt;
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+// Halt execution if condition is false; use this to catch impossible states
+#define ASSERT(x) if (!(x)) __debugbreak();
+
+// Wrap any OpenGL call: clear the error queue before, check it after.
+// If an error is found, prints the function name, file, and line, then breaks.
+#define GlCall(x) glClearError();\
+    x;\
+    ASSERT(glLogCall(#x, __FILE__, __LINE__))
+
+// Drain the OpenGL error queue so it is empty before the next call
+void glClearError();
+
+// Check the error queue after a call; print details and return false if any error found
+bool glLogCall(const char* function, const char* file, int line);
+
+// Renderer stub - Clear() is available now. Draw() methods are added in Lab 14
+// once VertexArray, IndexBuffer, and Shader classes exist.
+class Renderer {
+public:
+    void Clear() const;
+    void Clear(std::string colour) const;
+};</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Implement glClearError and glLogCall</h3>
+      <p>Create <code>src/Renderer.cpp</code> and implement the two error-checking utilities plus the <code>Clear</code> methods.</p>
+<ol>
+  <li>Create <code>src/Renderer.cpp</code> and include <code>"Renderer.h"</code> and <code>&lt;iostream&gt;</code>.</li>
+  <li>Implement <code>glClearError</code>. Call <code>glGetError</code> in a loop until it returns <code>GL_NO_ERROR</code>:
+    <pre><code class="language-cpp">void glClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}</code></pre>
+  </li>
+  <li>Implement <code>glLogCall</code>. Call <code>glGetError</code> in a loop. For each non-zero code, print the error value, function name, file, and line, then return <code>false</code> so <code>ASSERT</code> fires:
+    <pre><code class="language-cpp">bool glLogCall(const char* function, const char* file, int line)
+{
+    while (GLenum error = glGetError())
+    {
+        std::cout &lt;&lt; "[OpenGL Error]( " &lt;&lt; error &lt;&lt; " ) "
+                  &lt;&lt; function &lt;&lt; " File: " &lt;&lt; file &lt;&lt; " Line:" &lt;&lt; line &lt;&lt; std::endl;
+        return false;
+    }
+    return true;
+}</code></pre>
+  </li>
+  <li>Implement <code>Renderer::Clear()</code> to clear both the colour and depth buffers:
+    <pre><code class="language-cpp">void Renderer::Clear() const
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}</code></pre>
+  </li>
+  <li>Add <code>src/Renderer.cpp</code> to your Visual Studio project if it is not already listed.</li>
+  <li>Build the project. No new visual output is expected. 
+    To confirm <code>GlCall</code> works, temporarily add a bad call inside your render loop 
+    (for example <code>GlCall(glBindBuffer(GL_ARRAY_BUFFER, 999999))</code>), build and run, and verify the debugger breaks with an error in the console. 
+    Remove the test call afterwards.</li>
+</ol>
+      <div class="code-file-header">src/Renderer.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &quot;Renderer.h&quot;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+
+// Drain every pending error from the OpenGL error queue
+void glClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+
+// Check the error queue after a call; print function/file/line per error and return false
+bool glLogCall(const char* function, const char* file, int line)
+{
+    while (GLenum error = glGetError())
+    {
+        std::cout &lt;&lt; &quot;[OpenGL Error]( &quot; &lt;&lt; error &lt;&lt; &quot; ) &quot;
+                  &lt;&lt; function &lt;&lt; &quot; File: &quot; &lt;&lt; file &lt;&lt; &quot; Line:&quot; &lt;&lt; line &lt;&lt; std::endl;
+        return false;
+    }
+    return true;
+}
+
+void Renderer::Clear() const
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::Clear(std::string colour) const
+{
+    std::transform(colour.begin(), colour.end(), colour.begin(), ::towlower);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (colour == &quot;black&quot;)   GlCall(glClearColor(0, 0, 0, 1));
+    if (colour == &quot;white&quot;)   GlCall(glClearColor(1, 1, 1, 1));
+    if (colour == &quot;red&quot;)     GlCall(glClearColor(1, 0, 0, 1));
+    if (colour == &quot;green&quot;)   GlCall(glClearColor(0, 1, 0, 1));
+    if (colour == &quot;blue&quot;)    GlCall(glClearColor(0, 0, 1, 1));
+    if (colour == &quot;yellow&quot;)  GlCall(glClearColor(1, 1, 0, 1));
+    if (colour == &quot;cyan&quot;)    GlCall(glClearColor(0, 1, 1, 1));
+    if (colour == &quot;magenta&quot;) GlCall(glClearColor(1, 0, 1, 1));
+}
+
+</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &lt;GL/glew.h&gt;
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+// Halt execution if condition is false; use this to catch impossible states
+#define ASSERT(x) if (!(x)) __debugbreak();
+
+// Wrap any OpenGL call: clear the error queue before, check it after.
+// If an error is found, prints the function name, file, and line, then breaks.
+#define GlCall(x) glClearError();\
+    x;\
+    ASSERT(glLogCall(#x, __FILE__, __LINE__))
+
+// Drain the OpenGL error queue so it is empty before the next call
+void glClearError();
+
+// Check the error queue after a call; print details and return false if any error found
+bool glLogCall(const char* function, const char* file, int line);
+
+// Renderer stub - Clear() is available now. Draw() methods are added in Lab 14
+// once VertexArray, IndexBuffer, and Shader classes exist.
+class Renderer {
+public:
+    void Clear() const;
+    void Clear(std::string colour) const;
+};" data-filename="src/Renderer.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;Renderer.h&quot;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+
+// Drain every pending error from the OpenGL error queue
+void glClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+
+// Check the error queue after a call; print function/file/line per error and return false
+bool glLogCall(const char* function, const char* file, int line)
+{
+    while (GLenum error = glGetError())
+    {
+        std::cout &lt;&lt; &quot;[OpenGL Error]( &quot; &lt;&lt; error &lt;&lt; &quot; ) &quot;
+                  &lt;&lt; function &lt;&lt; &quot; File: &quot; &lt;&lt; file &lt;&lt; &quot; Line:&quot; &lt;&lt; line &lt;&lt; std::endl;
+        return false;
+    }
+    return true;
+}
+
+void Renderer::Clear() const
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::Clear(std::string colour) const
+{
+    std::transform(colour.begin(), colour.end(), colour.begin(), ::towlower);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (colour == &quot;black&quot;)   GlCall(glClearColor(0, 0, 0, 1));
+    if (colour == &quot;white&quot;)   GlCall(glClearColor(1, 1, 1, 1));
+    if (colour == &quot;red&quot;)     GlCall(glClearColor(1, 0, 0, 1));
+    if (colour == &quot;green&quot;)   GlCall(glClearColor(0, 1, 0, 1));
+    if (colour == &quot;blue&quot;)    GlCall(glClearColor(0, 0, 1, 1));
+    if (colour == &quot;yellow&quot;)  GlCall(glClearColor(1, 1, 0, 1));
+    if (colour == &quot;cyan&quot;)    GlCall(glClearColor(0, 1, 1, 1));
+    if (colour == &quot;magenta&quot;) GlCall(glClearColor(1, 0, 1, 1));
+}
+
+" data-filename="src/Renderer.cpp" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+
+</body>
+</html>

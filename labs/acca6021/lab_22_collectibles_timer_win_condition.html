@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 22 - Collectibles, Timer, and Win Condition | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 22 - Collectibles, Timer, and Win Condition</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>
+    In this lab you add a game loop to the maze from the previous two labs.
+    The player now has a countdown timer and must collect every gold coin before
+    time runs out. The test class gains a three-state machine:
+    <strong>Playing</strong>, <strong>Won</strong>, and <strong>Lost</strong>.
+    Coins are rendered as small spinning, bobbing cubes and disappear when
+    walked over. A HUD panel shows the remaining time and coin count, and
+    full-screen banners appear when the game ends. The key and exit door
+    mechanics that complete the game are added in the final maze lab (Lab 23).
+  </p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Implement a three-state game state machine (Playing, Won, Lost) driven by a countdown timer and a win condition.</li>
+      <li>Detect walk-over collectibles using an XZ-only distance check, ignoring the Y axis because pickups bob up and down.</li>
+      <li>Apply time-based animation (sin for bobbing, angle accumulation for spinning) to render coins as dynamic objects.</li>
+      <li>Use edge detection on the Enter key so the restart action fires once per press rather than every frame.</li>
+      <li>Render HUD overlays using ImGui's foreground draw list to draw a crosshair and centred win/lose banners on top of the 3D viewport.</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>
+    A game loop is a <strong>state machine</strong>: the game is always in
+    exactly one state, and each state determines what logic runs each frame and
+    what transitions are possible. Here the states are <code>Playing</code>
+    (normal gameplay), <code>Won</code> (all coins collected), and
+    <code>Lost</code> (timer expired). The state is stored as an
+    <code>enum class</code> member and a <code>switch</code> in
+    <code>Update()</code> branches to the appropriate logic.
+  </p>
+  <p>
+    Coin pickup uses a simple <strong>proximity test</strong>. Each
+    <code>Collectible</code> has a world-space position (set by
+    <code>MazeMap::Load</code> when it parses the <code>'C'</code> tiles).
+    Every frame we compare the player's XZ position to each uncollected coin's
+    XZ position. Y is deliberately excluded because coins bob vertically: the
+    player would miss them if the height had to match exactly. The distance
+    formula is <code>sqrt(dx*dx + dz*dz)</code>, and if it falls below a small
+    pickup radius the coin is marked collected.
+  </p>
+  <p>
+    <strong>Edge detection</strong> prevents a key press from firing many times
+    while the key is held. The pattern is to store whether the key was pressed
+    last frame: <code>bool advancePressed = advance &amp;&amp; !m_AdvancePressedLastFrame</code>.
+    This makes <code>advancePressed</code> true only on the single frame where
+    the key transitions from released to pressed. The same technique is used
+    for any "act on press" interaction, such as the E-key door unlock in the
+    next lab. Coin <strong>animation</strong> is driven by
+    <code>glfwGetTime()</code>: a sine wave controls the vertical bob and a
+    linearly growing angle drives the spin, both offset by a per-coin phase so
+    each coin moves independently.
+  </p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Extend the TestMaze header</h3>
+      <ol>
+  <li>
+    Open <code>src/tests/maze/TestMaze.h</code> and add a
+    <code>GameState</code> scoped enum at the top of the <code>private</code>
+    section:
+    <pre><code class="language-cpp">enum class GameState { Playing, Won, Lost };</code></pre>
+  </li>
+  <li>
+    Declare three new private methods alongside <code>BuildCubeMesh</code>
+    and <code>DrawCube</code>:
+    <pre><code class="language-cpp">void LoadLevel(unsigned int seed);
+void UpdatePlaying(float deltaTime);
+bool AllCoinsCollected() const;</code></pre>
+  </li>
+  <li>
+    Add four new member variables at the bottom of the private section:
+    <pre><code class="language-cpp">GameState m_State               = GameState::Playing;
+float     m_TimeRemaining       = 0.0f;
+int       m_CoinsCollected      = 0;
+bool      m_AdvancePressedLastFrame = false;</code></pre>
+  </li>
+  <li>
+    The skeleton below shows the complete updated header. Use it to check your
+    placement before moving on.
+  </li>
+</ol>
+      <div class="code-file-header">src/tests/maze/TestMaze.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+#include &quot;../Tests.h&quot;
+#include &quot;../../Renderer.h&quot;
+#include &quot;../../Shader.h&quot;
+#include &quot;../../Texture.h&quot;
+#include &quot;../../VertexArray.h&quot;
+#include &quot;../../VertexBuffer.h&quot;
+#include &quot;../../IndexBuffer.h&quot;
+#include &quot;../../utils/Camera.h&quot;
+#include &quot;MazeMap.h&quot;
+#include &quot;Player.h&quot;
+
+#include &lt;memory&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;glm/glm.hpp&gt;
+
+namespace test {
+    class TestMaze : public Tests {
+    public:
+        TestMaze(GLFWwindow* window);
+
+        void Update(float deltaTime) override;
+        void Render() override;
+        void RenderGUI() override;
+
+    private:
+        // TODO: Declare an enum class GameState with three values:
+        //   Playing, Won, Lost
+
+        void BuildCubeMesh();
+
+        // TODO: Declare three new private methods:
+        //   void LoadLevel(unsigned int seed);
+        //   void UpdatePlaying(float deltaTime);
+        //   bool AllCoinsCollected() const;
+
+        void DrawCube(const glm::mat4&amp; model, const glm::vec3&amp; colour, const Texture* texture);
+
+        GLFWwindow* m_window;
+        Renderer m_Renderer;
+
+        std::unique_ptr&lt;Camera&gt;  m_Camera;
+        std::unique_ptr&lt;Player&gt;  m_Player;
+        MazeMap m_Map;
+
+        std::unique_ptr&lt;Shader&gt;  m_Shader;
+        std::unique_ptr&lt;Texture&gt; m_WallTexture;
+        std::unique_ptr&lt;Texture&gt; m_FloorTexture;
+
+        std::unique_ptr&lt;VertexArray&gt;  m_CubeVAO;
+        std::unique_ptr&lt;VertexBuffer&gt; m_CubeVBO;
+        std::unique_ptr&lt;IndexBuffer&gt;  m_CubeIBO;
+
+        // TODO: Declare game state members:
+        //   GameState m_State = GameState::Playing;
+        //   float m_TimeRemaining = 0.0f;
+        //   int   m_CoinsCollected = 0;
+        //   bool  m_AdvancePressedLastFrame = false;
+    };
+}
+</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Add LoadLevel and initialise the game</h3>
+      <ol>
+  <li>
+    In <code>src/tests/maze/TestMaze.cpp</code>, add two file-scope constants
+    at the top of <code>namespace test</code>, alongside <code>WallHeight</code>:
+    <pre><code class="language-cpp">static const float s_LevelTime    = 90.0f;
+static const float s_PickupRadius = 0.6f;</code></pre>
+  </li>
+  <li>
+    Implement <code>LoadLevel(unsigned int seed)</code>. This function is the
+    single reset point for the game: it regenerates the maze, resets the timer
+    and coin count, resets the state to Playing, and respawns the player.
+    Call <code>m_Map.Load(0, seed)</code> first - everything else depends on
+    the grid being populated.
+  </li>
+  <li>
+    Implement <code>AllCoinsCollected()</code>. It should return true when
+    <code>m_CoinsCollected</code> equals the total number of coins in the
+    current map (<code>m_Map.Coins().size()</code>).
+  </li>
+  <li>
+    In the constructor, replace the two separate
+    <code>m_Map.Load</code> and <code>m_Player-&gt;Respawn</code> calls with a
+    single call to <code>LoadLevel(1337u)</code>.
+  </li>
+</ol>
+      <div class="code-file-header">src/tests/maze/TestMaze.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">// Add these near the top of TestMaze.cpp, inside namespace test { ... }
+// (before or after BuildCubeMesh - order does not matter)
+
+static const float s_LevelTime    = 90.0f;  // seconds on the clock
+static const float s_PickupRadius = 0.6f;   // walk-over distance for coins
+
+// -------------------------------------------------------------------------
+// Resets all game state and loads a fresh maze for level 0.
+// The constructor and the &quot;retry&quot; path in Update both call this.
+// -------------------------------------------------------------------------
+void TestMaze::LoadLevel(unsigned int seed)
+{
+    // TODO: Call m_Map.Load(0, seed) to generate and parse the tile grid
+    // TODO: Set m_TimeRemaining = s_LevelTime
+    // TODO: Set m_CoinsCollected = 0
+    // TODO: Set m_State = GameState::Playing
+    // TODO: Call m_Player-&gt;Respawn(m_Map.PlayerStart(), m_Map.StartYaw())
+}
+
+// Returns true when every coin in the current level has been walked over.
+bool TestMaze::AllCoinsCollected() const
+{
+    // TODO: Return (m_CoinsCollected == (int)m_Map.Coins().size())
+    return false; // placeholder
+}
+
+// -------------------------------------------------------------------------
+// Constructor - replace the m_Map.Load + Respawn calls with LoadLevel
+// -------------------------------------------------------------------------
+TestMaze::TestMaze(GLFWwindow* window)
+    : m_window(window)
+{
+    m_Camera = std::make_unique&lt;Camera&gt;(
+        window,
+        glm::vec3(0.0f, 1.6f, 0.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f),
+        0.0f, 0.0f, 60.0f
+    );
+    m_Player = std::make_unique&lt;Player&gt;(m_Camera.get(), &amp;m_Map);
+
+    m_Shader       = std::make_unique&lt;Shader&gt;(&quot;res/Shaders/Maze.shader&quot;);
+    m_WallTexture  = std::make_unique&lt;Texture&gt;(&quot;res/Textures/maze/wall.png&quot;);
+    m_FloorTexture = std::make_unique&lt;Texture&gt;(&quot;res/Textures/maze/floor.png&quot;);
+
+    BuildCubeMesh();
+    glEnable(GL_DEPTH_TEST);
+
+    // TODO: Replace the two separate m_Map.Load / m_Player-&gt;Respawn calls
+    // with a single call: LoadLevel(1337u)
+}
+</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Implement the state machine and coin pickups</h3>
+      <ol>
+  <li>
+    Replace <code>Update()</code> in <code>TestMaze.cpp</code> with the version
+    below. The key addition is a state switch after the camera update.
+  </li>
+  <li>
+    Add the <strong>edge detection</strong> pattern for the Enter key before
+    the switch:
+    <pre><code class="language-cpp">bool advance        = glfwGetKey(m_window, GLFW_KEY_ENTER) == GLFW_PRESS;
+bool advancePressed = advance &amp;&amp; !m_AdvancePressedLastFrame;
+m_AdvancePressedLastFrame = advance;</code></pre>
+    <code>advancePressed</code> is only <code>true</code> on the single frame
+    where Enter transitions from released to pressed.
+  </li>
+  <li>
+    In the <code>switch</code>, call <code>UpdatePlaying(deltaTime)</code>
+    for the Playing state. For Won and Lost, call <code>LoadLevel(1337u)</code>
+    only when <code>advancePressed</code> is true.
+  </li>
+  <li>
+    Implement <code>UpdatePlaying()</code>:
+    <ol type="a">
+      <li>
+        Subtract <code>deltaTime</code> from <code>m_TimeRemaining</code>.
+        If it reaches 0, clamp it to 0, set <code>m_State = GameState::Lost</code>,
+        and return early.
+      </li>
+      <li>
+        Loop over <code>m_Map.Coins()</code>. For each uncollected coin, compute
+        the XZ distance to the camera:
+        <pre><code class="language-cpp">float dx = playerPos.x - coin.position.x;
+float dz = playerPos.z - coin.position.z;
+float d  = std::sqrt(dx*dx + dz*dz);</code></pre>
+        If <code>d &lt; s_PickupRadius</code>, mark the coin collected and
+        increment <code>m_CoinsCollected</code>.
+      </li>
+      <li>
+        After the loop, call <code>AllCoinsCollected()</code>. If it returns
+        true, set <code>m_State = GameState::Won</code>.
+      </li>
+    </ol>
+  </li>
+</ol>
+      <div class="code-file-header">src/tests/maze/TestMaze.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">// Replace Update() and add UpdatePlaying() in TestMaze.cpp.
+// Both belong inside namespace test { ... }.
+
+void TestMaze::Update(float deltaTime)
+{
+    m_Player-&gt;Update(deltaTime);
+    m_Camera-&gt;Update(deltaTime);
+
+    // While the cursor is free (ESC paused), freeze game logic entirely.
+    if (m_Camera-&gt;isDetached())
+        return;
+
+    // EDGE-DETECTED ENTER KEY:
+    // We only want to act on the moment the key is pressed, not while it is
+    // held. Store the previous frame's state and compare.
+    // TODO: bool advance = glfwGetKey(m_window, GLFW_KEY_ENTER) == GLFW_PRESS;
+    // TODO: bool advancePressed = advance &amp;&amp; !m_AdvancePressedLastFrame;
+    // TODO: m_AdvancePressedLastFrame = advance;
+
+    switch (m_State)
+    {
+    case GameState::Playing:
+        // TODO: Call UpdatePlaying(deltaTime)
+        break;
+
+    case GameState::Won:
+    case GameState::Lost:
+        // TODO: if (advancePressed) LoadLevel(1337u);
+        break;
+    }
+}
+
+void TestMaze::UpdatePlaying(float deltaTime)
+{
+    // ---- Timer ----
+    // TODO: Subtract deltaTime from m_TimeRemaining
+    // TODO: If m_TimeRemaining &lt;= 0, clamp it to 0, set m_State = GameState::Lost, return
+
+    glm::vec3 playerPos = m_Camera-&gt;getPosition();
+
+    // ---- Coin pickups ----
+    // Coins bob up and down, so we ignore Y and test horizontal distance only.
+    // The lambda computes sqrt(dx^2 + dz^2) between two world positions.
+    auto distanceXZ = [](const glm::vec3&amp; a, const glm::vec3&amp; b)
+    {
+        float dx = a.x - b.x;
+        float dz = a.z - b.z;
+        return std::sqrt(dx * dx + dz * dz);
+    };
+
+    // TODO: Iterate m_Map.Coins() (non-const reference so we can set collected)
+    // TODO: For each coin, if (!coin.collected &amp;&amp; distanceXZ(...) &lt; s_PickupRadius)
+    //         set coin.collected = true and increment m_CoinsCollected
+
+    // ---- Win condition ----
+    // TODO: if (AllCoinsCollected()) m_State = GameState::Won;
+}
+</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 4 - Render coins and display the HUD</h3>
+      <ol>
+  <li>
+    In <code>Render()</code>, declare <code>float time = (float)glfwGetTime();</code>
+    before the tile loop (you will use it for both the tile loop - not needed
+    there, but makes the coins section self-contained) and add the coin render
+    loop immediately after the tile loop.
+    <ul>
+      <li>
+        Each coin translates to its bobbing position
+        (<code>position + bob</code>), rotates around Y with a phase offset, and
+        scales to 0.3 units.
+      </li>
+      <li>
+        Pass <code>nullptr</code> as the texture to
+        <code>DrawCube</code> - coins use a flat gold colour
+        <code>vec3(1.0f, 0.85f, 0.1f)</code> via the <code>u_UseTexture = 0</code>
+        path in the shader.
+      </li>
+    </ul>
+  </li>
+  <li>
+    Replace <code>RenderGUI()</code>. Add a panel section at the top with two
+    <code>ImGui::Text</code> calls for the time remaining and coin count.
+  </li>
+  <li>
+    Get the foreground draw list:
+    <pre><code class="language-cpp">ImDrawList* drawList = ImGui::GetForegroundDrawList();
+ImGuiIO&amp;    io       = ImGui::GetIO();
+ImVec2 center(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);</code></pre>
+    This draw list renders on top of every ImGui window and the 3D view.
+  </li>
+  <li>
+    When in the Playing state and the cursor is captured, draw a crosshair:
+    two lines of length 10 px crossing at <code>center</code>, colour
+    <code>IM_COL32(255, 255, 255, 200)</code>, thickness 2.
+  </li>
+  <li>
+    In the <code>switch (m_State)</code> block, draw the end-game banners using
+    the <code>drawCenteredText</code> lambda provided in the skeleton. The
+    lambda uses <code>font-&gt;CalcTextSizeA</code> to measure text at an
+    arbitrary font size (larger than ImGui's default) so it can centre
+    the string precisely.
+  </li>
+</ol>
+      <div class="code-file-header">src/tests/maze/TestMaze.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">// 1. In Render(), add the coin loop AFTER the tile loop.
+//    'time' comes from glfwGetTime(); make sure it is declared before the tile loop.
+
+    // ---- Coin rendering ----
+    // Each coin is a small gold-coloured spinning cube that bobs up and down.
+    // A per-coin phase offset stops them all bobbing in unison.
+    // TODO: const std::vector&lt;Collectible&gt;&amp; coins = m_Map.Coins();
+    // TODO: for (size_t i = 0; i &lt; coins.size(); i++)
+    // TODO: {
+    // TODO:     if (coins[i].collected) continue;
+    // TODO:     float phase = (float)i * 0.7f;
+    // TODO:     glm::vec3 bob(0.0f, 0.1f * std::sin(time * 3.0f + phase), 0.0f);
+    // TODO:     glm::mat4 model = glm::translate(glm::mat4(1.0f), coins[i].position + bob);
+    // TODO:     model = glm::rotate(model, time * 2.0f + phase, glm::vec3(0.0f, 1.0f, 0.0f));
+    // TODO:     model = glm::scale(model, glm::vec3(0.3f));
+    // TODO:     DrawCube(model, glm::vec3(1.0f, 0.85f, 0.1f), nullptr); // gold, no texture
+    // TODO: }
+
+// ---------------------------------------------------------------------------
+
+// 2. Replace RenderGUI() with the version below.
+
+void TestMaze::RenderGUI()
+{
+    // ---- Panel widgets ----
+    // TODO: ImGui::Text(&quot;Time:  %.0f s&quot;, m_TimeRemaining);
+    // TODO: ImGui::Text(&quot;Coins: %d / %d&quot;, m_CoinsCollected, (int)m_Map.Coins().size());
+    // TODO: ImGui::Separator();
+    m_Camera-&gt;cameraGUI();
+    ImGui::TextWrapped(&quot;WASD: move | Mouse: look | Enter: continue | ESC: pause + cursor&quot;);
+
+    // ---- Foreground overlays ----
+    // ImGui::GetForegroundDrawList() gives a draw list that renders ON TOP of
+    // everything, including other ImGui windows. We use it for the crosshair
+    // and the large win/lose text so they appear over the 3D viewport.
+    ImDrawList* drawList = ImGui::GetForegroundDrawList();
+    ImGuiIO&amp; io          = ImGui::GetIO();
+    ImVec2 center(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
+
+    // Helper: draw text centred at (center.x, center.y + yOffset).
+    // ImGui::CalcTextSize only works at the default font size, so we call
+    // font-&gt;CalcTextSizeA to measure at the requested fontSize.
+    auto drawCenteredText = [&amp;](float fontSize, float yOffset, ImU32 colour, const char* text)
+    {
+        ImFont* font = ImGui::GetFont();
+        ImVec2  size = font-&gt;CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
+        drawList-&gt;AddText(font, fontSize,
+            ImVec2(center.x - size.x * 0.5f, center.y + yOffset - size.y * 0.5f),
+            colour, text);
+    };
+
+    // Crosshair: only when Playing and cursor is captured
+    if (m_State == GameState::Playing &amp;&amp; !m_Camera-&gt;isDetached())
+    {
+        // TODO: Draw two crossing lines (arm length 10 px) using drawList-&gt;AddLine.
+        //   Horizontal: (center.x - arm, center.y) to (center.x + arm, center.y)
+        //   Vertical:   (center.x, center.y - arm) to (center.x, center.y + arm)
+        //   Colour: IM_COL32(255, 255, 255, 200)  Thickness: 2.0f
+    }
+
+    switch (m_State)
+    {
+    case GameState::Won:
+        // TODO: drawCenteredText(48.0f, -30.0f, IM_COL32(120, 255, 120, 255), &quot;ALL COINS COLLECTED!&quot;);
+        // TODO: drawCenteredText(24.0f,  30.0f, IM_COL32(255, 255, 255, 255), &quot;Press ENTER to play again&quot;);
+        break;
+    case GameState::Lost:
+        // TODO: drawCenteredText(48.0f, -30.0f, IM_COL32(255, 100, 100, 255), &quot;OUT OF TIME...&quot;);
+        // TODO: drawCenteredText(24.0f,  30.0f, IM_COL32(255, 255, 255, 255), &quot;Press ENTER to retry&quot;);
+        break;
+    case GameState::Playing:
+        break;
+    }
+}
+</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &quot;../Tests.h&quot;
+#include &quot;../../Renderer.h&quot;
+#include &quot;../../Shader.h&quot;
+#include &quot;../../Texture.h&quot;
+#include &quot;../../VertexArray.h&quot;
+#include &quot;../../VertexBuffer.h&quot;
+#include &quot;../../IndexBuffer.h&quot;
+#include &quot;../../utils/Camera.h&quot;
+#include &quot;MazeMap.h&quot;
+#include &quot;Player.h&quot;
+
+#include &lt;memory&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;glm/glm.hpp&gt;
+
+namespace test {
+    class TestMaze : public Tests {
+    public:
+        TestMaze(GLFWwindow* window);
+
+        void Update(float deltaTime) override;
+        void Render() override;
+        void RenderGUI() override;
+
+    private:
+        enum class GameState { Playing, Won, Lost };
+
+        void BuildCubeMesh();
+        void LoadLevel(unsigned int seed);
+        void UpdatePlaying(float deltaTime);
+        bool AllCoinsCollected() const;
+
+        void DrawCube(const glm::mat4&amp; model, const glm::vec3&amp; colour, const Texture* texture);
+
+        GLFWwindow* m_window;
+        Renderer m_Renderer;
+
+        std::unique_ptr&lt;Camera&gt;  m_Camera;
+        std::unique_ptr&lt;Player&gt;  m_Player;
+        MazeMap m_Map;
+
+        std::unique_ptr&lt;Shader&gt;  m_Shader;
+        std::unique_ptr&lt;Texture&gt; m_WallTexture;
+        std::unique_ptr&lt;Texture&gt; m_FloorTexture;
+
+        std::unique_ptr&lt;VertexArray&gt;  m_CubeVAO;
+        std::unique_ptr&lt;VertexBuffer&gt; m_CubeVBO;
+        std::unique_ptr&lt;IndexBuffer&gt;  m_CubeIBO;
+
+        // Game state
+        GameState m_State               = GameState::Playing;
+        float     m_TimeRemaining       = 0.0f;
+        int       m_CoinsCollected      = 0;
+        bool      m_AdvancePressedLastFrame = false;
+    };
+}
+" data-filename="src/tests/maze/TestMaze.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;TestMaze.h&quot;
+
+#include &quot;../../VertexBufferLayout.h&quot;
+#include &quot;../../vendor/imgui/imgui.h&quot;
+
+#include &lt;cmath&gt;
+#include &lt;glm/gtc/matrix_transform.hpp&gt;
+
+namespace test {
+
+    static const float WallHeight     = 2.5f;
+    static const float s_LevelTime    = 90.0f;
+    static const float s_PickupRadius = 0.6f;
+
+    // =========================================================================
+    // GAME STATE
+    // =========================================================================
+    void TestMaze::LoadLevel(unsigned int seed)
+    {
+        m_Map.Load(0, seed);
+        m_TimeRemaining  = s_LevelTime;
+        m_CoinsCollected = 0;
+        m_State          = GameState::Playing;
+        m_Player-&gt;Respawn(m_Map.PlayerStart(), m_Map.StartYaw());
+    }
+
+    bool TestMaze::AllCoinsCollected() const
+    {
+        return m_CoinsCollected == (int)m_Map.Coins().size();
+    }
+
+    // =========================================================================
+    // CONSTRUCTOR
+    // =========================================================================
+    TestMaze::TestMaze(GLFWwindow* window)
+        : m_window(window)
+    {
+        m_Camera = std::make_unique&lt;Camera&gt;(
+            window,
+            glm::vec3(0.0f, 1.6f, 0.0f),
+            glm::vec3(0.0f, 1.0f, 0.0f),
+            0.0f, 0.0f, 60.0f
+        );
+        m_Player = std::make_unique&lt;Player&gt;(m_Camera.get(), &amp;m_Map);
+
+        m_Shader       = std::make_unique&lt;Shader&gt;(&quot;res/Shaders/Maze.shader&quot;);
+        m_WallTexture  = std::make_unique&lt;Texture&gt;(&quot;res/Textures/maze/wall.png&quot;);
+        m_FloorTexture = std::make_unique&lt;Texture&gt;(&quot;res/Textures/maze/floor.png&quot;);
+
+        BuildCubeMesh();
+        glEnable(GL_DEPTH_TEST);
+
+        LoadLevel(1337u);
+    }
+
+    // =========================================================================
+    // GEOMETRY
+    // =========================================================================
+    void TestMaze::BuildCubeMesh()
+    {
+        const float vertices[] = {
+            // pos (x, y, z)        normal (nx, ny, nz)   uv (u, v)
+            // Front face (+Z)
+            -0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,   0.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,    0.0f,  0.0f,  1.0f,   1.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,   1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,    0.0f,  0.0f,  1.0f,   0.0f, 1.0f,
+            // Back face (-Z)
+             0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,   0.0f, 0.0f,
+            -0.5f, -0.5f, -0.5f,    0.0f,  0.0f, -1.0f,   1.0f, 0.0f,
+            -0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,   1.0f, 1.0f,
+             0.5f,  0.5f, -0.5f,    0.0f,  0.0f, -1.0f,   0.0f, 1.0f,
+            // Left face (-X)
+            -0.5f, -0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+            -0.5f, -0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+            -0.5f,  0.5f,  0.5f,   -1.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,   -1.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+            // Right face (+X)
+             0.5f, -0.5f,  0.5f,    1.0f,  0.0f,  0.0f,   0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,    1.0f,  0.0f,  0.0f,   1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,    1.0f,  0.0f,  0.0f,   1.0f, 1.0f,
+             0.5f,  0.5f,  0.5f,    1.0f,  0.0f,  0.0f,   0.0f, 1.0f,
+            // Top face (+Y)
+            -0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,   0.0f, 0.0f,
+             0.5f,  0.5f,  0.5f,    0.0f,  1.0f,  0.0f,   1.0f, 0.0f,
+             0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,   1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,    0.0f,  1.0f,  0.0f,   0.0f, 1.0f,
+            // Bottom face (-Y)
+            -0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,   0.0f, 0.0f,
+             0.5f, -0.5f, -0.5f,    0.0f, -1.0f,  0.0f,   1.0f, 0.0f,
+             0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,   1.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,    0.0f, -1.0f,  0.0f,   0.0f, 1.0f,
+        };
+
+        unsigned int indices[36];
+        for (unsigned int face = 0; face &lt; 6; face++)
+        {
+            unsigned int base = face * 4;
+            unsigned int* tri = &amp;indices[face * 6];
+            tri[0] = base;     tri[1] = base + 1; tri[2] = base + 2;
+            tri[3] = base + 2; tri[4] = base + 3; tri[5] = base;
+        }
+
+        m_CubeVAO = std::make_unique&lt;VertexArray&gt;();
+        m_CubeVBO = std::make_unique&lt;VertexBuffer&gt;(vertices, sizeof(vertices));
+
+        VertexBufferLayout layout;
+        layout.Push&lt;float&gt;(3); // position
+        layout.Push&lt;float&gt;(3); // normal
+        layout.Push&lt;float&gt;(2); // texCoord
+        m_CubeVAO-&gt;AddBuffer(*m_CubeVBO, layout);
+
+        m_CubeIBO = std::make_unique&lt;IndexBuffer&gt;(indices, 36);
+    }
+
+    // =========================================================================
+    // UPDATE
+    // =========================================================================
+    void TestMaze::Update(float deltaTime)
+    {
+        m_Player-&gt;Update(deltaTime);
+        m_Camera-&gt;Update(deltaTime);
+
+        if (m_Camera-&gt;isDetached()) return;
+
+        bool advance        = glfwGetKey(m_window, GLFW_KEY_ENTER) == GLFW_PRESS;
+        bool advancePressed = advance &amp;&amp; !m_AdvancePressedLastFrame;
+        m_AdvancePressedLastFrame = advance;
+
+        switch (m_State)
+        {
+        case GameState::Playing: UpdatePlaying(deltaTime); break;
+        case GameState::Won:
+        case GameState::Lost:    if (advancePressed) LoadLevel(1337u); break;
+        }
+    }
+
+    void TestMaze::UpdatePlaying(float deltaTime)
+    {
+        // Timer
+        m_TimeRemaining -= deltaTime;
+        if (m_TimeRemaining &lt;= 0.0f)
+        {
+            m_TimeRemaining = 0.0f;
+            m_State = GameState::Lost;
+            return;
+        }
+
+        glm::vec3 playerPos = m_Camera-&gt;getPosition();
+
+        // Coin pickups - XZ only, pickups bob on Y so we ignore height
+        auto distanceXZ = [](const glm::vec3&amp; a, const glm::vec3&amp; b)
+        {
+            float dx = a.x - b.x;
+            float dz = a.z - b.z;
+            return std::sqrt(dx * dx + dz * dz);
+        };
+
+        for (Collectible&amp; coin : m_Map.Coins())
+        {
+            if (!coin.collected &amp;&amp; distanceXZ(playerPos, coin.position) &lt; s_PickupRadius)
+            {
+                coin.collected = true;
+                m_CoinsCollected++;
+            }
+        }
+
+        // Win condition: all coins collected
+        if (AllCoinsCollected())
+            m_State = GameState::Won;
+    }
+
+    // =========================================================================
+    // RENDERING
+    // =========================================================================
+    void TestMaze::DrawCube(const glm::mat4&amp; model,
+                            const glm::vec3&amp; colour,
+                            const Texture*   texture)
+    {
+        m_Shader-&gt;Bind();
+        m_Shader-&gt;setUniformMat4f(&quot;u_Model&quot;, model);
+        m_Shader-&gt;setUniform3f(&quot;u_ObjectColour&quot;, colour.r, colour.g, colour.b);
+
+        if (texture)
+        {
+            texture-&gt;Bind(0);
+            m_Shader-&gt;setUniform1i(&quot;u_Texture&quot;, 0);
+            m_Shader-&gt;setUniform1i(&quot;u_UseTexture&quot;, 1);
+        }
+        else
+        {
+            m_Shader-&gt;setUniform1i(&quot;u_UseTexture&quot;, 0);
+        }
+
+        m_Renderer.Draw(*m_CubeVAO, *m_CubeIBO, *m_Shader);
+    }
+
+    void TestMaze::Render()
+    {
+        m_Renderer.ClearColour_Black();
+        m_Renderer.Clear();
+
+        int fbWidth, fbHeight;
+        glfwGetFramebufferSize(m_window, &amp;fbWidth, &amp;fbHeight);
+        float aspect = fbHeight &gt; 0 ? (float)fbWidth / (float)fbHeight : 16.0f / 9.0f;
+
+        glm::mat4 projection = glm::perspective(
+            glm::radians(m_Camera-&gt;getFOV()), aspect, 0.1f, 100.0f);
+        glm::mat4 view = m_Camera-&gt;getViewMatrix();
+
+        glm::vec3 mazeCenter = m_Map.TileCenter(m_Map.Cols() / 2, m_Map.Rows() / 2);
+        glm::vec3 cameraPos  = m_Camera-&gt;getPosition();
+
+        m_Shader-&gt;Bind();
+        m_Shader-&gt;setUniformMat4f(&quot;u_View&quot;,           view);
+        m_Shader-&gt;setUniformMat4f(&quot;u_Projection&quot;,     projection);
+        m_Shader-&gt;setUniform3f(&quot;u_Light.Position&quot;,    mazeCenter.x, 8.0f, mazeCenter.z);
+        m_Shader-&gt;setUniform3f(&quot;u_Light.Colour&quot;,      1.0f, 1.0f, 1.0f);
+        m_Shader-&gt;setUniform3f(&quot;u_CameraPosition&quot;,    cameraPos.x, cameraPos.y, cameraPos.z);
+        m_Shader-&gt;setUniform1f(&quot;u_AmbientIntensity&quot;,  0.35f);
+        m_Shader-&gt;setUniform1f(&quot;u_DiffuseIntensity&quot;,  0.8f);
+        m_Shader-&gt;setUniform1f(&quot;u_SpecularIntensity&quot;, 0.2f);
+        m_Shader-&gt;setUniform1f(&quot;u_Shininess&quot;,         32.0f);
+
+        float tile = m_Map.TileSize();
+        float time = (float)glfwGetTime();
+
+        // Tile loop: walls and floor
+        for (int row = 0; row &lt; m_Map.Rows(); row++)
+        {
+            for (int col = 0; col &lt; m_Map.Cols(); col++)
+            {
+                glm::vec3 center   = m_Map.TileCenter(col, row);
+                char      tileChar = m_Map.At(col, row);
+
+                if (tileChar == '#')
+                {
+                    glm::mat4 model = glm::translate(
+                        glm::mat4(1.0f),
+                        center + glm::vec3(0.0f, WallHeight * 0.5f, 0.0f));
+                    model = glm::scale(model, glm::vec3(tile, WallHeight, tile));
+                    DrawCube(model, glm::vec3(1.0f), m_WallTexture.get());
+                }
+                else
+                {
+                    glm::mat4 model = glm::translate(
+                        glm::mat4(1.0f),
+                        center + glm::vec3(0.0f, -0.05f, 0.0f));
+                    model = glm::scale(model, glm::vec3(tile, 0.1f, tile));
+                    DrawCube(model, glm::vec3(1.0f), m_FloorTexture.get());
+                }
+            }
+        }
+
+        // Coins: bobbing, spinning, gold
+        const std::vector&lt;Collectible&gt;&amp; coins = m_Map.Coins();
+        for (size_t i = 0; i &lt; coins.size(); i++)
+        {
+            if (coins[i].collected) continue;
+
+            float phase = (float)i * 0.7f;
+            glm::vec3 bob(0.0f, 0.1f * std::sin(time * 3.0f + phase), 0.0f);
+
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), coins[i].position + bob);
+            model = glm::rotate(model, time * 2.0f + phase, glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.3f));
+            DrawCube(model, glm::vec3(1.0f, 0.85f, 0.1f), nullptr);
+        }
+    }
+
+    // =========================================================================
+    // HUD
+    // =========================================================================
+    void TestMaze::RenderGUI()
+    {
+        ImGui::Text(&quot;Time:  %.0f s&quot;, m_TimeRemaining);
+        ImGui::Text(&quot;Coins: %d / %d&quot;, m_CoinsCollected, (int)m_Map.Coins().size());
+        ImGui::Separator();
+        m_Camera-&gt;cameraGUI();
+        ImGui::TextWrapped(&quot;WASD: move | Mouse: look | Enter: continue | ESC: pause + cursor&quot;);
+
+        ImDrawList* drawList = ImGui::GetForegroundDrawList();
+        ImGuiIO&amp;    io       = ImGui::GetIO();
+        ImVec2 center(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
+
+        auto drawCenteredText = [&amp;](float fontSize, float yOffset, ImU32 colour, const char* text)
+        {
+            ImFont* font = ImGui::GetFont();
+            ImVec2  size = font-&gt;CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
+            drawList-&gt;AddText(font, fontSize,
+                ImVec2(center.x - size.x * 0.5f, center.y + yOffset - size.y * 0.5f),
+                colour, text);
+        };
+
+        if (m_State == GameState::Playing &amp;&amp; !m_Camera-&gt;isDetached())
+        {
+            const float arm   = 10.0f;
+            ImU32       white = IM_COL32(255, 255, 255, 200);
+            drawList-&gt;AddLine(ImVec2(center.x - arm, center.y), ImVec2(center.x + arm, center.y), white, 2.0f);
+            drawList-&gt;AddLine(ImVec2(center.x, center.y - arm), ImVec2(center.x, center.y + arm), white, 2.0f);
+        }
+
+        switch (m_State)
+        {
+        case GameState::Won:
+            drawCenteredText(48.0f, -30.0f, IM_COL32(120, 255, 120, 255), &quot;ALL COINS COLLECTED!&quot;);
+            drawCenteredText(24.0f,  30.0f, IM_COL32(255, 255, 255, 255), &quot;Press ENTER to play again&quot;);
+            break;
+        case GameState::Lost:
+            drawCenteredText(48.0f, -30.0f, IM_COL32(255, 100, 100, 255), &quot;OUT OF TIME...&quot;);
+            drawCenteredText(24.0f,  30.0f, IM_COL32(255, 255, 255, 255), &quot;Press ENTER to retry&quot;);
+            break;
+        case GameState::Playing:
+            break;
+        }
+    }
+
+} // namespace test
+" data-filename="src/tests/maze/TestMaze.cpp" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 15 - Test Harness and C++ Architecture | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 15 - Test Harness and C++ Architecture</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>
+      In the Renderer and Refactoring lab (Lab 14) you assembled six abstraction classes into a
+      clean <code>main.cpp</code>. As the number of rendering experiments grows, editing that single
+      file to switch between them becomes unmanageable. This lab introduces a lightweight
+      <strong>test harness</strong> - a plugin architecture where each experiment lives in its own
+      class and registers itself with one line. You will build <code>Tests.h</code> and
+      <code>Tests.cpp</code>, wire the dispatch loop into <code>main.cpp</code>, and end with a
+      running application whose ImGui panel is ready to host future test scenes. Concrete tests
+      start in the Test Template lab (Lab 16).
+    </p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Explain how virtual functions allow the main loop to call Update, Render, and RenderGUI on any test scene without knowing its concrete type</li>
+      <li>Distinguish between pure virtual methods and virtual methods with default empty bodies, and explain which is appropriate here</li>
+      <li>Describe the factory pattern and explain how RegisterTest stores a construction lambda that is called when the user selects a scene</li>
+      <li>Implement TestMenu::RenderGUI so ImGui buttons call the matching factory and activate the selected test</li>
+      <li>Wire the test harness into main.cpp so every frame is dispatched through the active test pointer, with correct cleanup on exit</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>
+      As a graphics project grows, placing every rendering experiment in <code>main.cpp</code>
+      directly forces you to comment and uncomment large code sections each time you switch focus.
+      The file accumulates unrelated state, and touching one experiment risks breaking another.
+      What you need is a way to add new scenes without modifying existing code.
+    </p>
+    <p>
+      The solution combines a <strong>polymorphic interface</strong> with a <strong>factory
+      pattern</strong>. The <code>Tests</code> class declares three virtual methods -
+      <code>Update</code>, <code>Render</code>, and <code>RenderGUI</code> - each with an empty
+      default body so a derived scene overrides only what it uses. <code>TestMenu</code> holds a
+      <code>std::vector</code> of name-and-factory pairs. Each factory is a
+      <code>std::function&lt;Tests*()&gt;</code> lambda that constructs and returns the matching
+      scene object when called. When the user clicks a button in the ImGui panel,
+      <code>TestMenu::RenderGUI</code> invokes the factory and stores the result in a
+      <code>Tests*</code> pointer that lives in <code>main.cpp</code>. The main loop then calls
+      <code>Update</code>, <code>Render</code>, and <code>RenderGUI</code> on whatever that
+      pointer holds, with no knowledge of the concrete type. Adding a new scene requires only a
+      new class and one <code>RegisterTest</code> call - no existing code changes.
+    </p>
+    <p>
+      Two C++ features make this clean. The <code>TestMenu</code> constructor takes a
+      <strong>reference-to-pointer</strong> (<code>Tests*&amp;</code>), giving the menu direct
+      write access to the pointer in <code>main.cpp</code> when a button is clicked - no global
+      required. Registration uses a <strong>function template</strong>:
+      <code>RegisterTest&lt;T&gt;(name)</code> captures the type <code>T</code> in a lambda at
+      compile time so the factory can call <code>new T()</code> at runtime. The variadic overload
+      <code>RegisterTest&lt;T, Args...&gt;</code> handles tests whose constructors need arguments:
+      it packs them into a <code>std::tuple</code> with <code>std::make_tuple</code> and unpacks
+      them later with <code>std::apply</code>.
+    </p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Read the Tests base class</h3>
+      <p>
+          This task is read-only. The complete header is provided below as a reference. Work
+          through it section by section and consider the question in each step.
+          You do not need to write any code yet.
+        </p>
+        <ol>
+          <li>
+            Locate the three <strong>virtual methods</strong> on <code>Tests</code>:
+            <code>Update</code>, <code>Render</code>, and <code>RenderGUI</code>. Each has an
+            empty default body <code>{}</code>. Explain why a default empty body is more useful
+            here than making the methods <strong>pure virtual</strong> (declared with
+            <code>= 0</code>).
+          </li>
+          <li>
+            Find the <code>virtual ~Tests()</code> destructor. Imagine a <code>Tests*</code>
+            pointer holds a derived scene object and you call <code>delete</code> on it. What
+            resource leak occurs if <code>~Tests()</code> is <strong>not</strong> virtual?
+          </li>
+          <li>
+            Find <code>RegisterTest&lt;T&gt;</code> (the no-argument overload). The lambda
+            <code>[]() -&gt; Tests* { return new T(); }</code> is stored in <code>m_Tests</code>
+            now but called later. In <code>TestMenu::RenderGUI</code> (which you implement in
+            Task 2), identify the exact expression that invokes it.
+          </li>
+          <li>
+            Read the variadic <code>RegisterTest&lt;T, Args...&gt;</code> overload. Why must
+            constructor arguments be packed into a <code>std::tuple</code> rather than captured
+            directly in the lambda? What does <code>std::apply</code> do with the tuple when the
+            factory runs?
+          </li>
+          <li>
+            Examine the <code>m_Tests</code> member type:
+            <code>std::vector&lt;std::pair&lt;std::string, std::function&lt;Tests*()&gt;&gt;&gt;</code>.
+            Why is <code>std::function&lt;Tests*()&gt;</code> required here rather than a plain
+            function pointer of type <code>Tests*(*)() </code>?
+          </li>
+        </ol>
+      <div class="code-file-header">src/tests/Tests.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+#include &lt;functional&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;memory&gt;
+
+namespace test
+{
+    // =========================================================================
+    // BASE TEST CLASS
+    // =========================================================================
+    /**
+     * Tests - Abstract base class for all test scenes.
+     *
+     * VIRTUAL DESTRUCTOR:
+     * Without it, deleting a derived object through a Tests* calls only the
+     * base destructor, leaking the derived class's resources.
+     *
+     * DEFAULT IMPLEMENTATIONS:
+     * Empty {} bodies allow derived classes to override only the methods they use.
+     * If these were pure virtual (= 0), every derived class would be forced to
+     * implement all three even when some are not needed.
+     */
+    class Tests
+    {
+    public:
+        Tests() {}
+        virtual ~Tests() {}
+
+        virtual void Update(float deltaTime) {}
+        virtual void Render() {}
+        virtual void RenderGUI() {}
+    };
+
+
+    // =========================================================================
+    // TEST MENU (Factory Pattern)
+    // =========================================================================
+    /**
+     * TestMenu - manages test registration and instantiation.
+     *
+     * FACTORY PATTERN:
+     * Each test is registered with a factory lambda. Adding a new test requires
+     * only a RegisterTest call - TestMenu itself never needs to change.
+     *
+     * TYPE ERASURE:
+     * std::function&lt;Tests*()&gt; can hold any callable that returns a Tests*.
+     * This allows heterogeneous factory lambdas to live in a single vector.
+     *
+     * REFERENCE-TO-POINTER (Tests*&amp;):
+     * The constructor takes Tests*&amp; so the menu can update the caller's pointer
+     * directly when a button is clicked - no global variable needed.
+     */
+    class TestMenu : public Tests
+    {
+    public:
+        TestMenu(Tests*&amp; currentTestPointer);
+
+        void RenderGUI() override;
+
+        // Register a test that needs no constructor arguments.
+        // A lambda captures the type T and constructs it on demand.
+        template&lt;typename T&gt;
+        void RegisterTest(const std::string&amp; name)
+        {
+            m_Tests.push_back(std::make_pair(name, []() -&gt; Tests* { return new T(); }));
+        }
+
+        // Register a test whose constructor requires arguments.
+        // Arguments are packed into a tuple now and unpacked with std::apply
+        // when the factory is called later.
+        template&lt;typename T, typename... Args&gt;
+        void RegisterTest(const std::string&amp; name, Args&amp;&amp;... args)
+        {
+            m_Tests.push_back(std::make_pair(name,
+                [args = std::make_tuple(std::forward&lt;Args&gt;(args)...)]() -&gt; Tests* {
+                    return std::apply([](auto&amp;&amp;... unpackedArgs)
+                        {
+                            return new T(std::forward&lt;decltype(unpackedArgs)&gt;(unpackedArgs)...);
+                        }, args);
+                }));
+        }
+
+    private:
+        Tests*&amp; m_CurrentTest;
+        std::vector&lt;std::pair&lt;std::string, std::function&lt;Tests* ()&gt;&gt;&gt; m_Tests;
+    };
+}
+</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Implement TestMenu</h3>
+      <p>
+          Create <code>src/tests/Tests.cpp</code> in your project and fill in the one function
+          marked with a <code>// TODO</code> comment.
+        </p>
+        <ol>
+          <li>
+            In <code>TestMenu::RenderGUI</code>, the <code>for</code> loop already iterates over
+            <code>m_Tests</code>. Inside the loop, call
+            <code>ImGui::Button(test.first.c_str())</code>. This renders a labelled button and
+            returns <code>true</code> on the frame the user clicks it. When it returns
+            <code>true</code>, call <code>test.second()</code> to invoke the factory and assign
+            the returned pointer to <code>m_CurrentTest</code>.
+          </li>
+          <li>
+            Build the project. There should be no errors at this point. The menu will show no
+            buttons yet because no tests have been registered in <code>main.cpp</code>.
+          </li>
+        </ol>
+      <div class="code-file-header">src/tests/Tests.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &quot;Tests.h&quot;
+#include &quot;../vendor/imgui/imgui.h&quot;
+
+namespace test
+{
+    TestMenu::TestMenu(Tests*&amp; currentTestPointer) : m_CurrentTest(currentTestPointer)
+    {
+    }
+
+    void TestMenu::RenderGUI()
+    {
+        for (auto&amp; test : m_Tests)
+        {
+            // TODO: Create an ImGui button labelled with test.first
+            //       When clicked, call test.second() to invoke the factory
+            //       and assign the returned pointer to m_CurrentTest
+            //       Hint: ImGui::Button(test.first.c_str()) returns true on click
+        }
+    }
+}
+</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Wire the harness into main.cpp</h3>
+      <p>
+          Update <code>src/Main.cpp</code> to route every frame through the test harness. Follow
+          the numbered TODO comments in the skeleton below in order.
+        </p>
+        <ol>
+          <li>
+            Declare <code>test::Tests* currentTest = nullptr;</code> just after
+            <code>ImGui_ImplOpenGL3_Init()</code>. This pointer is what the main loop reads
+            every frame to know which scene to dispatch to.
+          </li>
+          <li>
+            Construct the menu: <code>test::TestMenu* TestMenu = new test::TestMenu(currentTest);</code>.
+            Passing <code>currentTest</code> by reference gives the menu direct write access to
+            the pointer in this scope so a button click can update it without a global variable.
+          </li>
+          <li>
+            Set the initial active scene: <code>currentTest = TestMenu;</code>. Because
+            <code>TestMenu</code> inherits <code>Tests</code>, the same dispatch block that runs
+            other scenes will render the menu itself on the first frame with no special case.
+          </li>
+          <li>
+            Inside the render loop, add the dispatch block from TODO 4. The guard
+            <code>if (currentTest != TestMenu)</code> on the back button prevents the menu from
+            deleting itself and leaving a dangling pointer.
+          </li>
+          <li>
+            After the render loop, add cleanup using the two-step pattern from TODO 5:
+            <code>if (currentTest != TestMenu) delete currentTest;</code> then
+            <code>delete TestMenu;</code>. This avoids a double-free when the user closes the
+            window while the menu is still the active scene.
+          </li>
+          <li>
+            Build and run. The application should open a window with an ImGui
+            <strong>Test control panel</strong> window containing no buttons yet. The harness is
+            ready - tests will be added from Lab 16 onward.
+          </li>
+        </ol>
+      <div class="code-file-header">src/Main.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &lt;GL/glew.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;iostream&gt;
+
+#include &quot;Renderer.h&quot;
+#include &quot;tests/Tests.h&quot;
+
+#include &quot;vendor/imgui/imgui.h&quot;
+#include &quot;vendor/imgui/imgui_impl_glfw.h&quot;
+#include &quot;vendor/imgui/imgui_impl_opengl3.h&quot;
+
+#define IMGUI_IMPL_OPENGL_LOADER_GLEW
+
+int main()
+{
+    if (!glfwInit()) return -1;
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(1280, 720, &quot;OpenGL&quot;, NULL, NULL);
+    if (!window) { glfwTerminate(); return -1; }
+    glfwMakeContextCurrent(window);
+
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) { glfwTerminate(); return -1; }
+
+    glfwSwapInterval(1);
+
+    {
+        Renderer renderer;
+
+        ImGui::CreateContext();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui::StyleColorsDark();
+        ImGui_ImplOpenGL3_Init();
+
+        // TODO 1: Declare the active-test pointer
+        //   test::Tests* currentTest = nullptr;
+
+        // TODO 2: Create the TestMenu, passing currentTest by reference
+        //   test::TestMenu* TestMenu = new test::TestMenu(currentTest);
+
+        // TODO 3: Set the menu as the initial active scene
+        //   currentTest = TestMenu;
+
+        // Tests will be registered in future labs. The syntax is:
+        //   TestMenu-&gt;RegisterTest&lt;test::SomeTest&gt;(&quot;Label&quot;);
+        //   TestMenu-&gt;RegisterTest&lt;test::SomeTest&gt;(&quot;Label&quot;, arg1, arg2);
+
+        float lastFrameTime = 0.0f;
+
+        while (!glfwWindowShouldClose(window))
+        {
+            float now = (float)glfwGetTime();
+            float deltaTime = now - lastFrameTime;
+            lastFrameTime = now;
+
+            renderer.Clear();
+
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            // TODO 4: Add the dispatch block:
+            //
+            //   if (currentTest)
+            //   {
+            //       currentTest-&gt;Update(deltaTime);
+            //       currentTest-&gt;Render();
+            //       ImGui::Begin(&quot;Test control panel&quot;);
+            //       if (currentTest != TestMenu &amp;&amp; ImGui::Button(&quot;&lt;-&quot;))
+            //       {
+            //           delete currentTest;
+            //           currentTest = TestMenu;
+            //       }
+            //       currentTest-&gt;RenderGUI();
+            //       ImGui::End();
+            //   }
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        }
+
+        // TODO 5: Clean up - avoid a double-free when the menu is still active
+        //   if (currentTest != TestMenu)
+        //       delete currentTest;
+        //   delete TestMenu;
+    }
+
+    ImGui_ImplGlfw_Shutdown();
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}
+</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &lt;functional&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;memory&gt;
+
+namespace test
+{
+    // =========================================================================
+    // BASE TEST CLASS
+    // =========================================================================
+    /**
+     * Tests - Abstract base class for all test scenes.
+     *
+     * VIRTUAL DESTRUCTOR:
+     * Without it, deleting a derived object through a Tests* calls only the
+     * base destructor, leaking the derived class's resources.
+     *
+     * DEFAULT IMPLEMENTATIONS:
+     * Empty {} bodies allow derived classes to override only the methods they use.
+     * If these were pure virtual (= 0), every derived class would be forced to
+     * implement all three even when some are not needed.
+     */
+    class Tests
+    {
+    public:
+        Tests() {}
+        virtual ~Tests() {}
+
+        virtual void Update(float deltaTime) {}
+        virtual void Render() {}
+        virtual void RenderGUI() {}
+    };
+
+
+    // =========================================================================
+    // TEST MENU (Factory Pattern)
+    // =========================================================================
+    /**
+     * TestMenu - manages test registration and instantiation.
+     *
+     * FACTORY PATTERN:
+     * Each test is registered with a factory lambda. Adding a new test requires
+     * only a RegisterTest call - TestMenu itself never needs to change.
+     *
+     * TYPE ERASURE:
+     * std::function&lt;Tests*()&gt; can hold any callable that returns a Tests*.
+     * This allows heterogeneous factory lambdas to live in a single vector.
+     *
+     * REFERENCE-TO-POINTER (Tests*&amp;):
+     * The constructor takes Tests*&amp; so the menu can update the caller's pointer
+     * directly when a button is clicked - no global variable needed.
+     */
+    class TestMenu : public Tests
+    {
+    public:
+        TestMenu(Tests*&amp; currentTestPointer);
+
+        void RenderGUI() override;
+
+        // Register a test that needs no constructor arguments.
+        // A lambda captures the type T and constructs it on demand.
+        template&lt;typename T&gt;
+        void RegisterTest(const std::string&amp; name)
+        {
+            m_Tests.push_back(std::make_pair(name, []() -&gt; Tests* { return new T(); }));
+        }
+
+        // Register a test whose constructor requires arguments.
+        // Arguments are packed into a tuple now and unpacked with std::apply
+        // when the factory is called later.
+        template&lt;typename T, typename... Args&gt;
+        void RegisterTest(const std::string&amp; name, Args&amp;&amp;... args)
+        {
+            m_Tests.push_back(std::make_pair(name,
+                [args = std::make_tuple(std::forward&lt;Args&gt;(args)...)]() -&gt; Tests* {
+                    return std::apply([](auto&amp;&amp;... unpackedArgs)
+                        {
+                            return new T(std::forward&lt;decltype(unpackedArgs)&gt;(unpackedArgs)...);
+                        }, args);
+                }));
+        }
+
+    private:
+        Tests*&amp; m_CurrentTest;
+        std::vector&lt;std::pair&lt;std::string, std::function&lt;Tests* ()&gt;&gt;&gt; m_Tests;
+    };
+}
+" data-filename="src/tests/Tests.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;Tests.h&quot;
+#include &quot;../vendor/imgui/imgui.h&quot;
+
+namespace test
+{
+    TestMenu::TestMenu(Tests*&amp; currentTestPointer) : m_CurrentTest(currentTestPointer)
+    {
+    }
+
+    void TestMenu::RenderGUI()
+    {
+        for (auto&amp; test : m_Tests)
+        {
+            if (ImGui::Button(test.first.c_str()))
+            {
+                m_CurrentTest = test.second();
+            }
+        }
+    }
+}
+" data-filename="src/tests/Tests.cpp" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &lt;GL/glew.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;iostream&gt;
+
+#include &quot;Renderer.h&quot;
+#include &quot;tests/Tests.h&quot;
+
+#include &quot;vendor/imgui/imgui.h&quot;
+#include &quot;vendor/imgui/imgui_impl_glfw.h&quot;
+#include &quot;vendor/imgui/imgui_impl_opengl3.h&quot;
+
+#define IMGUI_IMPL_OPENGL_LOADER_GLEW
+
+int main()
+{
+    if (!glfwInit()) return -1;
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(1280, 720, &quot;OpenGL&quot;, NULL, NULL);
+    if (!window) { glfwTerminate(); return -1; }
+    glfwMakeContextCurrent(window);
+
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) { glfwTerminate(); return -1; }
+
+    glfwSwapInterval(1);
+
+    {
+        Renderer renderer;
+
+        ImGui::CreateContext();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui::StyleColorsDark();
+        ImGui_ImplOpenGL3_Init();
+
+        test::Tests* currentTest = nullptr;
+        test::TestMenu* TestMenu = new test::TestMenu(currentTest);
+        currentTest = TestMenu;
+
+        // Tests will be registered in future labs. Example syntax:
+        //   TestMenu-&gt;RegisterTest&lt;test::SomeTest&gt;(&quot;Label&quot;);
+        //   TestMenu-&gt;RegisterTest&lt;test::SomeTest&gt;(&quot;Label&quot;, arg1, arg2);
+
+        float lastFrameTime = 0.0f;
+
+        while (!glfwWindowShouldClose(window))
+        {
+            float now = (float)glfwGetTime();
+            float deltaTime = now - lastFrameTime;
+            lastFrameTime = now;
+
+            renderer.Clear();
+
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            if (currentTest)
+            {
+                currentTest-&gt;Update(deltaTime);
+                currentTest-&gt;Render();
+                ImGui::Begin(&quot;Test control panel&quot;);
+                if (currentTest != TestMenu &amp;&amp; ImGui::Button(&quot;&lt;-&quot;))
+                {
+                    delete currentTest;
+                    currentTest = TestMenu;
+                }
+                currentTest-&gt;RenderGUI();
+                ImGui::End();
+            }
+
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+        }
+
+        if (currentTest != TestMenu)
+            delete currentTest;
+        delete TestMenu;
+    }
+
+    ImGui_ImplGlfw_Shutdown();
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}
+" data-filename="src/Main.cpp" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+
+</body>
+</html>

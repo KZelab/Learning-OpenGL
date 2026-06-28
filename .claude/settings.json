@@ -1,8 +1,13 @@
 {
   "mcpServers": {
     "lab-assembler": {
-      "command": "node",
-      "args": ["tools/lab-assembler/dist/index.js"]
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-w", "/workspace",
+        "-v", "C:\\Users\\natha\\dev\\CPP\\GPUProgramming\\Renderer:/workspace",
+        "lab-assembler"
+      ]
     }
   }
 }

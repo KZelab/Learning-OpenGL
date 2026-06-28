@@ -1,0 +1,5 @@
+
+C:\Users\natha\dev\worksheetbuilder
+
+a vite react user interface for the assembler, so that it can be used in a web browser manually without an llm ? 
+(also supports editing existing worksheets and saving them back to the filesystem)

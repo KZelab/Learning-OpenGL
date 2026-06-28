@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab M02 - The Identity Matrix | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      color: #cccccc;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Fill-in-the-blank ---- */
+    .fill-blanks-group { margin: 0.5rem 0 0.25rem; }
+
+    .blank-question {
+      margin: 0.6rem 0;
+      line-height: 2.2;
+    }
+
+    .blank-input {
+      display: inline-block;
+      border: none;
+      border-bottom: 2px solid var(--uwtsd-navy);
+      background: transparent;
+      font-family: inherit;
+      font-size: inherit;
+      color: var(--uwtsd-text);
+      padding: 0.05em 0.3em;
+      width: 14em;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      vertical-align: baseline;
+    }
+
+    .blank-input:focus { border-bottom-color: var(--uwtsd-gold); }
+
+    .blank-input.blank-correct {
+      border-bottom-color: #27ae60;
+      background: rgba(39,174,96,0.09);
+      border-radius: 3px 3px 0 0;
+    }
+
+    .blank-input.blank-incorrect {
+      border-bottom-color: #e74c3c;
+      background: rgba(231,76,60,0.09);
+      border-radius: 3px 3px 0 0;
+    }
+
+    .blank-feedback {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-top: 0.2rem;
+      min-height: 1.2em;
+    }
+
+    .feedback-correct { color: #27ae60; }
+    .feedback-incorrect { color: #c0392b; }
+
+    .check-blanks-btn {
+      display: inline-block;
+      margin: 0.75rem 0 0.25rem;
+      padding: 0.5rem 1.2rem;
+      background: var(--uwtsd-gold);
+      color: var(--uwtsd-navy);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .check-blanks-btn:hover { background: #b8952e; }
+
+    /* ---- Multiple choice ---- */
+    .mc-block { margin: 0.75rem 0 1rem; }
+
+    .mc-item {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+      background: #fff;
+    }
+
+    .mc-question-text { font-weight: 600; margin-bottom: 0.5rem; }
+
+    .mc-options { display: flex; flex-direction: column; gap: 0; margin: 0.4rem 0; }
+
+    .mc-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.35rem 0.5rem;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.1s;
+    }
+    .mc-option:hover { background: #f0f4ff; }
+
+    .mc-option input[type=radio] { margin-top: 0.2em; flex-shrink: 0; }
+
+    .mc-option.mc-correct   { color: #27ae60; font-weight: 600; }
+    .mc-option.mc-incorrect { color: #e74c3c; }
+
+    .mc-explanation {
+      display: none;
+      font-size: 0.88rem;
+      color: var(--uwtsd-muted);
+      margin-top: 0.4rem;
+      padding: 0.4rem 0.6rem;
+      border-left: 3px solid var(--uwtsd-gold);
+      background: #fffdf0;
+    }
+    .mc-explanation.visible { display: block; }
+
+    .mc-feedback {
+      font-size: 0.82rem;
+      font-weight: 600;
+      min-height: 1.2em;
+      margin-top: 0.25rem;
+    }
+
+    .mc-item-static { margin-bottom: 0.75rem; }
+    .mc-options-static { padding-left: 1.4rem; margin: 0.4rem 0; }
+
+    /* ---- Short answer ---- */
+    .sa-block { margin: 0.75rem 0 1rem; }
+
+    .sa-item {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+      background: #fff;
+    }
+
+    .sa-question-text { font-weight: 600; margin-bottom: 0.5rem; }
+
+    .sa-textarea {
+      width: 100%;
+      min-height: 6rem;
+      padding: 0.5rem 0.75rem;
+      font-family: inherit;
+      font-size: 0.93rem;
+      border: 1px solid #ccd0da;
+      border-radius: 4px;
+      resize: vertical;
+      margin-bottom: 0.5rem;
+      color: var(--uwtsd-text);
+      background: #fafbfc;
+      box-sizing: border-box;
+    }
+    .sa-textarea:focus { outline: none; border-color: var(--uwtsd-navy); }
+
+    .sa-reveal-btn {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      background: transparent;
+      color: var(--uwtsd-navy);
+      border: 1px solid var(--uwtsd-navy);
+      border-radius: 4px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .sa-reveal-btn:hover { background: var(--uwtsd-navy); color: white; }
+
+    .sa-answer-panel {
+      display: none;
+      margin-top: 0.5rem;
+      padding: 0.6rem 0.85rem;
+      background: #f0f4f0;
+      border-left: 3px solid #27ae60;
+      border-radius: 0 4px 4px 0;
+      font-size: 0.93rem;
+    }
+    .sa-answer-panel.visible { display: block; }
+
+    .sa-item-static { margin-bottom: 0.75rem; }
+    .sa-lines {
+      border-bottom: 1px solid #aaa;
+      min-height: 5rem;
+      margin-top: 0.4rem;
+    }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      .check-blanks-btn { display: none; }
+      .blank-input { border-bottom: 1px solid #555; min-width: 8em; background: transparent !important; }
+      .blank-feedback { display: none; }
+      .mc-option { break-inside: avoid; }
+      .mc-option input[type=radio] { display: none; }
+      .sa-reveal-btn { display: none; }
+      .sa-textarea { border: 1px solid #999; background: transparent !important; min-height: 5rem; }
+      .sa-answer-panel { display: block !important; border-left: 2px solid #555; background: #f9f9f9; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab M02 - The Identity Matrix</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>This worksheet explores the <strong>identity matrix</strong>, the cornerstone of every linear transform in OpenGL. You will construct a 4x4 identity matrix, verify its multiplicative property by hand calculation, and recognise how GLM uses it as the default starting point for model, view, and projection matrices.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Construct a 4x4 identity matrix from memory</li>
+      <li>Verify the multiplicative identity property I * M = M by hand</li>
+      <li>Explain why glm::mat4(1.0f) produces an identity matrix in C++</li>
+      <li>Describe why the identity matrix is the correct starting point for transform chains in OpenGL</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>Without a neutral element for matrix multiplication, there is no safe starting point for building transform chains. When you construct a model matrix in OpenGL, you combine rotations, translations, and scales by multiplying matrices together. You need a matrix that contributes nothing on its own. In ordinary arithmetic, the number <strong>1</strong> plays this role. The product of 1 and x always equals x, regardless of x. Matrices have an exact equivalent.</p>
+<p>The <strong>identity matrix</strong>, written as <strong>I</strong>, is a square matrix with the value 1 on every entry of the <strong>main diagonal</strong> (running from the top-left entry to the bottom-right) and 0 everywhere else. Its defining property is that multiplying any conformable matrix M by I from either side leaves M completely unchanged. This relationship, written I * M = M * I = M, makes I the <strong>multiplicative identity</strong> for matrices, exactly as 1 is the multiplicative identity for ordinary numbers.</p>
+<p>In GLM, the C++ maths library used alongside OpenGL, you create a 4x4 identity matrix by writing <code>glm::mat4(1.0f)</code>. The single float argument fills the four diagonal entries with that value and sets all other entries to zero. Writing <code>glm::mat4(0.0f)</code> instead produces an all-zero matrix, which destroys any vector multiplied by it. The convention of starting every transform with <code>glm::mat4(1.0f)</code> and then applying <code>glm::translate</code>, <code>glm::rotate</code>, and <code>glm::scale</code> on top of it follows directly from this identity property.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - The Structure of the Identity Matrix</h3>
+      <p>Study the 4x4 identity matrix below, then answer the questions that follow.</p>
+<pre><code>| 1  0  0  0 |
+| 0  1  0  0 |
+| 0  0  1  0 |
+| 0  0  0  1 |</code></pre>
+<p>The <strong>main diagonal</strong> runs from the top-left entry (row 1, column 1) to the bottom-right entry (row 4, column 4). Every entry on this diagonal is 1. Every other entry is 0.</p>
+
+<div class="fill-blanks-group">
+<div class="blank-question" data-answers="[[&quot;1&quot;,&quot;one&quot;]]">
+  <p>The value placed on the main diagonal of an identity matrix is <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong>.</p>
+  <span class="blank-feedback"></span>
+</div>
+<div class="blank-question" data-answers="[[&quot;0&quot;,&quot;zero&quot;]]">
+  <p>Every entry that is not on the main diagonal is <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong>.</p>
+  <span class="blank-feedback"></span>
+</div>
+<div class="blank-question" data-answers="[[&quot;4&quot;,&quot;four&quot;]]">
+  <p>A 4x4 identity matrix has <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong> non-zero entries.</p>
+  <span class="blank-feedback"></span>
+</div>
+<div class="blank-question" data-answers="[[&quot;square&quot;]]">
+  <p>The identity matrix is only defined for <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong> matrices.</p>
+  <span class="blank-feedback"></span>
+</div>
+</div>
+<button class="check-blanks-btn" onclick="checkBlanks(this)">Check Answers</button>
+
+<div class="mc-block"><div class="mc-item" data-correct="1">
+  <p class="mc-question-text">Which of the following correctly describes the identity matrix?</p>
+  <div class="mc-options"><label class="mc-option">
+    <input type="radio" name="mc-1-0" onchange="revealMCAnswer(this)">
+    <span>A. A matrix with 1s everywhere</span>
+  </label>
+<label class="mc-option">
+    <input type="radio" name="mc-1-0" onchange="revealMCAnswer(this)">
+    <span>B. A matrix with 1s on the main diagonal and 0s elsewhere</span>
+  </label>
+<label class="mc-option">
+    <input type="radio" name="mc-1-0" onchange="revealMCAnswer(this)">
+    <span>C. A matrix with 0s on the main diagonal and 1s elsewhere</span>
+  </label>
+<label class="mc-option">
+    <input type="radio" name="mc-1-0" onchange="revealMCAnswer(this)">
+    <span>D. A matrix with alternating 1s and 0s on each row</span>
+  </label></div>
+  <div class="mc-feedback"></div>
+  <div class="mc-explanation">The identity matrix has exactly 1 on each diagonal entry and 0 for all other entries. Multiplying any matrix by it leaves that matrix unchanged.</div>
+</div></div>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - The Multiplicative Identity Property</h3>
+      <p>The <strong>multiplicative identity property</strong> states that for any matrix M of appropriate size, multiplying by the identity matrix I leaves M unchanged. This is written as I * M = M * I = M.</p>
+<p>Work through the example below. Let M be a 2x2 matrix and I be the 2x2 identity:</p>
+<pre><code>    | 1  0 |         | 3  7 |
+I = |      |    M =  |      |
+    | 0  1 |         | 2  5 |</code></pre>
+<p>To compute I * M, multiply each row of I by each column of M and sum the products:</p>
+<pre><code>Row 1, Col 1:  (1)(3) + (0)(2) = ?
+Row 1, Col 2:  (1)(7) + (0)(5) = ?
+Row 2, Col 1:  (0)(3) + (1)(2) = ?
+Row 2, Col 2:  (0)(7) + (1)(5) = ?</code></pre>
+<p>Fill in the four results below.</p>
+
+<div class="fill-blanks-group">
+<div class="blank-question" data-answers="[[&quot;3&quot;]]">
+  <p>Row 1, Col 1: (1)(3) + (0)(2) = <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong></p>
+  <span class="blank-feedback"></span>
+</div>
+<div class="blank-question" data-answers="[[&quot;7&quot;]]">
+  <p>Row 1, Col 2: (1)(7) + (0)(5) = <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong></p>
+  <span class="blank-feedback"></span>
+</div>
+<div class="blank-question" data-answers="[[&quot;2&quot;]]">
+  <p>Row 2, Col 1: (0)(3) + (1)(2) = <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong></p>
+  <span class="blank-feedback"></span>
+</div>
+<div class="blank-question" data-answers="[[&quot;5&quot;]]">
+  <p>Row 2, Col 2: (0)(7) + (1)(5) = <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong></p>
+  <span class="blank-feedback"></span>
+</div>
+</div>
+<button class="check-blanks-btn" onclick="checkBlanks(this)">Check Answers</button>
+
+<div class="sa-block"><div class="sa-item">
+  <p class="sa-question-text">The result above equals M exactly. Explain why multiplying by the identity matrix always returns the original matrix. What feature of I causes each entry of M to pass through unchanged?</p>
+  <textarea class="sa-textarea" rows="4" placeholder="Write your answer here..."></textarea>
+  <button class="sa-reveal-btn" onclick="toggleModelAnswer(this)">Show Model Answer</button>
+  <div class="sa-answer-panel">The identity matrix has 1s on the diagonal and 0s everywhere else. When computing each entry of the result, only one term in the dot product is non-zero: the term where the diagonal 1 aligns with the corresponding entry of M. All other terms are zeroed out by the off-diagonal 0s. This means each entry of M is selected exactly once and passes through to the result without modification.</div>
+</div></div>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - The Identity Matrix in GLM</h3>
+      <p>GLM stores matrices in <strong>column-major</strong> order, matching the layout OpenGL expects on the GPU. When you call <code>glm::mat4(1.0f)</code>, the constructor sets each of the four diagonal entries to <code>1.0f</code> and all other entries to <code>0.0f</code>, producing the 4x4 identity matrix.</p>
+<p>The code below initialises a model matrix to the identity and then applies a translation:</p>
+
+<div class="code-file-header">typical transform setup</div>
+<pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">glm::mat4 model(1.0f);   // identity - neutral starting point
+model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));  // shift right by 2 units</code></pre>
+
+<div class="fill-blanks-group">
+<div class="blank-question" data-answers="[[&quot;1.0f&quot;,&quot;1.0&quot;,&quot;1&quot;]]">
+  <p>To create a 4x4 identity matrix in GLM, write <code>glm::mat4(<input class="blank-input" type="text" autocomplete="off" aria-label="blank 1">)</code>.</p>
+  <span class="blank-feedback"></span>
+</div>
+<div class="blank-question" data-answers="[[&quot;diagonal&quot;]]">
+  <p>The float argument to the constructor sets the value of all <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong> entries.</p>
+  <span class="blank-feedback"></span>
+</div>
+<div class="blank-question" data-answers="[[&quot;zero&quot;,&quot;0&quot;]]">
+  <p>Writing <code>glm::mat4(0.0f)</code> produces an all-<strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong> matrix.</p>
+  <span class="blank-feedback"></span>
+</div>
+</div>
+<button class="check-blanks-btn" onclick="checkBlanks(this)">Check Answers</button>
+
+<div class="mc-block"><div class="mc-item" data-correct="1">
+  <p class="mc-question-text">Why is glm::mat4(0.0f) almost never a correct starting point for a model matrix?</p>
+  <div class="mc-options"><label class="mc-option">
+    <input type="radio" name="mc-2-0" onchange="revealMCAnswer(this)">
+    <span>A. 0.0f is not a valid float value in C++</span>
+  </label>
+<label class="mc-option">
+    <input type="radio" name="mc-2-0" onchange="revealMCAnswer(this)">
+    <span>B. An all-zero matrix maps every vertex to the origin, destroying all geometry</span>
+  </label>
+<label class="mc-option">
+    <input type="radio" name="mc-2-0" onchange="revealMCAnswer(this)">
+    <span>C. GLM does not accept 0.0f as a constructor argument for mat4</span>
+  </label>
+<label class="mc-option">
+    <input type="radio" name="mc-2-0" onchange="revealMCAnswer(this)">
+    <span>D. The identity matrix requires 1.0f on all 16 entries, not just the diagonal</span>
+  </label></div>
+  <div class="mc-feedback"></div>
+  <div class="mc-explanation">Multiplying any vector by an all-zero matrix yields the zero vector. Every vertex in the mesh would collapse to the origin and nothing would appear on screen. The identity is the correct neutral starting point.</div>
+</div></div>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 4 - Identity in the Transform Pipeline</h3>
+      <p>Every model matrix in a typical OpenGL scene begins as an identity matrix. Transforms are then layered on top using GLM functions that multiply the current matrix by a new transform matrix. Starting from the identity ensures no unexpected rotation, scale, or translation is already present when the first transform is applied.</p>
+<p>Study the typical per-object matrix setup below:</p>
+
+<div class="code-file-header">render loop</div>
+<pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">glm::mat4 model(1.0f);                                                      // reset to identity each frame
+model = glm::translate(model, position);                                        // apply translation
+model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f)); // apply rotation
+model = glm::scale(model, scale);                                               // apply scale
+shader.setMat4(&quot;model&quot;, model);                                                 // send to GPU</code></pre>
+
+<div class="sa-block"><div class="sa-item">
+  <p class="sa-question-text">A student reuses the same model matrix variable across multiple draw calls without resetting it to identity each frame. Describe what will happen to the rendered objects after several frames, and state the correct fix.</p>
+  <textarea class="sa-textarea" rows="4" placeholder="Write your answer here..."></textarea>
+  <button class="sa-reveal-btn" onclick="toggleModelAnswer(this)">Show Model Answer</button>
+  <div class="sa-answer-panel">Each frame, the new transforms are multiplied on top of the previous frame's accumulated matrix rather than replacing it. After several frames the object will have been translated, rotated, and scaled many times over, causing it to drift rapidly off-screen or appear wildly distorted. The fix is to reset the matrix to glm::mat4(1.0f) at the start of each draw call so each frame applies a fresh set of transforms to a clean identity base.</div>
+</div></div>
+
+<div class="mc-block"><div class="mc-item" data-correct="2">
+  <p class="mc-question-text">Which line correctly resets a model matrix to the identity at the start of a render loop?</p>
+  <div class="mc-options"><label class="mc-option">
+    <input type="radio" name="mc-3-0" onchange="revealMCAnswer(this)">
+    <span>A. glm::mat4 model;</span>
+  </label>
+<label class="mc-option">
+    <input type="radio" name="mc-3-0" onchange="revealMCAnswer(this)">
+    <span>B. model = glm::mat4(0.0f);</span>
+  </label>
+<label class="mc-option">
+    <input type="radio" name="mc-3-0" onchange="revealMCAnswer(this)">
+    <span>C. model = glm::mat4(1.0f);</span>
+  </label>
+<label class="mc-option">
+    <input type="radio" name="mc-3-0" onchange="revealMCAnswer(this)">
+    <span>D. model = glm::mat4();</span>
+  </label></div>
+  <div class="mc-feedback"></div>
+  <div class="mc-explanation">glm::mat4(1.0f) explicitly sets the diagonal to 1.0f and all other entries to 0.0f, producing the identity. A default-constructed glm::mat4 without arguments leaves memory uninitialised in some build configurations. glm::mat4(0.0f) produces an all-zero matrix.</div>
+</div></div>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="// WS02 - The Identity Matrix - Answer Key
+//
+// Task 1 - Structure
+//   Main diagonal value:          1
+//   Off-diagonal value:           0
+//   Non-zero entries in 4x4 I:   4
+//   Matrix type:                  square
+//   Correct description: &quot;1s on the main diagonal and 0s elsewhere&quot;
+//
+// Task 2 - Multiplicative Property
+//   Row 1, Col 1: (1)(3) + (0)(2) = 3
+//   Row 1, Col 2: (1)(7) + (0)(5) = 7
+//   Row 2, Col 1: (0)(3) + (1)(2) = 2
+//   Row 2, Col 2: (0)(7) + (1)(5) = 5
+//   Result: [[3, 7], [2, 5]] = M  (M is unchanged, confirming I * M = M)
+//
+//   Why it works: the diagonal 1s each select exactly one entry of M.
+//   The off-diagonal 0s eliminate all other contributions.
+//   Every entry of M passes through to the result without change.
+//
+// Task 3 - GLM
+//   Constructor call:      glm::mat4(1.0f)
+//   Entries set by arg:    diagonal
+//   mat4(0.0f) produces:   zero matrix
+//   Why 0.0f is wrong:     all-zero matrix maps every vertex to the origin
+//
+// Task 4 - Transform Pipeline
+//   Correct reset line:    model = glm::mat4(1.0f);
+//
+//   Reusing without reset: transforms accumulate each frame.
+//   After N frames the object has been moved/rotated/scaled N times
+//   and will have drifted far from its intended position.
+//   Fix: reset to glm::mat4(1.0f) at the start of each draw call.
+//
+// Full usage example:
+glm::mat4 model(1.0f);
+model = glm::translate(model, position);
+model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 1.0f, 0.0f));
+model = glm::scale(model, scale);
+shader.setMat4(&quot;model&quot;, model);" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+
+  function checkBlanks(btn) {
+    var task = btn.closest('.task-block');
+    task.querySelectorAll('.blank-question').forEach(function(q) {
+      var answers = JSON.parse(q.dataset.answers);
+      var inputs = q.querySelectorAll('.blank-input');
+      var allCorrect = true;
+      inputs.forEach(function(input, i) {
+        var expected = [].concat(answers[i]).map(function(s) { return s.toLowerCase().trim(); });
+        var val = input.value.toLowerCase().trim();
+        var ok = expected.indexOf(val) !== -1;
+        input.classList.toggle('blank-correct', ok);
+        input.classList.toggle('blank-incorrect', !ok && val !== '');
+        if (!ok) allCorrect = false;
+      });
+      var fb = q.querySelector('.blank-feedback');
+      fb.textContent = allCorrect ? 'Correct!' : 'Check your answer.';
+      fb.className = 'blank-feedback ' + (allCorrect ? 'feedback-correct' : 'feedback-incorrect');
+    });
+  }
+
+  function revealMCAnswer(radio) {
+    var item    = radio.closest('.mc-item');
+    var correct = parseInt(item.dataset.correct, 10);
+    var radios  = Array.from(item.querySelectorAll('input[type=radio]'));
+    var chosen  = radios.indexOf(radio);
+    item.querySelectorAll('.mc-option').forEach(function(opt, i) {
+      opt.classList.toggle('mc-correct',   i === correct);
+      opt.classList.toggle('mc-incorrect', i === chosen && i !== correct);
+    });
+    var fb = item.querySelector('.mc-feedback');
+    if (fb) {
+      fb.textContent = chosen === correct ? 'Correct!' : 'Incorrect.';
+      fb.className   = 'mc-feedback ' + (chosen === correct ? 'feedback-correct' : 'feedback-incorrect');
+    }
+    var exp = item.querySelector('.mc-explanation');
+    if (exp) exp.classList.add('visible');
+    item.querySelectorAll('input[type=radio]').forEach(function(r) { r.disabled = true; });
+  }
+
+  function toggleModelAnswer(btn) {
+    var panel = btn.nextElementSibling;
+    var open  = panel.classList.toggle('visible');
+    btn.textContent = open ? 'Hide Model Answer' : 'Show Model Answer';
+  }
+</script>
+
+<script>/**
+ * Minified by jsDelivr using Terser v5.39.0.
+ * Original file: /npm/prismjs@1.29.0/prism.js
+ *
+ * Do NOT use SRI with dynamically generated files! More information: https://www.jsdelivr.com/using-sri-with-dynamic-files
+ */
+var _self="undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?self:{},Prism=function(e){var t=/(?:^|\s)lang(?:uage)?-([\w-]+)(?=\s|$)/i,n=0,a={},r={manual:e.Prism&&e.Prism.manual,disableWorkerMessageHandler:e.Prism&&e.Prism.disableWorkerMessageHandler,util:{encode:function e(t){return t instanceof s?new s(t.type,e(t.content),t.alias):Array.isArray(t)?t.map(e):t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\u00a0/g," ")},type:function(e){return Object.prototype.toString.call(e).slice(8,-1)},objId:function(e){return e.__id||Object.defineProperty(e,"__id",{value:++n}),e.__id},clone:function e(t,n){var a,s;switch(n=n||{},r.util.type(t)){case"Object":if(s=r.util.objId(t),n[s])return n[s];for(var i in a={},n[s]=a,t)t.hasOwnProperty(i)&&(a[i]=e(t[i],n));return a;case"Array":return s=r.util.objId(t),n[s]?n[s]:(a=[],n[s]=a,t.forEach((function(t,r){a[r]=e(t,n)})),a);default:return t}},getLanguage:function(e){for(;e;){var n=t.exec(e.className);if(n)return n[1].toLowerCase();e=e.parentElement}return"none"},setLanguage:function(e,n){e.className=e.className.replace(RegExp(t,"gi"),""),e.classList.add("language-"+n)},currentScript:function(){if("undefined"==typeof document)return null;if("currentScript"in document)return document.currentScript;try{throw new Error}catch(a){var e=(/at [^(\r\n]*\((.*):[^:]+:[^:]+\)$/i.exec(a.stack)||[])[1];if(e){var t=document.getElementsByTagName("script");for(var n in t)if(t[n].src==e)return t[n]}return null}},isActive:function(e,t,n){for(var a="no-"+t;e;){var r=e.classList;if(r.contains(t))return!0;if(r.contains(a))return!1;e=e.parentElement}return!!n}},languages:{plain:a,plaintext:a,text:a,txt:a,extend:function(e,t){var n=r.util.clone(r.languages[e]);for(var a in t)n[a]=t[a];return n},insertBefore:function(e,t,n,a){var s=(a=a||r.languages)[e],i={};for(var o in s)if(s.hasOwnProperty(o)){if(o==t)for(var l in n)n.hasOwnProperty(l)&&(i[l]=n[l]);n.hasOwnProperty(o)||(i[o]=s[o])}var u=a[e];return a[e]=i,r.languages.DFS(r.languages,(function(t,n){n===u&&t!=e&&(this[t]=i)})),i},DFS:function e(t,n,a,s){s=s||{};var i=r.util.objId;for(var o in t)if(t.hasOwnProperty(o)){n.call(t,o,t[o],a||o);var l=t[o],u=r.util.type(l);"Object"!==u||s[i(l)]?"Array"!==u||s[i(l)]||(s[i(l)]=!0,e(l,n,o,s)):(s[i(l)]=!0,e(l,n,null,s))}}},plugins:{},highlightAll:function(e,t){r.highlightAllUnder(document,e,t)},highlightAllUnder:function(e,t,n){var a={callback:n,container:e,selector:'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'};r.hooks.run("before-highlightall",a),a.elements=Array.prototype.slice.apply(a.container.querySelectorAll(a.selector)),r.hooks.run("before-all-elements-highlight",a);for(var s,i=0;s=a.elements[i++];)r.highlightElement(s,!0===t,a.callback)},highlightElement:function(t,n,a){var s=r.util.getLanguage(t),i=r.languages[s];r.util.setLanguage(t,s);var o=t.parentElement;o&&"pre"===o.nodeName.toLowerCase()&&r.util.setLanguage(o,s);var l={element:t,language:s,grammar:i,code:t.textContent};function u(e){l.highlightedCode=e,r.hooks.run("before-insert",l),l.element.innerHTML=l.highlightedCode,r.hooks.run("after-highlight",l),r.hooks.run("complete",l),a&&a.call(l.element)}if(r.hooks.run("before-sanity-check",l),(o=l.element.parentElement)&&"pre"===o.nodeName.toLowerCase()&&!o.hasAttribute("tabindex")&&o.setAttribute("tabindex","0"),!l.code)return r.hooks.run("complete",l),void(a&&a.call(l.element));if(r.hooks.run("before-highlight",l),l.grammar)if(n&&e.Worker){var g=new Worker(r.filename);g.onmessage=function(e){u(e.data)},g.postMessage(JSON.stringify({language:l.language,code:l.code,immediateClose:!0}))}else u(r.highlight(l.code,l.grammar,l.language));else u(r.util.encode(l.code))},highlight:function(e,t,n){var a={code:e,grammar:t,language:n};if(r.hooks.run("before-tokenize",a),!a.grammar)throw new Error('The language "'+a.language+'" has no grammar.');return a.tokens=r.tokenize(a.code,a.grammar),r.hooks.run("after-tokenize",a),s.stringify(r.util.encode(a.tokens),a.language)},tokenize:function(e,t){var n=t.rest;if(n){for(var a in n)t[a]=n[a];delete t.rest}var r=new l;return u(r,r.head,e),o(e,r,t,r.head,0),function(e){var t=[],n=e.head.next;for(;n!==e.tail;)t.push(n.value),n=n.next;return t}(r)},hooks:{all:{},add:function(e,t){var n=r.hooks.all;n[e]=n[e]||[],n[e].push(t)},run:function(e,t){var n=r.hooks.all[e];if(n&&n.length)for(var a,s=0;a=n[s++];)a(t)}},Token:s};function s(e,t,n,a){this.type=e,this.content=t,this.alias=n,this.length=0|(a||"").length}function i(e,t,n,a){e.lastIndex=t;var r=e.exec(n);if(r&&a&&r[1]){var s=r[1].length;r.index+=s,r[0]=r[0].slice(s)}return r}function o(e,t,n,a,l,c){for(var d in n)if(n.hasOwnProperty(d)&&n[d]){var p=n[d];p=Array.isArray(p)?p:[p];for(var m=0;m<p.length;++m){if(c&&c.cause==d+","+m)return;var h=p[m],f=h.inside,v=!!h.lookbehind,b=!!h.greedy,y=h.alias;if(b&&!h.pattern.global){var F=h.pattern.toString().match(/[imsuy]*$/)[0];h.pattern=RegExp(h.pattern.source,F+"g")}for(var x=h.pattern||h,k=a.next,w=l;k!==t.tail&&!(c&&w>=c.reach);w+=k.value.length,k=k.next){var A=k.value;if(t.length>e.length)return;if(!(A instanceof s)){var P,$=1;if(b){if(!(P=i(x,w,e,v))||P.index>=e.length)break;var S=P.index,E=P.index+P[0].length,_=w;for(_+=k.value.length;S>=_;)_+=(k=k.next).value.length;if(w=_-=k.value.length,k.value instanceof s)continue;for(var j=k;j!==t.tail&&(_<E||"string"==typeof j.value);j=j.next)$++,_+=j.value.length;$--,A=e.slice(w,_),P.index-=w}else if(!(P=i(x,0,A,v)))continue;S=P.index;var C=P[0],L=A.slice(0,S),z=A.slice(S+C.length),O=w+A.length;c&&O>c.reach&&(c.reach=O);var T=k.prev;if(L&&(T=u(t,T,L),w+=L.length),g(t,T,$),k=u(t,T,new s(d,f?r.tokenize(C,f):C,y,C)),z&&u(t,k,z),$>1){var M={cause:d+","+m,reach:O};o(e,t,n,k.prev,w,M),c&&M.reach>c.reach&&(c.reach=M.reach)}}}}}}function l(){var e={value:null,prev:null,next:null},t={value:null,prev:e,next:null};e.next=t,this.head=e,this.tail=t,this.length=0}function u(e,t,n){var a=t.next,r={value:n,prev:t,next:a};return t.next=r,a.prev=r,e.length++,r}function g(e,t,n){for(var a=t.next,r=0;r<n&&a!==e.tail;r++)a=a.next;t.next=a,a.prev=t,e.length-=r}if(e.Prism=r,s.stringify=function e(t,n){if("string"==typeof t)return t;if(Array.isArray(t)){var a="";return t.forEach((function(t){a+=e(t,n)})),a}var s={type:t.type,content:e(t.content,n),tag:"span",classes:["token",t.type],attributes:{},language:n},i=t.alias;i&&(Array.isArray(i)?Array.prototype.push.apply(s.classes,i):s.classes.push(i)),r.hooks.run("wrap",s);var o="";for(var l in s.attributes)o+=" "+l+'="'+(s.attributes[l]||"").replace(/"/g,"&quot;")+'"';return"<"+s.tag+' class="'+s.classes.join(" ")+'"'+o+">"+s.content+"</"+s.tag+">"},!e.document)return e.addEventListener?(r.disableWorkerMessageHandler||e.addEventListener("message",(function(t){var n=JSON.parse(t.data),a=n.language,s=n.code,i=n.immediateClose;e.postMessage(r.highlight(s,r.languages[a],a)),i&&e.close()}),!1),r):r;var c=r.util.currentScript();function d(){r.manual||r.highlightAll()}if(c&&(r.filename=c.src,c.hasAttribute("data-manual")&&(r.manual=!0)),!r.manual){var p=document.readyState;"loading"===p||"interactive"===p&&c&&c.defer?document.addEventListener("DOMContentLoaded",d):window.requestAnimationFrame?window.requestAnimationFrame(d):window.setTimeout(d,16)}return r}(_self);
+/**
+ * Prism: Lightweight, robust, elegant syntax highlighting
+ *
+ * @license MIT <https://opensource.org/licenses/MIT>
+ * @author Lea Verou <https://lea.verou.me>
+ * @namespace
+ * @public
+ */
+ "undefined"!=typeof module&&module.exports&&(module.exports=Prism),"undefined"!=typeof global&&(global.Prism=Prism),Prism.languages.markup={comment:{pattern:/<!--(?:(?!<!--)[\s\S])*?-->/,greedy:!0},prolog:{pattern:/<\?[\s\S]+?\?>/,greedy:!0},doctype:{pattern:/<!DOCTYPE(?:[^>"'[\]]|"[^"]*"|'[^']*')+(?:\[(?:[^<"'\]]|"[^"]*"|'[^']*'|<(?!!--)|<!--(?:[^-]|-(?!->))*-->)*\]\s*)?>/i,greedy:!0,inside:{"internal-subset":{pattern:/(^[^\[]*\[)[\s\S]+(?=\]>$)/,lookbehind:!0,greedy:!0,inside:null},string:{pattern:/"[^"]*"|'[^']*'/,greedy:!0},punctuation:/^<!|>$|[[\]]/,"doctype-tag":/^DOCTYPE/i,name:/[^\s<>'"]+/}},cdata:{pattern:/<!\[CDATA\[[\s\S]*?\]\]>/i,greedy:!0},tag:{pattern:/<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/,greedy:!0,inside:{tag:{pattern:/^<\/?[^\s>\/]+/,inside:{punctuation:/^<\/?/,namespace:/^[^\s>\/:]+:/}},"special-attr":[],"attr-value":{pattern:/=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+)/,inside:{punctuation:[{pattern:/^=/,alias:"attr-equals"},{pattern:/^(\s*)["']|["']$/,lookbehind:!0}]}},punctuation:/\/?>/,"attr-name":{pattern:/[^\s>\/]+/,inside:{namespace:/^[^\s>\/:]+:/}}}},entity:[{pattern:/&[\da-z]{1,8};/i,alias:"named-entity"},/&#x?[\da-f]{1,8};/i]},Prism.languages.markup.tag.inside["attr-value"].inside.entity=Prism.languages.markup.entity,Prism.languages.markup.doctype.inside["internal-subset"].inside=Prism.languages.markup,Prism.hooks.add("wrap",(function(e){"entity"===e.type&&(e.attributes.title=e.content.replace(/&amp;/,"&"))})),Object.defineProperty(Prism.languages.markup.tag,"addInlined",{value:function(e,t){var n={};n["language-"+t]={pattern:/(^<!\[CDATA\[)[\s\S]+?(?=\]\]>$)/i,lookbehind:!0,inside:Prism.languages[t]},n.cdata=/^<!\[CDATA\[|\]\]>$/i;var a={"included-cdata":{pattern:/<!\[CDATA\[[\s\S]*?\]\]>/i,inside:n}};a["language-"+t]={pattern:/[\s\S]+/,inside:Prism.languages[t]};var r={};r[e]={pattern:RegExp(/(<__[^>]*>)(?:<!\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]>|(?!<!\[CDATA\[)[\s\S])*?(?=<\/__>)/.source.replace(/__/g,(function(){return e})),"i"),lookbehind:!0,greedy:!0,inside:a},Prism.languages.insertBefore("markup","cdata",r)}}),Object.defineProperty(Prism.languages.markup.tag,"addAttribute",{value:function(e,t){Prism.languages.markup.tag.inside["special-attr"].push({pattern:RegExp(/(^|["'\s])/.source+"(?:"+e+")"+/\s*=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+(?=[\s>]))/.source,"i"),lookbehind:!0,inside:{"attr-name":/^[^\s=]+/,"attr-value":{pattern:/=[\s\S]+/,inside:{value:{pattern:/(^=\s*(["']|(?!["'])))\S[\s\S]*(?=\2$)/,lookbehind:!0,alias:[t,"language-"+t],inside:Prism.languages[t]},punctuation:[{pattern:/^=/,alias:"attr-equals"},/"|'/]}}}})}}),Prism.languages.html=Prism.languages.markup,Prism.languages.mathml=Prism.languages.markup,Prism.languages.svg=Prism.languages.markup,Prism.languages.xml=Prism.languages.extend("markup",{}),Prism.languages.ssml=Prism.languages.xml,Prism.languages.atom=Prism.languages.xml,Prism.languages.rss=Prism.languages.xml,function(e){var t=/(?:"(?:\\(?:\r\n|[\s\S])|[^"\\\r\n])*"|'(?:\\(?:\r\n|[\s\S])|[^'\\\r\n])*')/;e.languages.css={comment:/\/\*[\s\S]*?\*\//,atrule:{pattern:RegExp("@[\\w-](?:"+/[^;{\s"']|\s+(?!\s)/.source+"|"+t.source+")*?"+/(?:;|(?=\s*\{))/.source),inside:{rule:/^@[\w-]+/,"selector-function-argument":{pattern:/(\bselector\s*\(\s*(?![\s)]))(?:[^()\s]|\s+(?![\s)])|\((?:[^()]|\([^()]*\))*\))+(?=\s*\))/,lookbehind:!0,alias:"selector"},keyword:{pattern:/(^|[^\w-])(?:and|not|only|or)(?![\w-])/,lookbehind:!0}}},url:{pattern:RegExp("\\burl\\((?:"+t.source+"|"+/(?:[^\\\r\n()"']|\\[\s\S])*/.source+")\\)","i"),greedy:!0,inside:{function:/^url/i,punctuation:/^\(|\)$/,string:{pattern:RegExp("^"+t.source+"$"),alias:"url"}}},selector:{pattern:RegExp("(^|[{}\\s])[^{}\\s](?:[^{};\"'\\s]|\\s+(?![\\s{])|"+t.source+")*(?=\\s*\\{)"),lookbehind:!0},string:{pattern:t,greedy:!0},property:{pattern:/(^|[^-\w\xA0-\uFFFF])(?!\s)[-_a-z\xA0-\uFFFF](?:(?!\s)[-\w\xA0-\uFFFF])*(?=\s*:)/i,lookbehind:!0},important:/!important\b/i,function:{pattern:/(^|[^-a-z0-9])[-a-z0-9]+(?=\()/i,lookbehind:!0},punctuation:/[(){};:,]/},e.languages.css.atrule.inside.rest=e.languages.css;var n=e.languages.markup;n&&(n.tag.addInlined("style","css"),n.tag.addAttribute("style","css"))}(Prism),Prism.languages.clike={comment:[{pattern:/(^|[^\\])\/\*[\s\S]*?(?:\*\/|$)/,lookbehind:!0,greedy:!0},{pattern:/(^|[^\\:])\/\/.*/,lookbehind:!0,greedy:!0}],string:{pattern:/(["'])(?:\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/,greedy:!0},"class-name":{pattern:/(\b(?:class|extends|implements|instanceof|interface|new|trait)\s+|\bcatch\s+\()[\w.\\]+/i,lookbehind:!0,inside:{punctuation:/[.\\]/}},keyword:/\b(?:break|catch|continue|do|else|finally|for|function|if|in|instanceof|new|null|return|throw|try|while)\b/,boolean:/\b(?:false|true)\b/,function:/\b\w+(?=\()/,number:/\b0x[\da-f]+\b|(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[+-]?\d+)?/i,operator:/[<>]=?|[!=]=?=?|--?|\+\+?|&&?|\|\|?|[?*/~^%]/,punctuation:/[{}[\];(),.:]/},Prism.languages.javascript=Prism.languages.extend("clike",{"class-name":[Prism.languages.clike["class-name"],{pattern:/(^|[^$\w\xA0-\uFFFF])(?!\s)[_$A-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\.(?:constructor|prototype))/,lookbehind:!0}],keyword:[{pattern:/((?:^|\})\s*)catch\b/,lookbehind:!0},{pattern:/(^|[^.]|\.\.\.\s*)\b(?:as|assert(?=\s*\{)|async(?=\s*(?:function\b|\(|[$\w\xA0-\uFFFF]|$))|await|break|case|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally(?=\s*(?:\{|$))|for|from(?=\s*(?:['"]|$))|function|(?:get|set)(?=\s*(?:[#\[$\w\xA0-\uFFFF]|$))|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)\b/,lookbehind:!0}],function:/#?(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*(?:\.\s*(?:apply|bind|call)\s*)?\()/,number:{pattern:RegExp(/(^|[^\w$])/.source+"(?:"+/NaN|Infinity/.source+"|"+/0[bB][01]+(?:_[01]+)*n?/.source+"|"+/0[oO][0-7]+(?:_[0-7]+)*n?/.source+"|"+/0[xX][\dA-Fa-f]+(?:_[\dA-Fa-f]+)*n?/.source+"|"+/\d+(?:_\d+)*n/.source+"|"+/(?:\d+(?:_\d+)*(?:\.(?:\d+(?:_\d+)*)?)?|\.\d+(?:_\d+)*)(?:[Ee][+-]?\d+(?:_\d+)*)?/.source+")"+/(?![\w$])/.source),lookbehind:!0},operator:/--|\+\+|\*\*=?|=>|&&=?|\|\|=?|[!=]==|<<=?|>>>?=?|[-+*/%&|^!=<>]=?|\.{3}|\?\?=?|\?\.?|[~:]/}),Prism.languages.javascript["class-name"][0].pattern=/(\b(?:class|extends|implements|instanceof|interface|new)\s+)[\w.\\]+/,Prism.languages.insertBefore("javascript","keyword",{regex:{pattern:RegExp(/((?:^|[^$\w\xA0-\uFFFF."'\])\s]|\b(?:return|yield))\s*)/.source+/\//.source+"(?:"+/(?:\[(?:[^\]\\\r\n]|\\.)*\]|\\.|[^/\\\[\r\n])+\/[dgimyus]{0,7}/.source+"|"+/(?:\[(?:[^[\]\\\r\n]|\\.|\[(?:[^[\]\\\r\n]|\\.|\[(?:[^[\]\\\r\n]|\\.)*\])*\])*\]|\\.|[^/\\\[\r\n])+\/[dgimyus]{0,7}v[dgimyus]{0,7}/.source+")"+/(?=(?:\s|\/\*(?:[^*]|\*(?!\/))*\*\/)*(?:$|[\r\n,.;:})\]]|\/\/))/.source),lookbehind:!0,greedy:!0,inside:{"regex-source":{pattern:/^(\/)[\s\S]+(?=\/[a-z]*$)/,lookbehind:!0,alias:"language-regex",inside:Prism.languages.regex},"regex-delimiter":/^\/|\/$/,"regex-flags":/^[a-z]+$/}},"function-variable":{pattern:/#?(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*[=:]\s*(?:async\s*)?(?:\bfunction\b|(?:\((?:[^()]|\([^()]*\))*\)|(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*)\s*=>))/,alias:"function"},parameter:[{pattern:/(function(?:\s+(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*)?\s*\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\))/,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/(^|[^$\w\xA0-\uFFFF])(?!\s)[_$a-z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*=>)/i,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/(\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\)\s*=>)/,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/((?:\b|\s|^)(?!(?:as|async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|from|function|get|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|set|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)(?![$\w\xA0-\uFFFF]))(?:(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*\s*)\(\s*|\]\s*\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\)\s*\{)/,lookbehind:!0,inside:Prism.languages.javascript}],constant:/\b[A-Z](?:[A-Z_]|\dx?)*\b/}),Prism.languages.insertBefore("javascript","string",{hashbang:{pattern:/^#!.*/,greedy:!0,alias:"comment"},"template-string":{pattern:/`(?:\\[\s\S]|\$\{(?:[^{}]|\{(?:[^{}]|\{[^}]*\})*\})+\}|(?!\$\{)[^\\`])*`/,greedy:!0,inside:{"template-punctuation":{pattern:/^`|`$/,alias:"string"},interpolation:{pattern:/((?:^|[^\\])(?:\\{2})*)\$\{(?:[^{}]|\{(?:[^{}]|\{[^}]*\})*\})+\}/,lookbehind:!0,inside:{"interpolation-punctuation":{pattern:/^\$\{|\}$/,alias:"punctuation"},rest:Prism.languages.javascript}},string:/[\s\S]+/}},"string-property":{pattern:/((?:^|[,{])[ \t]*)(["'])(?:\\(?:\r\n|[\s\S])|(?!\2)[^\\\r\n])*\2(?=\s*:)/m,lookbehind:!0,greedy:!0,alias:"property"}}),Prism.languages.insertBefore("javascript","operator",{"literal-property":{pattern:/((?:^|[,{])[ \t]*)(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*:)/m,lookbehind:!0,alias:"property"}}),Prism.languages.markup&&(Prism.languages.markup.tag.addInlined("script","javascript"),Prism.languages.markup.tag.addAttribute(/on(?:abort|blur|change|click|composition(?:end|start|update)|dblclick|error|focus(?:in|out)?|key(?:down|up)|load|mouse(?:down|enter|leave|move|out|over|up)|reset|resize|scroll|select|slotchange|submit|unload|wheel)/.source,"javascript")),Prism.languages.js=Prism.languages.javascript,function(){if(void 0!==Prism&&"undefined"!=typeof document){Element.prototype.matches||(Element.prototype.matches=Element.prototype.msMatchesSelector||Element.prototype.webkitMatchesSelector);var e={js:"javascript",py:"python",rb:"ruby",ps1:"powershell",psm1:"powershell",sh:"bash",bat:"batch",h:"c",tex:"latex"},t="data-src-status",n="loading",a="loaded",r="pre[data-src]:not(["+t+'="'+a+'"]):not(['+t+'="'+n+'"])';Prism.hooks.add("before-highlightall",(function(e){e.selector+=", "+r})),Prism.hooks.add("before-sanity-check",(function(s){var i=s.element;if(i.matches(r)){s.code="",i.setAttribute(t,n);var o=i.appendChild(document.createElement("CODE"));o.textContent="Loading…";var l=i.getAttribute("data-src"),u=s.language;if("none"===u){var g=(/\.(\w+)$/.exec(l)||[,"none"])[1];u=e[g]||g}Prism.util.setLanguage(o,u),Prism.util.setLanguage(i,u);var c=Prism.plugins.autoloader;c&&c.loadLanguages(u),function(e,t,n){var a=new XMLHttpRequest;a.open("GET",e,!0),a.onreadystatechange=function(){4==a.readyState&&(a.status<400&&a.responseText?t(a.responseText):a.status>=400?n("✖ Error "+a.status+" while fetching file: "+a.statusText):n("✖ Error: File does not exist or is empty"))},a.send(null)}(l,(function(e){i.setAttribute(t,a);var n=function(e){var t=/^\s*(\d+)\s*(?:(,)\s*(?:(\d+)\s*)?)?$/.exec(e||"");if(t){var n=Number(t[1]),a=t[2],r=t[3];return a?r?[n,Number(r)]:[n,void 0]:[n,n]}}(i.getAttribute("data-range"));if(n){var r=e.split(/\r\n?|\n/g),s=n[0],l=null==n[1]?r.length:n[1];s<0&&(s+=r.length),s=Math.max(0,Math.min(s-1,r.length)),l<0&&(l+=r.length),l=Math.max(0,Math.min(l,r.length)),e=r.slice(s,l).join("\n"),i.hasAttribute("data-start")||i.setAttribute("data-start",String(s+1))}o.textContent=e,Prism.highlightElement(o)}),(function(e){i.setAttribute(t,"failed"),o.textContent=e}))}})),Prism.plugins.fileHighlight={highlight:function(e){for(var t,n=(e||document).querySelectorAll(r),a=0;t=n[a++];)Prism.highlightElement(t)}};var s=!1;Prism.fileHighlight=function(){s||(console.warn("Prism.fileHighlight is deprecated. Use `Prism.plugins.fileHighlight.highlight` instead."),s=!0),Prism.plugins.fileHighlight.highlight.apply(this,arguments)}}}();//# sourceMappingURL=/sm/1f55244a569fc0911044b5e4725a97872b6d85b0662a3429a809bb62f713c381.mapPrism.languages.c=Prism.languages.extend("clike",{comment:{pattern:/\/\/(?:[^\r\n\\]|\\(?:\r\n?|\n|(?![\r\n])))*|\/\*[\s\S]*?(?:\*\/|$)/,greedy:!0},string:{pattern:/"(?:\\(?:\r\n|[\s\S])|[^"\\\r\n])*"/,greedy:!0},"class-name":{pattern:/(\b(?:enum|struct)\s+(?:__attribute__\s*\(\([\s\S]*?\)\)\s*)?)\w+|\b[a-z]\w*_t\b/,lookbehind:!0},keyword:/\b(?:_Alignas|_Alignof|_Atomic|_Bool|_Complex|_Generic|_Imaginary|_Noreturn|_Static_assert|_Thread_local|__attribute__|asm|auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|inline|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|typeof|union|unsigned|void|volatile|while)\b/,function:/\b[a-z_]\w*(?=\s*\()/i,number:/(?:\b0x(?:[\da-f]+(?:\.[\da-f]*)?|\.[\da-f]+)(?:p[+-]?\d+)?|(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[+-]?\d+)?)[ful]{0,4}/i,operator:/>>=?|<<=?|->|([-+&|:])\1|[?:~]|[-+*/%&|^!=<>]=?/}),Prism.languages.insertBefore("c","string",{char:{pattern:/'(?:\\(?:\r\n|[\s\S])|[^'\\\r\n]){0,32}'/,greedy:!0}}),Prism.languages.insertBefore("c","string",{macro:{pattern:/(^[\t ]*)#\s*[a-z](?:[^\r\n\\/]|\/(?!\*)|\/\*(?:[^*]|\*(?!\/))*\*\/|\\(?:\r\n|[\s\S]))*/im,lookbehind:!0,greedy:!0,alias:"property",inside:{string:[{pattern:/^(#\s*include\s*)<[^>]+>/,lookbehind:!0},Prism.languages.c.string],char:Prism.languages.c.char,comment:Prism.languages.c.comment,"macro-name":[{pattern:/(^#\s*define\s+)\w+\b(?!\()/i,lookbehind:!0},{pattern:/(^#\s*define\s+)\w+\b(?=\()/i,lookbehind:!0,alias:"function"}],directive:{pattern:/^(#\s*)[a-z]+/,lookbehind:!0,alias:"keyword"},"directive-hash":/^#/,punctuation:/##|\\(?=[\r\n])/,expression:{pattern:/\S[\s\S]*/,inside:Prism.languages.c}}}}),Prism.languages.insertBefore("c","function",{constant:/\b(?:EOF|NULL|SEEK_CUR|SEEK_END|SEEK_SET|__DATE__|__FILE__|__LINE__|__TIMESTAMP__|__TIME__|__func__|stderr|stdin|stdout)\b/}),delete Prism.languages.c.boolean;!function(e){var t=/\b(?:alignas|alignof|asm|auto|bool|break|case|catch|char|char16_t|char32_t|char8_t|class|co_await|co_return|co_yield|compl|concept|const|const_cast|consteval|constexpr|constinit|continue|decltype|default|delete|do|double|dynamic_cast|else|enum|explicit|export|extern|final|float|for|friend|goto|if|import|inline|int|int16_t|int32_t|int64_t|int8_t|long|module|mutable|namespace|new|noexcept|nullptr|operator|override|private|protected|public|register|reinterpret_cast|requires|return|short|signed|sizeof|static|static_assert|static_cast|struct|switch|template|this|thread_local|throw|try|typedef|typeid|typename|uint16_t|uint32_t|uint64_t|uint8_t|union|unsigned|using|virtual|void|volatile|wchar_t|while)\b/,n="\\b(?!<keyword>)\\w+(?:\\s*\\.\\s*\\w+)*\\b".replace(/<keyword>/g,(function(){return t.source}));e.languages.cpp=e.languages.extend("c",{"class-name":[{pattern:RegExp("(\\b(?:class|concept|enum|struct|typename)\\s+)(?!<keyword>)\\w+".replace(/<keyword>/g,(function(){return t.source}))),lookbehind:!0},/\b[A-Z]\w*(?=\s*::\s*\w+\s*\()/,/\b[A-Z_]\w*(?=\s*::\s*~\w+\s*\()/i,/\b\w+(?=\s*<(?:[^<>]|<(?:[^<>]|<[^<>]*>)*>)*>\s*::\s*\w+\s*\()/],keyword:t,number:{pattern:/(?:\b0b[01']+|\b0x(?:[\da-f']+(?:\.[\da-f']*)?|\.[\da-f']+)(?:p[+-]?[\d']+)?|(?:\b[\d']+(?:\.[\d']*)?|\B\.[\d']+)(?:e[+-]?[\d']+)?)[ful]{0,4}/i,greedy:!0},operator:/>>=?|<<=?|->|--|\+\+|&&|\|\||[?:~]|<=>|[-+*/%&|^!=<>]=?|\b(?:and|and_eq|bitand|bitor|not|not_eq|or|or_eq|xor|xor_eq)\b/,boolean:/\b(?:false|true)\b/}),e.languages.insertBefore("cpp","string",{module:{pattern:RegExp('(\\b(?:import|module)\\s+)(?:"(?:\\\\(?:\r\n|[^])|[^"\\\\\r\n])*"|<[^<>\r\n]*>|'+"<mod-name>(?:\\s*:\\s*<mod-name>)?|:\\s*<mod-name>".replace(/<mod-name>/g,(function(){return n}))+")"),lookbehind:!0,greedy:!0,inside:{string:/^[<"][\s\S]+/,operator:/:/,punctuation:/\./}},"raw-string":{pattern:/R"([^()\\ ]{0,16})\([\s\S]*?\)\1"/,alias:"string",greedy:!0}}),e.languages.insertBefore("cpp","keyword",{"generic-function":{pattern:/\b(?!operator\b)[a-z_]\w*\s*<(?:[^<>]|<[^<>]*>)*>(?=\s*\()/i,inside:{function:/^\w+/,generic:{pattern:/<[\s\S]+/,alias:"class-name",inside:e.languages.cpp}}}}),e.languages.insertBefore("cpp","operator",{"double-colon":{pattern:/::/,alias:"punctuation"}}),e.languages.insertBefore("cpp","class-name",{"base-clause":{pattern:/(\b(?:class|struct)\s+\w+\s*:\s*)[^;{}"'\s]+(?:\s+[^;{}"'\s]+)*(?=\s*[;{])/,lookbehind:!0,greedy:!0,inside:e.languages.extend("cpp",{})}}),e.languages.insertBefore("inside","double-colon",{"class-name":/\b[a-z_]\w*\b(?!\s*::)/i},e.languages.cpp["base-clause"])}(Prism);</script>
+
+</body>
+</html>

@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 18 - Texture2D | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 18 - Texture2D</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>This lab brings together every abstraction class built in the previous series - <code>VertexArray</code>, <code>VertexBuffer</code>, <code>IndexBuffer</code>, <code>Shader</code>, <code>Texture</code>, and <code>Renderer</code> - into a complete test scene. The result is a PNG-textured quad drawn twice on screen at positions controlled in real time via Dear ImGui sliders. Along the way you will learn how to store UV texture coordinates alongside position data in a single vertex buffer, how to build a 2D orthographic projection matrix, and how to draw the same geometry at two different positions in a single frame by uploading a distinct model matrix before each draw call.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Store 2D position and UV texture coordinate data together as two attributes in one interleaved vertex buffer</li>
+      <li>Build an orthographic projection matrix with glm::ortho and multiply it with a per-object model matrix to form a complete MVP uniform</li>
+      <li>Load a PNG image with the Texture class and link it to a sampler2D uniform in GLSL</li>
+      <li>Draw the same quad geometry twice in one frame by computing a fresh model matrix from each translation vector before each draw call</li>
+      <li>Expose real-time position controls using Dear ImGui SliderFloat3 widgets</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>Without a transformation matrix, every vertex drawn by the GPU stays at its declared local coordinates. Placing the same quad at two different positions on screen is impossible unless the CPU tells the GPU a unique offset for each copy. A <strong>Model-View-Projection (MVP) matrix</strong> solves this problem. It is a single 4x4 matrix that carries a vertex all the way from local object space to clip space in one multiplication, and it is uploaded to the shader as a <code>uniform mat4</code> whose value can be changed between draw calls.</p><p>The MVP is the product of three components. The <strong>model matrix</strong> places the object in the world. In this lab it is a translation built with <code>glm::translate</code>. The <strong>view matrix</strong> moves the scene to simulate a camera. For this 2D scene the view is an identity matrix, meaning the camera sits at the origin facing the XY plane. The <strong>projection matrix</strong> maps the 3D scene onto the 2D screen. <code>glm::ortho</code> builds an <strong>orthographic projection</strong> that maps a chosen rectangle of world coordinates directly to clip space with no perspective distortion. Passing pixel-sized bounds (0 to 960 in width, 0 to 540 in height) means object coordinates correspond to pixel-like screen positions, which makes layout straightforward.</p><p><strong>UV coordinates</strong> are a second per-vertex attribute stored in the same vertex buffer immediately after the position. Each UV pair is a 2D value from 0 to 1 that pins the vertex to a corner of the texture image. The <code>VertexBufferLayout</code> class records both attributes with two calls to <code>Push&lt;float&gt;(2)</code>. The GPU uses this layout to unpack the interleaved data automatically. Inside the fragment shader, a <code>sampler2D</code> uniform receives the texture unit index set from C++ with <code>setUniform1i</code>. The built-in <code>texture()</code> function then returns the texel colour at the interpolated UV coordinate for each fragment.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Declare the class</h3>
+      <ol>
+  <li>Create a new file <code>src/tests/testTexture2D.h</code> using the skeleton below as your starting point.</li>
+  <li>Replace the <code>TODO</code> comment in the <code>private</code> section with five <code>std::unique_ptr</code> member declarations: <code>m_VAO</code> wrapping <code>VertexArray</code>, <code>m_VBO</code> wrapping <code>VertexBuffer</code>, <code>m_IndexBuffer</code> wrapping <code>IndexBuffer</code>, <code>m_Shader</code> wrapping <code>Shader</code>, and <code>m_Texture</code> wrapping <code>Texture</code>.</li>
+  <li>Create the matching source file <code>src/tests/testTexture2D.cpp</code>. Add <code>#include "testTexture2D.h"</code> at the top and open the <code>test</code> namespace. You will fill in the method bodies in the following tasks.</li>
+  <li>Add both files to the Visual Studio project so they appear in the Solution Explorer and are compiled with the rest of the project.</li>
+</ol>
+      <div class="code-file-header">src/tests/testTexture2D.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+#include &quot;Tests.h&quot;
+#include &quot;../Renderer.h&quot;
+#include &quot;glm/glm.hpp&quot;
+#include &quot;glm/gtc/matrix_transform.hpp&quot;
+#include &quot;../VertexBuffer.h&quot;
+#include &quot;../VertexBufferLayout.h&quot;
+#include &quot;../IndexBuffer.h&quot;
+#include &quot;../VertexArray.h&quot;
+#include &quot;../Shader.h&quot;
+#include &quot;../Texture.h&quot;
+#include &quot;../vendor/imgui/imgui.h&quot;
+#include &quot;../vendor/imgui/imgui_impl_glfw.h&quot;
+#include &quot;../vendor/imgui/imgui_impl_opengl3.h&quot;
+#include &lt;memory&gt;
+
+namespace test
+{
+    class testTexture2D : public Tests
+    {
+    public:
+        testTexture2D();
+        void Update(float deltaTime) override;
+        void Render() override;
+        void RenderGUI() override;
+
+    private:
+        glm::mat4 m_Proj, m_View;
+        glm::vec3 m_TranslationA, m_TranslationB;
+
+        // TODO: declare five std::unique_ptr members:
+        //   m_VAO         -&gt; VertexArray
+        //   m_VBO         -&gt; VertexBuffer
+        //   m_IndexBuffer -&gt; IndexBuffer
+        //   m_Shader      -&gt; Shader
+        //   m_Texture     -&gt; Texture
+    };
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Implement the constructor</h3>
+      <ol>
+  <li>In <code>testTexture2D.cpp</code>, begin the constructor with the initialiser list shown below, setting <code>m_TranslationA</code> to <code>(200, 200, 0)</code> and <code>m_TranslationB</code> to <code>(400, 400, 0)</code>.</li>
+  <li>Fill in the four vertex entries in <code>positions[]</code>. Each row holds four floats: the 2D screen position (x, y) followed by the UV coordinate (u, v). The quad is centred on the origin so each corner is 50 units from the centre. UV values run from 0.0 at the bottom-left to 1.0 at the top-right of the texture.</li>
+  <li>Add the two <code>layout.Push&lt;float&gt;(2)</code> calls - one for the 2D position attribute and one for the UV attribute - so the <code>VertexBufferLayout</code> knows how to unpack the interleaved data correctly.</li>
+  <li>Replace the Texture TODO with the construction line: <code>m_Texture = std::make_unique&lt;Texture&gt;(R"(res/Textures/1.png)");</code>. This line must appear before <code>m_Texture-&gt;Bind()</code>.</li>
+  <li>Complete the uniform link by replacing the final TODO with <code>m_Shader-&gt;setUniform1i("u_Texture", 0);</code> to tell the sampler which texture unit to read from.</li>
+</ol>
+      <pre><code class="language-cpp">testTexture2D::testTexture2D()
+    : m_TranslationA(200, 200, 0), m_TranslationB(400, 400, 0)
+{
+    GlCall(glEnable(GL_BLEND));
+    GlCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+    // Each vertex holds four floats: x, y (position), then u, v (UV).
+    // The quad is centred on the origin. Corners sit at +/-50 units.
+    // UV coordinates run from 0.0 (bottom-left) to 1.0 (top-right).
+    float positions[] = {
+        // TODO: fill in four rows of (x, y, u, v)
+    };
+
+    unsigned int indices[] = { 0, 1, 2, 2, 3, 0 }; // two CCW triangles
+
+    m_Shader = std::make_unique&lt;Shader&gt;(R&quot;(res/Shaders/Basic.shader)&quot;);
+    m_VAO    = std::make_unique&lt;VertexArray&gt;();
+    m_VBO    = std::make_unique&lt;VertexBuffer&gt;(positions, 4 * 4 * sizeof(float));
+
+    VertexBufferLayout layout;
+    // TODO: layout.Push&lt;float&gt;(2);  // 2D position
+    // TODO: layout.Push&lt;float&gt;(2);  // UV texture coordinate
+    m_VAO-&gt;AddBuffer(*m_VBO, layout);
+
+    m_IndexBuffer = std::make_unique&lt;IndexBuffer&gt;(indices, 6);
+
+    // Orthographic projection: 960x540 viewport, origin at bottom-left
+    m_Proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+    m_View = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+
+    // TODO: m_Texture = std::make_unique&lt;Texture&gt;(R&quot;(res/Textures/1.png)&quot;);
+    m_Texture-&gt;Bind();
+    m_Shader-&gt;Bind();
+    // TODO: m_Shader-&gt;setUniform1i(&quot;u_Texture&quot;, 0);
+
+    m_VAO-&gt;unBind();
+    m_Shader-&gt;Unbind();
+    m_VBO-&gt;Unbind();
+    m_IndexBuffer-&gt;Unbind();
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Write the GLSL shader</h3>
+      <ol>
+  <li>Create <code>res/Shaders/Basic.shader</code>. The custom <code>Shader</code> class reads two sections from this single file, identified by the markers <code>#shader vertex</code> and <code>#shader fragment</code>.</li>
+  <li>In the <strong>vertex shader</strong>, declare the two input attributes at the layout locations that match the <code>VertexBufferLayout</code> order you set in Task 2: location 0 for a <code>vec2 position</code> and location 1 for a <code>vec2 texCoords</code>. Declare <code>out vec2 v_TexCoords</code> to carry UVs to the fragment stage and <code>uniform mat4 u_MVP</code> for the transformation.</li>
+  <li>In the vertex <code>main()</code>, set <code>gl_Position = u_MVP * vec4(position, 0.0, 1.0);</code>. The third component <code>0.0</code> places the quad on the XY plane. The fourth component <code>1.0</code> marks the vertex as a point in homogeneous coordinates so the translation part of the MVP matrix is applied. Pass UVs through with <code>v_TexCoords = texCoords;</code>.</li>
+  <li>In the <strong>fragment shader</strong>, declare the matching <code>in vec2 v_TexCoords</code> and a <code>uniform sampler2D u_Texture</code>. In <code>main()</code>, assign <code>colour = texture(u_Texture, v_TexCoords);</code>.</li>
+</ol>
+      <div class="code-file-header">res/Shaders/Basic.shader</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-glsl">#shader vertex
+#version 330 core
+
+// TODO: layout(location = 0) in vec2 position;
+// TODO: layout(location = 1) in vec2 texCoords;
+// TODO: out vec2 v_TexCoords;
+// TODO: uniform mat4 u_MVP;
+
+void main()
+{
+    // TODO: gl_Position = u_MVP * vec4(position, 0.0, 1.0);
+    // TODO: v_TexCoords = texCoords;
+}
+
+
+#shader fragment
+#version 330 core
+
+layout(location = 0) out vec4 colour;
+
+// TODO: in vec2 v_TexCoords;
+// TODO: uniform sampler2D u_Texture;
+
+void main()
+{
+    // TODO: colour = texture(u_Texture, v_TexCoords);
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 4 - Render the quad at two positions</h3>
+      <ol>
+  <li>In <code>Render()</code>, create a local <code>Renderer renderer</code> and call <code>renderer.ClearColour_White()</code> followed by <code>renderer.Clear()</code> to set a white background each frame.</li>
+  <li>Call <code>m_Texture-&gt;Bind()</code> before any draw calls so the sampler has an active texture unit to read from.</li>
+  <li>For <strong>Object A</strong>, fill in the MVP computation inside the scoped block: build a model matrix with <code>glm::translate(glm::mat4(1.0f), m_TranslationA)</code>, then multiply to get <code>mvp = m_Proj * m_View * model</code>. Bind the shader and upload the MVP with <code>setUniformMat4f("u_MVP", mvp)</code>.</li>
+  <li>Complete the <strong>Object B</strong> block in the same way using <code>m_TranslationB</code>. The geometry is identical so the VAO and index buffer are reused without rebinding.</li>
+</ol>
+      <pre><code class="language-cpp">void testTexture2D::Render()
+{
+    Renderer renderer;
+    renderer.ClearColour_White();
+    renderer.Clear();
+
+    m_Texture-&gt;Bind(); // activate texture unit 0 before drawing
+
+    { // Object A
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), m_TranslationA);
+        // TODO: glm::mat4 mvp = m_Proj * m_View * model;
+        m_Shader-&gt;Bind();
+        // TODO: m_Shader-&gt;setUniformMat4f(&quot;u_MVP&quot;, mvp);
+        renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
+    }
+
+    { // Object B
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), m_TranslationB);
+        // TODO: compute mvp from m_TranslationB and draw
+    }
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 5 - Add ImGui controls and register the scene</h3>
+      <ol>
+  <li>In <code>RenderGUI()</code>, replace the two TODO comments with <code>ImGui::SliderFloat3</code> calls. Connect the first to <code>&amp;m_TranslationA.x</code> with label <code>"Translation A"</code> and a range of <code>0.0f</code> to <code>960.0f</code>. Connect the second to <code>&amp;m_TranslationB.x</code> with label <code>"Translation B"</code>.</li>
+  <li>Open <code>src/Main.cpp</code> and add the include near the other test headers:
+    <pre><code class="language-cpp">#include "tests/testTexture2D.h"</code></pre>
+  </li>
+  <li>In the test menu registration block, add:
+    <pre><code class="language-cpp">TestMenu-&gt;RegisterTest&lt;test::testTexture2D&gt;("Test Texture2D");</code></pre>
+    This scene requires no keyboard or mouse window input, so no extra arguments are passed to <code>RegisterTest</code>.
+  </li>
+  <li>Build and run the project. Select <strong>Test Texture2D</strong> from the menu. Two textured quads should appear on a white background. Drag the Translation A and Translation B sliders to move them independently around the 960x540 viewport.</li>
+</ol>
+      <pre><code class="language-cpp">void testTexture2D::RenderGUI()
+{
+    // TODO: ImGui::SliderFloat3(&quot;Translation A&quot;, &amp;m_TranslationA.x, 0.0f, 960.0f);
+    // TODO: ImGui::SliderFloat3(&quot;Translation B&quot;, &amp;m_TranslationB.x, 0.0f, 960.0f);
+
+    float rate = ImGui::GetIO().Framerate;
+    ImGui::Text(&quot;Application average %.3f ms/frame (%.1f FPS)&quot;, 1000.0f / rate, rate);
+}</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &quot;Tests.h&quot;
+#include &quot;../Renderer.h&quot;
+#include &quot;glm/glm.hpp&quot;
+#include &quot;glm/gtc/matrix_transform.hpp&quot;
+#include &quot;../VertexBuffer.h&quot;
+#include &quot;../VertexBufferLayout.h&quot;
+#include &quot;../IndexBuffer.h&quot;
+#include &quot;../VertexArray.h&quot;
+#include &quot;../Shader.h&quot;
+#include &quot;../Texture.h&quot;
+#include &quot;../vendor/imgui/imgui.h&quot;
+#include &quot;../vendor/imgui/imgui_impl_glfw.h&quot;
+#include &quot;../vendor/imgui/imgui_impl_opengl3.h&quot;
+#include &lt;memory&gt;
+
+namespace test
+{
+    class testTexture2D : public Tests
+    {
+    public:
+        testTexture2D();
+        void Update(float deltaTime) override;
+        void Render() override;
+        void RenderGUI() override;
+
+    private:
+        glm::mat4 m_Proj, m_View;
+        glm::vec3 m_TranslationA, m_TranslationB;
+        std::unique_ptr&lt;VertexArray&gt;  m_VAO;
+        std::unique_ptr&lt;VertexBuffer&gt; m_VBO;
+        std::unique_ptr&lt;IndexBuffer&gt;  m_IndexBuffer;
+        std::unique_ptr&lt;Shader&gt;       m_Shader;
+        std::unique_ptr&lt;Texture&gt;      m_Texture;
+    };
+}" data-filename="src/tests/testTexture2D.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;testTexture2D.h&quot;
+#include &quot;glm/glm.hpp&quot;
+#include &quot;glm/gtc/matrix_transform.hpp&quot;
+#include &lt;memory&gt;
+
+namespace test
+{
+    testTexture2D::testTexture2D()
+        : m_TranslationA(200, 200, 0), m_TranslationB(400, 400, 0)
+    {
+        // Enable alpha blending for PNG transparency
+        GlCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        GlCall(glEnable(GL_BLEND));
+
+        // x, y (position), u, v (UV) -- quad centred on origin, 100 units wide
+        float positions[] = {
+           -50.0f, -50.0f, 0.0f, 0.0f, // bottom-left
+            50.0f, -50.0f, 1.0f, 0.0f, // bottom-right
+            50.0f,  50.0f, 1.0f, 1.0f, // top-right
+           -50.0f,  50.0f, 0.0f, 1.0f  // top-left
+        };
+
+        unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+
+        m_Shader = std::make_unique&lt;Shader&gt;(R&quot;(res/Shaders/Basic.shader)&quot;);
+        m_VAO    = std::make_unique&lt;VertexArray&gt;();
+        m_VBO    = std::make_unique&lt;VertexBuffer&gt;(positions, 4 * 4 * sizeof(float));
+
+        VertexBufferLayout layout;
+        layout.Push&lt;float&gt;(2); // 2D position
+        layout.Push&lt;float&gt;(2); // UV texture coordinate
+        m_VAO-&gt;AddBuffer(*m_VBO, layout);
+
+        m_IndexBuffer = std::make_unique&lt;IndexBuffer&gt;(indices, 6);
+
+        // Orthographic projection: 960x540 viewport, origin at bottom-left
+        m_Proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+        m_View = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+
+        m_Texture = std::make_unique&lt;Texture&gt;(R&quot;(res/Textures/1.png)&quot;);
+        m_Texture-&gt;Bind();
+        m_Shader-&gt;Bind();
+        m_Shader-&gt;setUniform1i(&quot;u_Texture&quot;, 0); // link sampler to texture unit 0
+
+        m_VAO-&gt;unBind();
+        m_Shader-&gt;Unbind();
+        m_VBO-&gt;Unbind();
+        m_IndexBuffer-&gt;Unbind();
+    }
+
+    void testTexture2D::Update(float deltaTime) {}
+
+    void testTexture2D::Render()
+    {
+        Renderer renderer;
+        renderer.ClearColour_White();
+        renderer.Clear();
+
+        m_Texture-&gt;Bind();
+
+        { // Object A
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), m_TranslationA);
+            glm::mat4 mvp   = m_Proj * m_View * model;
+            m_Shader-&gt;Bind();
+            m_Shader-&gt;setUniformMat4f(&quot;u_MVP&quot;, mvp);
+            renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
+        }
+
+        { // Object B
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), m_TranslationB);
+            glm::mat4 mvp   = m_Proj * m_View * model;
+            m_Shader-&gt;Bind();
+            m_Shader-&gt;setUniformMat4f(&quot;u_MVP&quot;, mvp);
+            renderer.Draw(*m_VAO, *m_IndexBuffer, *m_Shader);
+        }
+    }
+
+    void testTexture2D::RenderGUI()
+    {
+        ImGui::SliderFloat3(&quot;Translation A&quot;, &amp;m_TranslationA.x, 0.0f, 960.0f);
+        ImGui::SliderFloat3(&quot;Translation B&quot;, &amp;m_TranslationB.x, 0.0f, 960.0f);
+        float rate = ImGui::GetIO().Framerate;
+        ImGui::Text(&quot;Application average %.3f ms/frame (%.1f FPS)&quot;, 1000.0f / rate, rate);
+    }
+}" data-filename="src/tests/testTexture2D.cpp" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#shader vertex
+#version 330 core
+
+layout(location = 0) in vec2 position;
+layout(location = 1) in vec2 texCoords;
+
+out vec2 v_TexCoords;
+
+uniform mat4 u_MVP;
+
+void main()
+{
+    // Z=0.0 places the quad on the XY plane; W=1.0 marks it as a point
+    gl_Position = u_MVP * vec4(position, 0.0, 1.0);
+    v_TexCoords = texCoords;
+}
+
+
+#shader fragment
+#version 330 core
+
+layout(location = 0) out vec4 colour;
+
+in vec2 v_TexCoords;
+
+uniform sampler2D u_Texture;
+
+void main()
+{
+    colour = texture(u_Texture, v_TexCoords);
+}" data-filename="res/Shaders/Basic.shader" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-glsl.min.js"></script>
+
+</body>
+</html>

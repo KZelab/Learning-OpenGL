@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 13 - Texture Class | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 13 - Texture Class</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>The Shader Class lab (Lab 12) removed the last raw shader management code from <code>main.cpp</code>. Texture loading is the final piece of boilerplate to extract. In earlier labs, loading an image required calling <code>stbi_load</code>, creating a texture object with <code>glGenTextures</code>, setting four parameters, uploading pixel data with <code>glTexImage2D</code>, and remembering to call <code>stbi_image_free</code> and <code>glDeleteTextures</code> at the right time. This lab wraps all of that in a <code>Texture</code> class that follows the same RAII pattern as the buffer classes. After this lab, the entire resource setup that fills <code>main.cpp</code> can be replaced with a handful of class instantiations.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Explain why stbi_set_flip_vertically_on_load is necessary before calling stbi_load</li>
+      <li>Identify the four glTexParameteri calls and explain what each controls</li>
+      <li>Distinguish between the internal format parameter (GL_RGBA8) and the source format parameters (GL_RGBA, GL_UNSIGNED_BYTE) in glTexImage2D</li>
+      <li>Explain why glActiveTexture must be called before glBindTexture when using multiple textures simultaneously</li>
+      <li>Implement the Texture class and replace the raw texture setup block in main.cpp with a Texture instance</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>Loading an image with <code>stbi_load</code> gives you a pointer to raw pixel bytes in CPU memory. OpenGL cannot access CPU memory during rendering - it needs a copy on the GPU. The <code>glGenTextures</code> function creates a <strong>texture object</strong> (identified by an unsigned int handle, like all GL objects), and <code>glTexImage2D</code> copies the pixel data from CPU to GPU. Once the upload is complete, the CPU-side buffer is no longer needed and <code>stbi_image_free</code> releases it. OpenGL reads texture rows from bottom to top (UV origin at the bottom-left corner), but <code>stbi_load</code> delivers rows from top to bottom. Calling <code>stbi_set_flip_vertically_on_load(1)</code> before loading corrects this mismatch so textures appear the right way up.</p>
+
+<p><code>glTexImage2D</code> takes two distinct format arguments that are often confused. The <strong>internal format</strong> (<code>GL_RGBA8</code>) describes how the GPU should store the texture - four channels, eight bits each. The <strong>source format</strong> (<code>GL_RGBA</code> plus <code>GL_UNSIGNED_BYTE</code>) describes the layout of the CPU data you are uploading. You can choose them independently: for example, you could upload 8-bit-per-channel data and ask the GPU to store it at 16-bit precision. The four <code>glTexParameteri</code> calls set the <strong>sampling behaviour</strong>: <code>GL_TEXTURE_MIN_FILTER</code> controls how the GPU samples when the texture is displayed at smaller than native resolution (with filtering to avoid aliasing), <code>GL_TEXTURE_MAG_FILTER</code> controls the same for larger-than-native display, and <code>GL_TEXTURE_WRAP_S/T</code> control what happens when UV coordinates go outside the 0-1 range. <code>GL_CLAMP_TO_EDGE</code> clamps the coordinate to the nearest edge pixel.</p>
+
+<p>OpenGL supports up to 80 texture units (slots) that can be bound simultaneously, numbered <code>GL_TEXTURE0</code> through <code>GL_TEXTURE79</code>. Before binding a texture for use in a draw call, you must first activate the target unit with <code>glActiveTexture(GL_TEXTURE0 + slot)</code>, then bind the texture with <code>glBindTexture</code>. The corresponding GLSL <code>sampler2D</code> uniform must be set to the same integer slot via <code>shader.setUniform1i("u_Texture", 0)</code>. This indirection lets a single draw call read from multiple textures at once - normal maps, diffuse maps, and shadow maps can all be bound to different slots simultaneously. The <code>Texture::Bind(unsigned int slot)</code> method handles both the <code>glActiveTexture</code> and <code>glBindTexture</code> calls together so the caller only specifies the slot number.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Create the Texture Header</h3>
+      <p>Create <code>src/Texture.h</code> from the skeleton below. The header includes <code>Renderer.h</code> (for <code>GlCall</code> and <code>glm::vec2</code>). Fill in the private member variables.</p>
+<ol>
+  <li>Create <code>src/Texture.h</code> and fill in the four private members: <code>m_RendererID</code>, <code>m_Filepath</code>, <code>m_Localbuffer</code>, and the three dimension fields.</li>
+  <li>Note the default argument on <code>Bind(unsigned int slot = 0)</code> - callers can omit the slot number when only one texture is active.</li>
+  <li>Add the file to your Visual Studio project.</li>
+</ol>
+      <div class="code-file-header">src/Texture.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+#include &quot;Renderer.h&quot;
+
+class Texture
+{
+private:
+    // TODO: unsigned int m_RendererID
+    // TODO: std::string m_Filepath
+    // TODO: unsigned char* m_Localbuffer  (temporary CPU pixel buffer)
+    // TODO: int width, height, bitsPerPixel
+
+public:
+    // TODO: constructor - loads the image and uploads it to the GPU
+    Texture(const std::string&amp; filepath);
+
+    // TODO: destructor - deletes the GPU texture
+    ~Texture();
+
+    // Bind this texture to the given texture unit (default = 0)
+    // Call this before drawing and match the slot to the sampler2D uniform index
+    void Bind(unsigned int slot = 0) const;
+
+    void Unbind() const;
+
+    int getWidth()  const { return width;  }
+    int getHeight() const { return height; }
+
+    glm::vec2 getTexelSize() const { return glm::vec2(1.0f / width, 1.0f / height); }
+};</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Implement the Texture Upload and Bind</h3>
+      <p>Create <code>src/Texture.cpp</code> from the skeleton below. Each <code>// TODO:</code> corresponds to exactly one GL call or stb_image call. Work through them in order - the sequence matters.</p>
+<ol>
+  <li>Create <code>src/Texture.cpp</code>. Include <code>"Texture.h"</code> and <code>"vendor/stb_image.h"</code>.</li>
+  <li>In the constructor, call <code>stbi_set_flip_vertically_on_load(1)</code> before <code>stbi_load</code>. The fourth argument to <code>stbi_load</code> is the number of desired channels - pass <code>4</code> to force RGBA output regardless of the source image format.</li>
+  <li>After the pixel data is loaded, create and bind a texture object, then set the four parameters as described in the Concept section.</li>
+  <li>Call <code>glTexImage2D</code> with <code>GL_RGBA8</code> as the internal format and <code>GL_RGBA, GL_UNSIGNED_BYTE</code> as the source format. Use the <code>width</code> and <code>height</code> values returned by <code>stbi_load</code>.</li>
+  <li>Unbind the texture after upload, then free the CPU buffer with <code>stbi_image_free(m_Localbuffer)</code>.</li>
+  <li>In <code>Bind(slot)</code>, call <code>glActiveTexture(GL_TEXTURE0 + slot)</code> first, then <code>glBindTexture</code>.</li>
+  <li>Add <code>src/Texture.cpp</code> to your project.</li>
+  <li>In <code>main.cpp</code>, replace the raw texture setup block with a <code>Texture texture("res/Textures/1.png")</code> declaration. Replace the <code>glActiveTexture</code> and <code>glBindTexture</code> calls in the render loop with <code>texture.Bind(0)</code>. Remove the manual <code>glDeleteTextures</code> call from cleanup.</li>
+  <li>Build and run. The textured, rotating, projected quad from Lab 08 should appear with no visual change.</li>
+</ol>
+      <div class="code-file-header">src/Texture.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &quot;Texture.h&quot;
+#include &quot;vendor/stb_image.h&quot;
+
+Texture::Texture(const std::string&amp; filepath)
+    : m_RendererID(0), m_Filepath(filepath),
+      m_Localbuffer(nullptr), width(0), height(0), bitsPerPixel(0)
+{
+    // TODO: stbi_set_flip_vertically_on_load(1)
+    //       (OpenGL reads rows bottom-up; stb_image reads top-down - flip to match)
+
+    // TODO: m_Localbuffer = stbi_load(filepath.c_str(), &amp;width, &amp;height, &amp;bitsPerPixel, 4)
+    //       (the 4 forces RGBA output regardless of the source format)
+
+    // TODO: glGenTextures(1, &amp;m_RendererID)
+    // TODO: glBindTexture(GL_TEXTURE_2D, m_RendererID)
+
+    // TODO: set four texture parameters using glTexParameteri:
+    //   GL_TEXTURE_MIN_FILTER -&gt; GL_LINEAR
+    //   GL_TEXTURE_MAG_FILTER -&gt; GL_LINEAR
+    //   GL_TEXTURE_WRAP_S     -&gt; GL_CLAMP_TO_EDGE
+    //   GL_TEXTURE_WRAP_T     -&gt; GL_CLAMP_TO_EDGE
+
+    // TODO: glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
+    //                    GL_RGBA, GL_UNSIGNED_BYTE, m_Localbuffer)
+
+    // TODO: glBindTexture(GL_TEXTURE_2D, 0)   (unbind after upload)
+
+    // TODO: if (m_Localbuffer) stbi_image_free(m_Localbuffer)
+}
+
+Texture::~Texture()
+{
+    // TODO: glDeleteTextures(1, &amp;m_RendererID)
+}
+
+void Texture::Bind(unsigned int slot) const
+{
+    // TODO: glActiveTexture(GL_TEXTURE0 + slot)
+    //       (activate the correct unit before binding so multiple textures can coexist)
+    // TODO: glBindTexture(GL_TEXTURE_2D, m_RendererID)
+}
+
+void Texture::Unbind() const
+{
+    // TODO: glBindTexture(GL_TEXTURE_2D, 0)
+}</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &quot;Renderer.h&quot;
+
+class Texture
+{
+private:
+    unsigned int  m_RendererID;     // OpenGL texture object handle
+    std::string   m_Filepath;       // stored for debugging
+    unsigned char* m_Localbuffer;   // temporary CPU-side pixel data
+    int width, height, bitsPerPixel;
+
+public:
+    // Load an image from disk and upload it to the GPU
+    Texture(const std::string&amp; filepath);
+
+    // Releases the GPU texture object
+    ~Texture();
+
+    // Activate a texture unit and bind this texture to it
+    // slot matches the sampler2D uniform index (default = 0)
+    void Bind(unsigned int slot = 0) const;
+
+    void Unbind() const;
+
+    int getWidth()  const { return width;  }
+    int getHeight() const { return height; }
+
+    // Returns 1/width and 1/height as a vec2 (useful for texel-size calculations)
+    glm::vec2 getTexelSize() const { return glm::vec2(1.0f / width, 1.0f / height); }
+};" data-filename="src/Texture.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;Texture.h&quot;
+#include &quot;vendor/stb_image.h&quot;
+
+Texture::Texture(const std::string&amp; filepath)
+    : m_RendererID(0), m_Filepath(filepath),
+      m_Localbuffer(nullptr), width(0), height(0), bitsPerPixel(0)
+{
+    // OpenGL reads texture rows from bottom to top; stb_image reads top to bottom.
+    // Flipping here makes UV (0,0) map to the bottom-left corner as OpenGL expects.
+    stbi_set_flip_vertically_on_load(1);
+    m_Localbuffer = stbi_load(filepath.c_str(), &amp;width, &amp;height, &amp;bitsPerPixel, 4);
+
+    GlCall(glGenTextures(1, &amp;m_RendererID));
+    GlCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));
+
+    // Minification filter: how to sample when the texture is displayed smaller than its original size
+    GlCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+
+    // Magnification filter: how to sample when the texture is displayed larger than its original size
+    GlCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+
+    // Wrap mode: clamp UV coordinates to the edge rather than repeating the texture
+    GlCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+    GlCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+
+    // Upload pixel data to GPU.
+    // GL_RGBA8 = internal format (how the GPU stores it, 8 bits per channel).
+    // GL_RGBA + GL_UNSIGNED_BYTE = source format (what stb_image gave us).
+    GlCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
+                        width, height, 0,
+                        GL_RGBA, GL_UNSIGNED_BYTE, m_Localbuffer));
+
+    // Unbind after upload - the data is now on the GPU
+    GlCall(glBindTexture(GL_TEXTURE_2D, 0));
+
+    if (m_Localbuffer)
+        stbi_image_free(m_Localbuffer);
+}
+
+Texture::~Texture()
+{
+    GlCall(glDeleteTextures(1, &amp;m_RendererID));
+}
+
+void Texture::Bind(unsigned int slot) const
+{
+    // Activate the texture unit before binding so multiple textures can coexist
+    GlCall(glActiveTexture(GL_TEXTURE0 + slot));
+    GlCall(glBindTexture(GL_TEXTURE_2D, m_RendererID));
+}
+
+void Texture::Unbind() const
+{
+    GlCall(glBindTexture(GL_TEXTURE_2D, 0));
+}" data-filename="src/Texture.cpp" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+
+</body>
+</html>

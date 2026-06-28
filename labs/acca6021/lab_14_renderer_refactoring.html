@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 14 - Renderer and Refactoring | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 14 - Renderer and Refactoring</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>Over the last five labs you built six abstraction classes. This final lab in the series has two goals. First, you complete the <code>Renderer</code> class by adding the <code>Draw()</code> methods that were deferred in Lab 09 (GlCall Error System) because they reference <code>VertexArray</code>, <code>IndexBuffer</code>, and <code>Shader</code> - classes that did not exist at that point. Second, you refactor the Lab 08 monolithic <code>main.cpp</code> by replacing every raw OpenGL block with instantiations of those six classes. When the refactor is complete, <code>main.cpp</code> shrinks from over 100 lines of GL boilerplate to a concise, readable scene setup, and RAII eliminates the entire manual cleanup section at the end.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Explain why Renderer::Draw was deferred to this lab and which header includes it now requires</li>
+      <li>Implement Renderer::Draw by binding the shader, VAO, and IBO in the correct order before calling glDrawElements</li>
+      <li>Replace every raw glGenBuffers, glBufferData, and glVertexAttribPointer call in main.cpp with the corresponding class instances</li>
+      <li>Explain why the manual glDeleteBuffers, glDeleteTextures, and glDeleteProgram calls in the Lab 08 cleanup section can be removed entirely</li>
+      <li>Identify the one line that links the sampler2D uniform to a texture unit and explain why it only needs to be called once outside the render loop</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>The <code>Renderer</code> class was introduced in Lab 09 (GlCall Error System) with only its <code>Clear()</code> methods. Adding <code>Draw()</code> was deferred because its signature references <code>VertexArray</code>, <code>IndexBuffer</code>, and <code>Shader</code> - and <code>Renderer.h</code> cannot include headers that do not exist yet. Now that all three classes are built, <code>Renderer.h</code> can include them at the top and declare the <code>Draw</code> overloads. The implementation in <code>Renderer.cpp</code> binds the three objects in the required order - shader first, then VAO, then IBO - and calls <code>glDrawElements</code> with the index count from <code>ib.GetCount()</code>. Centralising this sequence in one method means that every test scene in the project can call <code>renderer.Draw(vao, ibo, shader)</code> without repeating the bind sequence.</p>
+
+<p>The refactoring task demonstrates the value of RAII concretely. The Lab 08 <code>main.cpp</code> had a multi-line cleanup block at the end: <code>glDeleteTextures</code>, <code>glDeleteBuffers</code> (twice), <code>glDeleteVertexArrays</code>, <code>glDeleteProgram</code>. In the refactored version, all of that code disappears. When the local variables <code>vao</code>, <code>vbo</code>, <code>ibo</code>, <code>shader</code>, and <code>tex</code> go out of scope at the end of <code>main</code>, their destructors call the corresponding <code>glDelete*</code> functions automatically, in reverse declaration order. There is nothing to forget, nothing to leak, and nothing to call manually.</p>
+
+<p>One subtle point in the refactored <code>main.cpp</code> is that <code>shader.setUniform1i("u_Texture", 0)</code> is called <em>once</em> before the render loop, not inside it. This call sets the GLSL <code>sampler2D</code> uniform to texture unit 0. Because the sampler unit does not change between frames, repeating the call every frame is redundant. The texture itself changes frame to frame only if you are animating it - here it does not, so <code>tex.Bind(0)</code> inside the loop is all that is needed. The rule is: set uniform values only as often as they actually change.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Complete the Renderer Header</h3>
+      <p>Open <code>src/Renderer.h</code> from Lab 09 (GlCall Error System) and add the includes and <code>Draw</code> method declarations that were deferred until now.</p>
+<ol>
+  <li>Open <code>src/Renderer.h</code>. At the top, after <code>#include &lt;GL/glew.h&gt;</code>, add includes for the three classes that <code>Draw</code> depends on:
+    <pre><code class="language-cpp">#include "VertexArray.h"
+#include "IndexBuffer.h"
+#include "Shader.h"</code></pre>
+  </li>
+  <li>Inside the <code>Renderer</code> class, add the two <code>Draw</code> declarations:
+    <pre><code class="language-cpp">void Draw(const VertexArray&amp; va, const IndexBuffer&amp; ib, const Shader&amp; shader) const;
+void Draw(const VertexArray&amp; va, const IndexBuffer&amp; ib) const;</code></pre>
+    The second overload is for when the shader is already bound externally (for example, when the same shader is shared across multiple draw calls).
+  </li>
+  <li>Remove the <code>#include &lt;iostream&gt;</code> and <code>#include &lt;string&gt;</code> that were added in Lab 09 if they are not needed in the header - they belong in the <code>.cpp</code> file. The reference block below shows the complete final header.</li>
+</ol>
+      <div class="code-file-header">src/Renderer.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+#include &lt;GL/glew.h&gt;
+#include &quot;VertexArray.h&quot;
+#include &quot;IndexBuffer.h&quot;
+#include &quot;Shader.h&quot;
+
+// Halt execution if condition is false
+#define ASSERT(x) if (!(x)) __debugbreak();
+
+// Wrap any OpenGL call: clear the error queue before, check it after
+#define GlCall(x) glClearError();\
+    x;\
+    ASSERT(glLogCall(#x, __FILE__, __LINE__))
+
+void glClearError();
+bool glLogCall(const char* function, const char* file, int line);
+
+class Renderer {
+public:
+    // Bind shader, VAO, and IBO then issue a single glDrawElements call
+    void Draw(const VertexArray&amp; va, const IndexBuffer&amp; ib, const Shader&amp; shader) const;
+
+    // Draw without binding a shader (for when the shader is bound externally)
+    void Draw(const VertexArray&amp; va, const IndexBuffer&amp; ib) const;
+
+    void Clear() const;
+    void Clear(std::string colour) const;
+    void ClearColour_Black() const;
+    void ClearColour_White() const;
+};</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Implement Renderer::Draw</h3>
+      <p>Open <code>src/Renderer.cpp</code> and add the two <code>Draw</code> implementations.</p>
+<ol>
+  <li>Add the first overload. Bind the shader, then the VAO, then the IBO. Call <code>glDrawElements</code> with <code>GL_TRIANGLES</code>, <code>ib.GetCount()</code>, <code>GL_UNSIGNED_INT</code>, and <code>nullptr</code> (the IBO is already bound, so no offset pointer is needed):
+    <pre><code class="language-cpp">void Renderer::Draw(const VertexArray&amp; va, const IndexBuffer&amp; ib, const Shader&amp; shader) const
+{
+    shader.Bind();
+    va.Bind();
+    ib.Bind();
+    GlCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+}</code></pre>
+  </li>
+  <li>Add the second overload (no shader parameter - bind VAO and IBO only):
+    <pre><code class="language-cpp">void Renderer::Draw(const VertexArray&amp; va, const IndexBuffer&amp; ib) const
+{
+    va.Bind();
+    ib.Bind();
+    GlCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+}</code></pre>
+  </li>
+  <li>Build the project. There should be no new errors at this point.</li>
+</ol>
+      <div class="code-file-header">src/Renderer.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &quot;Renderer.h&quot;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+
+void glClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+
+bool glLogCall(const char* function, const char* file, int line)
+{
+    while (GLenum error = glGetError())
+    {
+        std::cout &lt;&lt; &quot;[OpenGL Error]( &quot; &lt;&lt; error &lt;&lt; &quot; ) &quot;
+                  &lt;&lt; function &lt;&lt; &quot; File: &quot; &lt;&lt; file &lt;&lt; &quot; Line:&quot; &lt;&lt; line &lt;&lt; std::endl;
+        return false;
+    }
+    return true;
+}
+
+void Renderer::Draw(const VertexArray&amp; va, const IndexBuffer&amp; ib, const Shader&amp; shader) const
+{
+    shader.Bind();
+    va.Bind();
+    ib.Bind();
+    GlCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+}
+
+void Renderer::Draw(const VertexArray&amp; va, const IndexBuffer&amp; ib) const
+{
+    va.Bind();
+    ib.Bind();
+    GlCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+}
+
+void Renderer::Clear() const
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::Clear(std::string colour) const
+{
+    std::transform(colour.begin(), colour.end(), colour.begin(), ::towlower);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (colour == &quot;black&quot;)   GlCall(glClearColor(0, 0, 0, 1));
+    if (colour == &quot;white&quot;)   GlCall(glClearColor(1, 1, 1, 1));
+    if (colour == &quot;red&quot;)     GlCall(glClearColor(1, 0, 0, 1));
+    if (colour == &quot;green&quot;)   GlCall(glClearColor(0, 1, 0, 1));
+    if (colour == &quot;blue&quot;)    GlCall(glClearColor(0, 0, 1, 1));
+    if (colour == &quot;yellow&quot;)  GlCall(glClearColor(1, 1, 0, 1));
+    if (colour == &quot;cyan&quot;)    GlCall(glClearColor(0, 1, 1, 1));
+    if (colour == &quot;magenta&quot;) GlCall(glClearColor(1, 0, 1, 1));
+}
+
+void Renderer::ClearColour_Black() const
+{
+    GlCall(glClearColor(0, 0, 0, 1));
+}
+
+void Renderer::ClearColour_White() const
+{
+    GlCall(glClearColor(1, 1, 1, 1));
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Refactor main.cpp</h3>
+      <p>The skeleton below is the Lab 08 monolithic <code>main.cpp</code> with <code>// TODO:</code> comments marking every section to replace. Work through it top to bottom.</p>
+<ol>
+  <li>Replace the <code>#include</code> block at the top. Remove all raw OpenGL and stb_image headers. Add includes for each abstraction class: <code>"Renderer.h"</code>, <code>"VertexBuffer.h"</code>, <code>"VertexBufferLayout.h"</code>, <code>"VertexArray.h"</code>, <code>"IndexBuffer.h"</code>, <code>"Shader.h"</code>, <code>"Texture.h"</code>. Keep GLFW, GLM, and iostream.</li>
+  <li>Delete the standalone <code>parseShader</code> function, <code>compileShader</code> function, and <code>createProgram</code> function - the <code>Shader</code> class handles all of that.</li>
+  <li>Inside <code>main()</code>, replace the raw VAO/VBO/IBO setup with:
+    <pre><code class="language-cpp">VertexArray vao;
+VertexBuffer vbo(vertices, sizeof(vertices));
+VertexBufferLayout layout;
+layout.Push&lt;float&gt;(3); // position
+layout.Push&lt;float&gt;(2); // UV coordinates
+vao.AddBuffer(vbo, layout);
+IndexBuffer ibo(indices, 6);</code></pre>
+  </li>
+  <li>Replace the shader creation block with <code>Shader shader("res/shaders/transform.shader");</code>.</li>
+  <li>Replace the texture setup block with <code>Texture tex("res/Textures/1.png");</code>.</li>
+  <li>Add <code>Renderer renderer;</code>. Before the render loop, bind the shader and set the sampler uniform once: <code>shader.Bind(); shader.setUniform1i("u_Texture", 0);</code>.</li>
+  <li>Inside the render loop, replace the clear calls with <code>renderer.Clear();</code>.</li>
+  <li>Replace the raw uniform, bind, and draw calls with: <code>tex.Bind(0); shader.setUniformMat4f("u_MVP", proj * view * model); renderer.Draw(vao, ibo, shader);</code>.</li>
+  <li>Delete the entire cleanup block at the end of <code>main()</code> (<code>glDeleteTextures</code>, <code>glDeleteBuffers</code>, etc.). RAII handles all cleanup automatically.</li>
+  <li>Build and run. The output must be identical to the Lab 08 result - a textured quad rotating around its Y axis with perspective/orthographic toggle on P.</li>
+</ol>
+      <div class="code-file-header">src/main.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">// Lab 08 solution (starting point for this lab)
+// Goal: replace every raw OpenGL block below with the abstraction classes from Labs 09-13
+
+#include &lt;GL/glew.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;glm/glm.hpp&gt;
+#include &lt;glm/gtc/matrix_transform.hpp&gt;
+#include &lt;glm/gtc/type_ptr.hpp&gt;
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+#include &quot;vendor/stb_image.h&quot;
+
+struct ShaderSource { std::string vertex; std::string fragment; };
+
+ShaderSource parseShader(const std::string&amp; filepath) {
+    std::ifstream file(filepath);
+    std::stringstream ss[2];
+    int type = -1;
+    std::string line;
+    while (std::getline(file, line)) {
+        if      (line.find(&quot;#shader vertex&quot;)   != std::string::npos) type = 0;
+        else if (line.find(&quot;#shader fragment&quot;) != std::string::npos) type = 1;
+        else if (type == 0 || type == 1) ss[type] &lt;&lt; line &lt;&lt; '\n';
+    }
+    return { ss[0].str(), ss[1].str() };
+}
+
+static unsigned int compileShader(unsigned int type, const std::string&amp; source) {
+    unsigned int id = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(id, 1, &amp;src, nullptr);
+    glCompileShader(id);
+    int result;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &amp;result);
+    if (!result) {
+        int len; glGetShaderiv(id, GL_INFO_LOG_LENGTH, &amp;len);
+        char* msg = new char[len];
+        glGetShaderInfoLog(id, len, &amp;len, msg);
+        std::cerr &lt;&lt; &quot;Shader compile error: &quot; &lt;&lt; msg &lt;&lt; &quot;\n&quot;;
+        delete[] msg; glDeleteShader(id); return 0;
+    }
+    return id;
+}
+
+unsigned int createProgram(const std::string&amp; vertSrc, const std::string&amp; fragSrc) {
+    unsigned int program = glCreateProgram();
+    unsigned int vs = compileShader(GL_VERTEX_SHADER,   vertSrc);
+    unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragSrc);
+    glAttachShader(program, vs); glAttachShader(program, fs);
+    glLinkProgram(program);
+    glDeleteShader(vs); glDeleteShader(fs);
+    return program;
+}
+
+int main() {
+    if (!glfwInit()) { std::cerr &lt;&lt; &quot;Failed to initialise GLFW\n&quot;; return -1; }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(800, 600, &quot;Projections&quot;, nullptr, nullptr);
+    if (!window) { glfwTerminate(); return -1; }
+    glfwMakeContextCurrent(window);
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) { std::cerr &lt;&lt; &quot;Failed to initialise GLEW\n&quot;; glfwTerminate(); return -1; }
+    glfwSwapInterval(1);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    float vertices[] = {
+        -0.5f, -0.5f,  0.0f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.0f,  0.0f, 1.0f
+    };
+    unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+
+    // TODO: replace this raw VAO/VBO/IBO block with VertexArray, VertexBuffer,
+    //       VertexBufferLayout (Push&lt;float&gt;(3), Push&lt;float&gt;(2)), and IndexBuffer
+    unsigned int vao, vbo, ibo;
+    glGenVertexArrays(1, &amp;vao);
+    glBindVertexArray(vao);
+    glGenBuffers(1, &amp;vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glGenBuffers(1, &amp;ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBindVertexArray(0);
+
+    // TODO: replace parseShader + createProgram with Shader shader(&quot;res/shaders/transform.shader&quot;)
+    ShaderSource src = parseShader(&quot;res/shaders/transform.shader&quot;);
+    unsigned int shader = createProgram(src.vertex, src.fragment);
+
+    // TODO: replace raw texture setup with Texture texture(&quot;res/Textures/1.png&quot;)
+    stbi_set_flip_vertically_on_load(1);
+    int imgWidth, imgHeight, imgChannels;
+    unsigned char* imgData = stbi_load(&quot;res/Textures/1.png&quot;, &amp;imgWidth, &amp;imgHeight, &amp;imgChannels, 4);
+    unsigned int texture;
+    glGenTextures(1, &amp;texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    if (imgData) stbi_image_free(imgData);
+
+    // TODO: create a Renderer renderer
+
+    bool useOrtho = false;
+    bool pWasDown = false;
+
+    while (!glfwWindowShouldClose(window)) {
+        // TODO: replace glClearColor + glClear with renderer.Clear()
+        glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        bool pDown = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
+        if (pDown &amp;&amp; !pWasDown) {
+            useOrtho = !useOrtho;
+            std::cout &lt;&lt; (useOrtho ? &quot;Orthographic\n&quot; : &quot;Perspective\n&quot;);
+        }
+        pWasDown = pDown;
+
+        float angle = (float)glfwGetTime();
+        glm::mat4 model = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 view  = glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        glm::mat4 proj  = useOrtho
+            ? glm::ortho(-1.33f, 1.33f, -1.0f, 1.0f, 0.1f, 100.0f)
+            : glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        glm::mat4 mvp = proj * view * model;
+
+        // TODO: replace raw uniform upload with shader.setUniform1i / shader.setUniformMat4f
+        // TODO: replace glActiveTexture + glBindTexture with texture.Bind(0)
+        // TODO: replace glBindVertexArray + glDrawElements with renderer.Draw(vao, ibo, shader)
+        glUseProgram(shader);
+        glUniformMatrix4fv(glGetUniformLocation(shader, &quot;u_MVP&quot;), 1, GL_FALSE, glm::value_ptr(mvp));
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glUniform1i(glGetUniformLocation(shader, &quot;u_Texture&quot;), 0);
+        glBindVertexArray(vao);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    // TODO: remove manual delete calls - RAII handles cleanup automatically
+    glDeleteTextures(1, &amp;texture);
+    glDeleteBuffers(1, &amp;ibo);
+    glDeleteBuffers(1, &amp;vbo);
+    glDeleteVertexArrays(1, &amp;vao);
+    glDeleteProgram(shader);
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &lt;GL/glew.h&gt;
+#include &quot;VertexArray.h&quot;
+#include &quot;IndexBuffer.h&quot;
+#include &quot;Shader.h&quot;
+
+// Halt execution if condition is false
+#define ASSERT(x) if (!(x)) __debugbreak();
+
+// Wrap any OpenGL call: clear the error queue before, check it after
+#define GlCall(x) glClearError();\
+    x;\
+    ASSERT(glLogCall(#x, __FILE__, __LINE__))
+
+void glClearError();
+bool glLogCall(const char* function, const char* file, int line);
+
+class Renderer {
+public:
+    // Bind shader, VAO, and IBO then issue a single glDrawElements call
+    void Draw(const VertexArray&amp; va, const IndexBuffer&amp; ib, const Shader&amp; shader) const;
+
+    // Draw without binding a shader (for when the shader is bound externally)
+    void Draw(const VertexArray&amp; va, const IndexBuffer&amp; ib) const;
+
+    void Clear() const;
+    void Clear(std::string colour) const;
+    void ClearColour_Black() const;
+    void ClearColour_White() const;
+};" data-filename="src/Renderer.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;Renderer.h&quot;
+#include &lt;iostream&gt;
+#include &lt;algorithm&gt;
+
+void glClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+
+bool glLogCall(const char* function, const char* file, int line)
+{
+    while (GLenum error = glGetError())
+    {
+        std::cout &lt;&lt; &quot;[OpenGL Error]( &quot; &lt;&lt; error &lt;&lt; &quot; ) &quot;
+                  &lt;&lt; function &lt;&lt; &quot; File: &quot; &lt;&lt; file &lt;&lt; &quot; Line:&quot; &lt;&lt; line &lt;&lt; std::endl;
+        return false;
+    }
+    return true;
+}
+
+void Renderer::Draw(const VertexArray&amp; va, const IndexBuffer&amp; ib, const Shader&amp; shader) const
+{
+    shader.Bind();
+    va.Bind();
+    ib.Bind();
+    GlCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+}
+
+void Renderer::Draw(const VertexArray&amp; va, const IndexBuffer&amp; ib) const
+{
+    va.Bind();
+    ib.Bind();
+    GlCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
+}
+
+void Renderer::Clear() const
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::Clear(std::string colour) const
+{
+    std::transform(colour.begin(), colour.end(), colour.begin(), ::towlower);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (colour == &quot;black&quot;)   GlCall(glClearColor(0, 0, 0, 1));
+    if (colour == &quot;white&quot;)   GlCall(glClearColor(1, 1, 1, 1));
+    if (colour == &quot;red&quot;)     GlCall(glClearColor(1, 0, 0, 1));
+    if (colour == &quot;green&quot;)   GlCall(glClearColor(0, 1, 0, 1));
+    if (colour == &quot;blue&quot;)    GlCall(glClearColor(0, 0, 1, 1));
+    if (colour == &quot;yellow&quot;)  GlCall(glClearColor(1, 1, 0, 1));
+    if (colour == &quot;cyan&quot;)    GlCall(glClearColor(0, 1, 1, 1));
+    if (colour == &quot;magenta&quot;) GlCall(glClearColor(1, 0, 1, 1));
+}
+
+void Renderer::ClearColour_Black() const
+{
+    GlCall(glClearColor(0, 0, 0, 1));
+}
+
+void Renderer::ClearColour_White() const
+{
+    GlCall(glClearColor(1, 1, 1, 1));
+}" data-filename="src/Renderer.cpp" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &lt;GL/glew.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;glm/glm.hpp&gt;
+#include &lt;glm/gtc/matrix_transform.hpp&gt;
+#include &lt;iostream&gt;
+
+#include &quot;Renderer.h&quot;
+#include &quot;VertexBuffer.h&quot;
+#include &quot;VertexBufferLayout.h&quot;
+#include &quot;VertexArray.h&quot;
+#include &quot;IndexBuffer.h&quot;
+#include &quot;Shader.h&quot;
+#include &quot;Texture.h&quot;
+
+int main() {
+    if (!glfwInit()) { std::cerr &lt;&lt; &quot;Failed to initialise GLFW\n&quot;; return -1; }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(800, 600, &quot;Projections&quot;, nullptr, nullptr);
+    if (!window) { glfwTerminate(); return -1; }
+    glfwMakeContextCurrent(window);
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) { std::cerr &lt;&lt; &quot;Failed to initialise GLEW\n&quot;; glfwTerminate(); return -1; }
+    glfwSwapInterval(1);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    float vertices[] = {
+        -0.5f, -0.5f,  0.0f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.0f,  0.0f, 1.0f
+    };
+    unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+
+    // All GPU resource objects follow RAII - they are released automatically when they go out of scope
+    VertexArray vao;
+    VertexBuffer vbo(vertices, sizeof(vertices));
+    VertexBufferLayout layout;
+    layout.Push&lt;float&gt;(3); // position (x, y, z)
+    layout.Push&lt;float&gt;(2); // UV coordinates (u, v)
+    vao.AddBuffer(vbo, layout);
+    IndexBuffer ibo(indices, 6);
+
+    Shader  shader(&quot;res/shaders/transform.shader&quot;);
+    Texture tex(&quot;res/Textures/1.png&quot;);
+    Renderer renderer;
+
+    // Link the sampler2D uniform to texture unit 0 once, outside the loop
+    shader.Bind();
+    shader.setUniform1i(&quot;u_Texture&quot;, 0);
+
+    bool useOrtho = false;
+    bool pWasDown = false;
+
+    while (!glfwWindowShouldClose(window)) {
+        renderer.Clear();
+
+        bool pDown = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
+        if (pDown &amp;&amp; !pWasDown) {
+            useOrtho = !useOrtho;
+            std::cout &lt;&lt; (useOrtho ? &quot;Orthographic\n&quot; : &quot;Perspective\n&quot;);
+        }
+        pWasDown = pDown;
+
+        float angle = (float)glfwGetTime();
+        glm::mat4 model = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 view  = glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+        glm::mat4 proj  = useOrtho
+            ? glm::ortho(-1.33f, 1.33f, -1.0f, 1.0f, 0.1f, 100.0f)
+            : glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+        tex.Bind(0);
+        shader.setUniformMat4f(&quot;u_MVP&quot;, proj * view * model);
+        renderer.Draw(vao, ibo, shader);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+    // No manual cleanup needed - RAII destructors release all GPU resources automatically
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}" data-filename="src/main.cpp" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+
+</body>
+</html>

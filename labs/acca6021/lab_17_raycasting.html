@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 17 - RayCasting | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 17 - RayCasting</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>This lab builds an interactive mouse-picking system that works with both spheres and axis-aligned cubes. You will cast a ray from the camera through the cursor into 3D space, dispatch each scene object to the appropriate intersection test, and highlight the nearest hit object in green. Spheres use the quadratic discriminant test from the original version of this lab. Cubes add a second algorithm - the slab method - which treats the box as the overlap of three axis-aligned slabs and finds where the ray enters and exits each one. The lab builds on the projection matrices from the Projections lab (Lab 08) and the test harness registration pattern from the Test Harness lab (Lab 15).</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Convert a 2D mouse screen position to a 3D normalised ray in world space using inverse projection and view matrices</li>
+      <li>Apply the quadratic discriminant test to detect a ray-sphere intersection</li>
+      <li>Apply the slab method to detect a ray-AABB intersection for axis-aligned cubes</li>
+      <li>Dispatch each scene object to the correct intersection test based on its ObjectType</li>
+      <li>Maintain separate VAO and IBO pairs for sphere and cube geometry and draw them selectively each frame</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>Without a reverse projection, there is no way to determine which 3D object the mouse cursor is hovering over. The GPU rasteriser maps geometry from world space onto the screen during rendering, but nothing in the standard OpenGL pipeline inverts that mapping automatically. <strong>Ray casting</strong> performs the inversion by hand. A ray is fired from the camera position through the pixel under the cursor, and each scene object is tested to see whether the ray hits it.</p>
+
+<p>The ray originates as a 2D mouse position and must be transformed into world space through three coordinate systems. The mouse position is first mapped from window pixels to <strong>Normalised Device Coordinates (NDC)</strong>, where the screen centre is (0, 0) and the corners sit at -1 and 1. The horizontal conversion is <code>(2.0f * mouseX) / width - 1.0f</code>. The vertical conversion flips Y because window coordinates grow downward while NDC grows upward: <code>1.0f - (2.0f * mouseY) / height</code>. This NDC position is packed into a <code>glm::vec4</code> with z set to -1 (pointing forward into the scene) and w set to 1, forming the <strong>clip-space ray</strong>. Multiplying by <code>glm::inverse(projectionMatrix)</code> converts to <strong>eye space</strong>. Overriding w to 0 marks the result as a direction, not a point. A final multiplication by <code>glm::inverse(viewMatrix)</code> gives the ray direction in <strong>world space</strong>.</p>
+
+<p>With the world-space ray, each object is tested with the algorithm that matches its geometry. Spheres use the <strong>ray-sphere quadratic test</strong>. Writing the ray as P = origin + t * direction and substituting into the sphere equation produces a quadratic in t with coefficients <code>a = dot(d, d)</code>, <code>b = 2 * dot(oc, d)</code>, and <code>c = dot(oc, oc) - r * r</code>, where <code>oc</code> is the vector from the sphere centre to the ray origin. The <strong>discriminant</strong> <code>b * b - 4 * a * c</code> gives the answer without solving for t: positive means two intersection points, negative means a miss. Axis-aligned boxes use the <strong>slab method</strong>. A box is the intersection of three pairs of parallel planes (slabs), one pair per axis. For each axis, two t values give where the ray crosses the near and far plane of that slab. <code>tEnter</code> is the largest of the three near crossings and <code>tExit</code> is the smallest far crossing. When <code>tExit &gt; tEnter</code> and <code>tExit &gt; 0</code>, the ray passes through all three slabs simultaneously and the box is hit. The GLM calls used are <code>glm::inverse</code>, <code>glm::dot</code>, <code>glm::normalize</code>, <code>glm::min</code>, and <code>glm::max</code>.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Update the class header</h3>
+      <ol>
+  <li>Open <code>src/tests/testRayCasting.h</code> and replace the <code>Object</code> struct. The struct now has four fields: <code>glm::vec3 position</code>, <code>float size</code> (radius for spheres, half-extent for cubes), <code>std::string name</code>, and <code>ObjectType type</code>.</li>
+  <li>Add the <code>enum class ObjectType { Sphere, Cube };</code> declaration above the struct.</li>
+  <li>Add three new private members for cube GPU resources: <code>std::unique_ptr&lt;VertexArray&gt; m_CubeVAO</code>, <code>std::unique_ptr&lt;VertexBuffer&gt; m_CubeVBO</code>, and <code>std::unique_ptr&lt;IndexBuffer&gt; m_CubeIBO</code>.</li>
+  <li>Add three new private method declarations: <code>GenerateCubeData</code>, <code>SetupCubeBuffers</code>, and <code>RayIntersectsCube</code>. Study the signatures in the reference below before moving to Task 2.</li>
+</ol>
+      <div class="code-file-header">src/tests/testRayCasting.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+#include &quot;Tests.h&quot;
+#include &quot;../VertexBuffer.h&quot;
+#include &quot;../VertexBufferLayout.h&quot;
+#include &quot;../IndexBuffer.h&quot;
+#include &quot;../VertexArray.h&quot;
+#include &quot;../Shader.h&quot;
+#include &quot;gl/glew.h&quot;
+#include &quot;GLFW/glfw3.h&quot;
+#include &quot;glm/glm.hpp&quot;
+#include &quot;glm/gtc/matrix_transform.hpp&quot;
+#include &quot;glm/gtc/type_ptr.hpp&quot;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;memory&gt;
+
+namespace test {
+    class testRayCasting : public Tests {
+    public:
+        testRayCasting(GLFWwindow* window);
+        void Update(float deltaTime) override;
+        void Render() override;
+        void RenderGUI() override;
+
+    private:
+        GLFWwindow* m_window;
+
+        glm::vec3 cameraPosition;
+        glm::vec3 cameraFront;
+        glm::vec3 cameraUp;
+        float cameraSpeed;
+
+        glm::mat4 viewMatrix;
+        glm::mat4 projectionMatrix;
+
+        // Distinguishes which intersection algorithm to use per object.
+        enum class ObjectType { Sphere, Cube };
+
+        // 'size' is radius for spheres and half-extent for cubes.
+        struct Object {
+            glm::vec3 position;
+            float size;
+            std::string name;
+            ObjectType type;
+        };
+
+        // Separate GPU buffers for cube geometry.
+        std::unique_ptr&lt;VertexArray&gt;  m_CubeVAO;
+        std::unique_ptr&lt;VertexBuffer&gt; m_CubeVBO;
+        std::unique_ptr&lt;IndexBuffer&gt;  m_CubeIBO;
+
+        std::vector&lt;Object&gt; objects;
+        int selectedObjectIndex;
+
+        std::unique_ptr&lt;VertexArray&gt;  m_VAO;
+        std::unique_ptr&lt;VertexBuffer&gt; m_VBO;
+        std::unique_ptr&lt;IndexBuffer&gt;  m_IBO;
+        std::unique_ptr&lt;Shader&gt;       m_Shader;
+
+        void GenerateSphereData(std::vector&lt;float&gt;&amp; vertices,
+                                std::vector&lt;unsigned int&gt;&amp; indices,
+                                float radius,
+                                unsigned int longitudeDiv,
+                                unsigned int latitudeDiv);
+        void ProcessInput();
+        void SetupBuffers();
+        glm::vec3 CalculateRayDirection(float mouseX, float mouseY);
+        bool RayIntersectsSphere(const glm::vec3&amp; rayOrigin,
+                                 const glm::vec3&amp; rayDirection,
+                                 const glm::vec3&amp; sphereCenter,
+                                 float sphereRadius);
+
+        // Cube-specific methods.
+        void GenerateCubeData(std::vector&lt;float&gt;&amp; vertices,
+                              std::vector&lt;unsigned int&gt;&amp; indices,
+                              float size);
+        void SetupCubeBuffers();
+        bool RayIntersectsCube(const glm::vec3&amp; rayOrigin,
+                               const glm::vec3&amp; rayDirection,
+                               const glm::vec3&amp; boxCenter,
+                               float boxSize);
+    };
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Review the shader</h3>
+      <ol>
+  <li>Open <code>res/Shaders/BasicMVP.shader</code> and read through both sections.</li>
+  <li>The vertex shader expects two per-vertex inputs at locations 0 and 1, and three matrix uniforms: <code>model</code>, <code>view</code>, and <code>projection</code>.</li>
+  <li>The fragment shader ignores the interpolated vertex colour and reads a flat <code>uniform vec4 u_Colour</code> passed from C++. This is the value you will swap between red and green each frame to show which object is selected.</li>
+  <li>Confirm that the uniform names in the shader (<code>model</code>, <code>view</code>, <code>projection</code>, <code>u_Colour</code>) match the strings you will pass to <code>setUniformMat4f</code> and <code>setUniform4f</code> in Task 8. A name mismatch is a silent failure that produces no compiler error.</li>
+  <li>You do not need to modify this shader.</li>
+</ol>
+      <div class="code-file-header">res/Shaders/BasicMVP.shader</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-glsl">#shader vertex
+#version 330 core
+
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec4 aColour;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+out vec4 fragColour;
+
+void main() {
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    fragColour = aColour;
+}
+
+#shader fragment
+#version 330 core
+
+in vec4 fragColour;
+
+uniform vec4 u_Colour;
+
+out vec4 colour;
+
+void main() {
+    colour = u_Colour;
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Update the constructor and sphere setup</h3>
+      <ol>
+  <li>Open <code>src/tests/testRayCasting.cpp</code>. The camera initialisation and <code>SetupBuffers</code> and <code>GenerateSphereData</code> implementations remain unchanged.</li>
+  <li>Update the object list in the constructor. Replace the old sphere entries (which used a <code>radius</code> field) with the new struct layout that includes <code>size</code> and <code>ObjectType::Sphere</code>:
+    <ul>
+      <li>Sphere 1: position (0, 0, 0), size 1.0, name "Sphere 1", <code>ObjectType::Sphere</code></li>
+      <li>Sphere 2: position (2, 0, -3), size 1.5, name "Sphere 2", <code>ObjectType::Sphere</code></li>
+      <li>Sphere 3: position (-2, 1, -2), size 1.0, name "Sphere 3", <code>ObjectType::Sphere</code></li>
+    </ul>
+  </li>
+  <li>Add two cube entries using <code>ObjectType::Cube</code>:
+    <ul>
+      <li>Cube 1: position (3, 0.5, -1), size 0.8, name "Cube 1"</li>
+      <li>Cube 2: position (-3, 0, -2.5), size 1.0, name "Cube 2"</li>
+    </ul>
+  </li>
+  <li>After the call to <code>SetupBuffers()</code>, add a call to <code>SetupCubeBuffers()</code> (which you will implement in Task 4).</li>
+  <li>Build the project to check that the struct changes compile correctly before continuing.</li>
+</ol>
+      <pre><code class="language-cpp">// Constructor - initialise camera, populate scene, setup GPU buffers.
+testRayCasting::testRayCasting(GLFWwindow* window)
+    : m_window(window), selectedObjectIndex(-1)
+{
+    cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+    cameraFront    = glm::vec3(0.0f, 0.0f, -1.0f);
+    cameraUp       = glm::vec3(0.0f, 1.0f, 0.0f);
+    cameraSpeed    = 0.5f;
+
+    // TODO: Push three spheres with ObjectType::Sphere.
+    //       Sphere 1: position (0, 0, 0), size 1.0, name &quot;Sphere 1&quot;
+    //       Sphere 2: position (2, 0, -3), size 1.5, name &quot;Sphere 2&quot;
+    //       Sphere 3: position (-2, 1, -2), size 1.0, name &quot;Sphere 3&quot;
+
+    // TODO: Push two cubes with ObjectType::Cube.
+    //       Cube 1: position (3, 0.5, -1), size 0.8, name &quot;Cube 1&quot;
+    //       Cube 2: position (-3, 0, -2.5), size 1.0, name &quot;Cube 2&quot;
+
+    SetupBuffers();
+    // TODO: Call SetupCubeBuffers() to create GPU buffers for cube geometry.
+
+    m_Shader = std::make_unique&lt;Shader&gt;(&quot;res/Shaders/BasicMVP.shader&quot;);
+}
+
+// SetupBuffers - create the sphere VAO, VBO, and IBO.
+void testRayCasting::SetupBuffers() {
+    std::vector&lt;float&gt; vertices;
+    std::vector&lt;unsigned int&gt; indices;
+    GenerateSphereData(vertices, indices, 1.0f, 20, 20);
+
+    m_VAO = std::make_unique&lt;VertexArray&gt;();
+    m_VBO = std::make_unique&lt;VertexBuffer&gt;(vertices.data(), vertices.size() * sizeof(float));
+
+    VertexBufferLayout layout;
+    layout.Push&lt;float&gt;(3); // position
+    layout.Push&lt;float&gt;(3); // normal
+    m_VAO-&gt;AddBuffer(*m_VBO, layout);
+
+    m_IBO = std::make_unique&lt;IndexBuffer&gt;(indices.data(), indices.size());
+    glEnable(GL_DEPTH_TEST);
+}
+
+// GenerateSphereData - UV sphere using spherical coordinates (6 floats per vertex).
+void testRayCasting::GenerateSphereData(
+    std::vector&lt;float&gt;&amp; vertices,
+    std::vector&lt;unsigned int&gt;&amp; indices,
+    float radius,
+    unsigned int longitudeDiv,
+    unsigned int latitudeDiv)
+{
+    for (unsigned int lat = 0; lat &lt;= latitudeDiv; ++lat) {
+        float theta    = lat * glm::pi&lt;float&gt;() / latitudeDiv;
+        float sinTheta = sin(theta);
+        float cosTheta = cos(theta);
+
+        for (unsigned int lon = 0; lon &lt;= longitudeDiv; ++lon) {
+            float phi    = lon * 2.0f * glm::pi&lt;float&gt;() / longitudeDiv;
+            float sinPhi = sin(phi);
+            float cosPhi = cos(phi);
+
+            float x = cosPhi * sinTheta;
+            float y = cosTheta;
+            float z = sinPhi * sinTheta;
+
+            vertices.push_back(radius * x); vertices.push_back(radius * y); vertices.push_back(radius * z);
+            vertices.push_back(x);          vertices.push_back(y);          vertices.push_back(z);
+        }
+    }
+
+    for (unsigned int lat = 0; lat &lt; latitudeDiv; ++lat) {
+        for (unsigned int lon = 0; lon &lt; longitudeDiv; ++lon) {
+            unsigned int first  = (lat * (longitudeDiv + 1)) + lon;
+            unsigned int second = first + longitudeDiv + 1;
+            indices.push_back(first);   indices.push_back(second);   indices.push_back(first + 1);
+            indices.push_back(second);  indices.push_back(second + 1); indices.push_back(first + 1);
+        }
+    }
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 4 - Generate cube geometry</h3>
+      <ol>
+  <li>Implement <code>GenerateCubeData</code> in <code>testRayCasting.cpp</code>. The function receives a <code>std::vector&lt;float&gt;&amp;</code> for vertices and a <code>std::vector&lt;unsigned int&gt;&amp;</code> for indices, plus a half-extent <code>size</code>. Each vertex stores 6 floats: position (x, y, z) followed by a normal placeholder (nx, ny, nz).</li>
+  <li>Define the 8 corner vertices. Store them as <code>float verts[8][6]</code>. Use the sign pattern of each corner as its normal placeholder (corner 0 at (-s,-s,-s) gets normal (-1,-1,-1), and so on). The corners are:
+    <ul>
+      <li>0: (-s,-s,-s)  1: (s,-s,-s)  2: (s,s,-s)  3: (-s,s,-s)</li>
+      <li>4: (-s,-s, s)  5: (s,-s, s)  6: (s,s, s)  7: (-s,s, s)</li>
+    </ul>
+  </li>
+  <li>Push all 48 floats to <code>vertices</code> with a nested loop over the array.</li>
+  <li>Define the 36 indices for 12 triangles (2 per face) as <code>unsigned int idx[36]</code>. The face order and winding is given in the skeleton below. Push each index to <code>indices</code>.</li>
+  <li>Implement <code>SetupCubeBuffers</code>. Call <code>GenerateCubeData(vertices, indices, 1.0f)</code>, then create <code>m_CubeVAO</code>, <code>m_CubeVBO</code>, and <code>m_CubeIBO</code> following the exact same pattern used for the sphere in <code>SetupBuffers</code>. The vertex layout is the same: 3 floats for position, 3 floats for normal.</li>
+</ol>
+      <pre><code class="language-cpp">// GenerateCubeData - 8 corner vertices, 12 triangles, 6 floats per vertex.
+void testRayCasting::GenerateCubeData(
+    std::vector&lt;float&gt;&amp; vertices,
+    std::vector&lt;unsigned int&gt;&amp; indices,
+    float size)
+{
+    float s = size;
+
+    // The 8 corners of an axis-aligned cube with half-extent s:
+    //   0: (-s,-s,-s)   1: (s,-s,-s)   2: (s,s,-s)   3: (-s,s,-s)
+    //   4: (-s,-s, s)   5: (s,-s, s)   6: (s,s, s)   7: (-s,s, s)
+    // Each vertex stores: position (3f) then a corner-direction normal placeholder (3f).
+
+    // TODO: Declare a float array verts[8][6] with the 8 corner vertices.
+    //       Use the corner direction (e.g. corner 0 -&gt; (-1,-1,-1)) as the normal.
+    float verts[8][6] = {
+        // position        normal placeholder
+        // TODO: fill in all 8 rows
+    };
+
+    // TODO: Push all 48 floats to vertices.
+    //       Hint: for (auto&amp; v : verts) for (float f : v) vertices.push_back(f);
+
+    // 12 triangles (2 per face). Winding order keeps each face visible from outside.
+    //   -Z face: 0,1,2  0,2,3
+    //   +Z face: 5,4,7  5,7,6
+    //   -X face: 4,0,3  4,3,7
+    //   +X face: 1,5,6  1,6,2
+    //   -Y face: 4,5,1  4,1,0
+    //   +Y face: 3,2,6  3,6,7
+
+    // TODO: Declare an unsigned int array idx[36] with the 36 indices above.
+    // TODO: Push each index to indices.
+    //       Hint: for (unsigned int i : idx) indices.push_back(i);
+}
+
+// SetupCubeBuffers - create the cube VAO, VBO, and IBO.
+void testRayCasting::SetupCubeBuffers() {
+    std::vector&lt;float&gt; vertices;
+    std::vector&lt;unsigned int&gt; indices;
+    // TODO: Call GenerateCubeData with size = 1.0f.
+
+    // TODO: Create m_CubeVAO, m_CubeVBO (from vertices), add layout (3f position + 3f normal).
+    // TODO: Create m_CubeIBO from indices.
+    //       Follow the same pattern used in SetupBuffers() for the sphere.
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 5 - Calculate the ray direction from the mouse position</h3>
+      <ol>
+  <li>Implement <code>CalculateRayDirection(float mouseX, float mouseY)</code> in <code>testRayCasting.cpp</code>. This function is shared by both sphere and cube picking and does not change between them.</li>
+  <li>Retrieve the current window dimensions with <code>glfwGetFramebufferSize(m_window, &amp;width, &amp;height)</code>.</li>
+  <li>Convert the mouse X coordinate to NDC: <code>x = (2.0f * mouseX) / width - 1.0f</code>.</li>
+  <li>Convert the mouse Y coordinate to NDC: <code>y = 1.0f - (2.0f * mouseY) / height</code>. The subtraction from 1 flips the axis because window Y grows downward but NDC Y grows upward.</li>
+  <li>Pack the NDC coordinates into <code>glm::vec4 rayClip(x, y, -1.0f, 1.0f)</code>. The z = -1 points forward into the scene.</li>
+  <li>Multiply <code>rayClip</code> by <code>glm::inverse(projectionMatrix)</code> to move into eye space. Override the result to <code>glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f)</code>. Setting w to 0 marks this as a direction vector.</li>
+  <li>Multiply by <code>glm::inverse(viewMatrix)</code> and extract xyz. Return <code>glm::normalize(rayWorld)</code>.</li>
+</ol>
+      <pre><code class="language-cpp">glm::vec3 testRayCasting::CalculateRayDirection(float mouseX, float mouseY) {
+    int width, height;
+    // TODO: Get the current framebuffer dimensions from GLFW.
+
+    // TODO: Convert mouseX to NDC x in [-1, 1]:  x = (2.0f * mouseX) / width - 1.0f
+    float x = 0.0f;
+    // TODO: Convert mouseY to NDC y in [-1, 1], flipping the axis:
+    //        y = 1.0f - (2.0f * mouseY) / height
+    float y = 0.0f;
+
+    // Step 1 - Clip space: z = -1 points into the scene.
+    glm::vec4 rayClip(x, y, -1.0f, 1.0f);
+
+    // Step 2 - Eye space: unproject with the inverse projection matrix.
+    // TODO: Multiply rayClip by glm::inverse(projectionMatrix).
+    glm::vec4 rayEye = glm::vec4(0.0f);
+    // Override z and w: direction, not a point.
+    rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+
+    // Step 3 - World space: unproject with the inverse view matrix.
+    // TODO: Multiply rayEye by glm::inverse(viewMatrix) and extract xyz.
+    glm::vec3 rayWorld = glm::vec3(0.0f);
+
+    // TODO: Return the normalised world-space direction.
+    return glm::vec3(0.0f);
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 6 - Implement ray-sphere intersection</h3>
+      <ol>
+  <li>Implement <code>RayIntersectsSphere</code> in <code>testRayCasting.cpp</code>.</li>
+  <li>Compute <code>oc = rayOrigin - sphereCenter</code>. This vector appears in all three quadratic coefficients.</li>
+  <li>Compute the three coefficients of the quadratic <code>a*t^2 + b*t + c = 0</code>:
+    <ul>
+      <li><code>a = glm::dot(rayDirection, rayDirection)</code></li>
+      <li><code>b = 2.0f * glm::dot(oc, rayDirection)</code></li>
+      <li><code>c = glm::dot(oc, oc) - sphereRadius * sphereRadius</code></li>
+    </ul>
+  </li>
+  <li>Compute <code>discriminant = b * b - 4 * a * c</code>.</li>
+  <li>Return <code>true</code> if the discriminant is greater than 0. A positive discriminant means the ray intersects the sphere at two distinct points.</li>
+</ol>
+      <pre><code class="language-cpp">bool testRayCasting::RayIntersectsSphere(
+    const glm::vec3&amp; rayOrigin,
+    const glm::vec3&amp; rayDirection,
+    const glm::vec3&amp; sphereCenter,
+    float sphereRadius)
+{
+    // TODO: Compute oc = rayOrigin - sphereCenter.
+    glm::vec3 oc = glm::vec3(0.0f);
+
+    // Substituting P = origin + t*direction into |P - center|^2 = r^2
+    // gives the quadratic  a*t^2 + b*t + c = 0.
+    // TODO: a = dot(rayDirection, rayDirection)
+    float a = 0.0f;
+    // TODO: b = 2 * dot(oc, rayDirection)
+    float b = 0.0f;
+    // TODO: c = dot(oc, oc) - sphereRadius^2
+    float c = 0.0f;
+
+    // TODO: discriminant = b^2 - 4*a*c
+    float discriminant = 0.0f;
+
+    // TODO: Return true when discriminant &gt; 0 (two intersection points exist).
+    return false;
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 7 - Implement ray-AABB intersection</h3>
+      <ol>
+  <li>Implement <code>RayIntersectsCube</code> in <code>testRayCasting.cpp</code>. This function uses the slab method described in the Concept section.</li>
+  <li>Compute <code>invDir = 1.0f / rayDirection</code> component-wise. Dividing once and multiplying gives the same result as repeated division but avoids redundant work.</li>
+  <li>Compute <code>t1 = (boxCenter - glm::vec3(boxSize) - rayOrigin) * invDir</code>. Each component of <code>t1</code> is the t value where the ray crosses the near wall of that axis slab.</li>
+  <li>Compute <code>t2 = (boxCenter + glm::vec3(boxSize) - rayOrigin) * invDir</code>. Each component of <code>t2</code> is the t value where the ray crosses the far wall.</li>
+  <li>Use <code>tMin = glm::min(t1, t2)</code> and <code>tMax = glm::max(t1, t2)</code> to ensure the near value is always smaller regardless of the ray direction sign.</li>
+  <li>Compute <code>tEnter = glm::max(glm::max(tMin.x, tMin.y), tMin.z)</code> (last axis the ray enters) and <code>tExit = glm::min(glm::min(tMax.x, tMax.y), tMax.z)</code> (first axis the ray exits).</li>
+  <li>Return <code>true</code> when <code>tExit &gt; tEnter &amp;&amp; tExit &gt; 0.0f</code>. The first condition means the ray is inside all three slabs at some point. The second condition means the box is in front of the ray origin.</li>
+</ol>
+      <pre><code class="language-cpp">bool testRayCasting::RayIntersectsCube(
+    const glm::vec3&amp; rayOrigin,
+    const glm::vec3&amp; rayDirection,
+    const glm::vec3&amp; boxCenter,
+    float boxSize)
+{
+    // The slab method tests each axis independently.
+    // For each axis, the ray crosses two planes (the near and far walls of the slab).
+    // tEnter = the largest of the three near crossings (the ray is inside ALL slabs from here).
+    // tExit  = the smallest of the three far crossings  (the ray leaves the box here).
+    // Hit when tExit &gt; tEnter and tExit &gt; 0 (box is in front of the ray origin).
+
+    // TODO: Compute invDir = 1.0f / rayDirection  (one multiply per component is cheaper than divide).
+    glm::vec3 invDir = glm::vec3(1.0f);
+
+    // TODO: t1 = (boxCenter - vec3(boxSize) - rayOrigin) * invDir   (near slab crossings per axis)
+    glm::vec3 t1 = glm::vec3(0.0f);
+    // TODO: t2 = (boxCenter + vec3(boxSize) - rayOrigin) * invDir   (far slab crossings per axis)
+    glm::vec3 t2 = glm::vec3(0.0f);
+
+    // Ensure tMin.x &lt; tMax.x etc. regardless of ray direction sign.
+    // TODO: tMin = glm::min(t1, t2)
+    glm::vec3 tMin = glm::vec3(0.0f);
+    // TODO: tMax = glm::max(t1, t2)
+    glm::vec3 tMax = glm::vec3(0.0f);
+
+    // TODO: tEnter = glm::max(glm::max(tMin.x, tMin.y), tMin.z)
+    float tEnter = 0.0f;
+    // TODO: tExit  = glm::min(glm::min(tMax.x, tMax.y), tMax.z)
+    float tExit  = 0.0f;
+
+    // TODO: Return true when tExit &gt; tEnter &amp;&amp; tExit &gt; 0.0f.
+    return false;
+}</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 8 - Wire picking and rendering for both object types</h3>
+      <ol>
+  <li>In <code>Update</code>, after getting the ray direction, iterate over <code>objects</code>. For each object, check <code>objects[i].type</code> and call either <code>RayIntersectsSphere</code> or <code>RayIntersectsCube</code> with <code>objects[i].position</code> and <code>objects[i].size</code>. On the first hit, store the index in <code>selectedObjectIndex</code> and break.</li>
+  <li>In <code>Render</code>, build the view and projection matrices and pass them to the shader as before. In the draw loop, check <code>objects[i].type</code>: draw spheres with <code>renderer.Draw(*m_VAO, *m_IBO, *m_Shader)</code> and cubes with <code>renderer.Draw(*m_CubeVAO, *m_CubeIBO, *m_Shader)</code>.</li>
+  <li>In <code>RenderGUI</code>, update the selected-object display. When an object is selected, show its name, type ("Sphere" or "Cube"), position, and size. When nothing is selected, show "No object selected."</li>
+  <li>Compile and run. Moving the cursor over a sphere or a cube should turn it green. The ImGui panel should correctly label the object type.</li>
+</ol>
+      <pre><code class="language-cpp">void testRayCasting::Update(float deltaTime) {
+    ProcessInput();
+
+    double mouseX, mouseY;
+    // TODO: Call glfwGetCursorPos to get cursor coordinates.
+
+    // TODO: Call CalculateRayDirection to get the world-space ray.
+    glm::vec3 rayDirection = glm::vec3(0.0f);
+    glm::vec3 rayOrigin    = cameraPosition;
+
+    // TODO: Reset selectedObjectIndex to -1.
+
+    for (size_t i = 0; i &lt; objects.size(); ++i) {
+        // TODO: Declare bool hit = false.
+        // TODO: If objects[i].type == ObjectType::Sphere, call RayIntersectsSphere.
+        //       Otherwise call RayIntersectsCube.
+        //       Both receive rayOrigin, rayDirection, objects[i].position, objects[i].size.
+        // TODO: If hit is true, store i in selectedObjectIndex and break.
+    }
+}
+
+void testRayCasting::Render() {
+    Renderer renderer;
+    renderer.Clear();
+
+    m_Shader-&gt;Bind();
+
+    // TODO: Build viewMatrix with glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp).
+    // TODO: Build projectionMatrix with glm::perspective(45 degrees, 800/600 aspect, 0.1 near, 100 far).
+    // TODO: Pass both to the shader (&quot;view&quot; and &quot;projection&quot;).
+
+    for (size_t i = 0; i &lt; objects.size(); ++i) {
+        // TODO: Translate glm::mat4(1.0f) to objects[i].position. Pass as &quot;model&quot;.
+        // TODO: Colour is green (0,1,0) when i == selectedObjectIndex, red (1,0,0) otherwise.
+        // TODO: Pass colour via setUniform4f(&quot;u_Colour&quot;, r, g, b, 1.0f).
+        // TODO: If ObjectType::Sphere, call renderer.Draw(*m_VAO, *m_IBO, *m_Shader).
+        //       If ObjectType::Cube,   call renderer.Draw(*m_CubeVAO, *m_CubeIBO, *m_Shader).
+    }
+}
+
+void testRayCasting::RenderGUI() {
+    // TODO: Display camera position with ImGui::Text.
+    // TODO: Add ImGui::SliderFloat for cameraSpeed in range 0.1 to 10.0.
+    // TODO: If selectedObjectIndex != -1, show the object name, type (&quot;Sphere&quot; or &quot;Cube&quot;),
+    //       position, and size. Otherwise display &quot;No object selected.&quot;
+}</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &quot;Tests.h&quot;
+#include &quot;../VertexBuffer.h&quot;
+#include &quot;../VertexBufferLayout.h&quot;
+#include &quot;../IndexBuffer.h&quot;
+#include &quot;../VertexArray.h&quot;
+#include &quot;../Shader.h&quot;
+#include &quot;gl/glew.h&quot;
+#include &quot;GLFW/glfw3.h&quot;
+#include &quot;glm/glm.hpp&quot;
+#include &quot;glm/gtc/matrix_transform.hpp&quot;
+#include &quot;glm/gtc/type_ptr.hpp&quot;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;memory&gt;
+
+namespace test {
+    class testRayCasting : public Tests {
+    public:
+        testRayCasting(GLFWwindow* window);
+        void Update(float deltaTime) override;
+        void Render() override;
+        void RenderGUI() override;
+
+    private:
+        GLFWwindow* m_window;
+
+        glm::vec3 cameraPosition;
+        glm::vec3 cameraFront;
+        glm::vec3 cameraUp;
+        float cameraSpeed;
+
+        glm::mat4 viewMatrix;
+        glm::mat4 projectionMatrix;
+
+        enum class ObjectType { Sphere, Cube };
+
+        struct Object {
+            glm::vec3 position;
+            float size;        // radius for spheres, half-extent for cubes
+            std::string name;
+            ObjectType type;
+        };
+
+        std::unique_ptr&lt;VertexArray&gt;  m_CubeVAO;
+        std::unique_ptr&lt;VertexBuffer&gt; m_CubeVBO;
+        std::unique_ptr&lt;IndexBuffer&gt;  m_CubeIBO;
+
+        std::vector&lt;Object&gt; objects;
+        int selectedObjectIndex;
+
+        std::unique_ptr&lt;VertexArray&gt;  m_VAO;
+        std::unique_ptr&lt;VertexBuffer&gt; m_VBO;
+        std::unique_ptr&lt;IndexBuffer&gt;  m_IBO;
+        std::unique_ptr&lt;Shader&gt;       m_Shader;
+
+        void GenerateSphereData(std::vector&lt;float&gt;&amp; vertices,
+                                std::vector&lt;unsigned int&gt;&amp; indices,
+                                float radius,
+                                unsigned int longitudeDiv,
+                                unsigned int latitudeDiv);
+        void ProcessInput();
+        void SetupBuffers();
+        glm::vec3 CalculateRayDirection(float mouseX, float mouseY);
+        bool RayIntersectsSphere(const glm::vec3&amp; rayOrigin,
+                                 const glm::vec3&amp; rayDirection,
+                                 const glm::vec3&amp; sphereCenter,
+                                 float sphereRadius);
+
+        void GenerateCubeData(std::vector&lt;float&gt;&amp; vertices,
+                              std::vector&lt;unsigned int&gt;&amp; indices,
+                              float size);
+        void SetupCubeBuffers();
+        bool RayIntersectsCube(const glm::vec3&amp; rayOrigin,
+                               const glm::vec3&amp; rayDirection,
+                               const glm::vec3&amp; boxCenter,
+                               float boxSize);
+    };
+}" data-filename="src/tests/testRayCasting.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;testRayCasting.h&quot;
+#include &quot;../Renderer.h&quot;
+#include &quot;../vendor/imgui/imgui.h&quot;
+#include &lt;GL/glew.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+
+namespace test {
+
+    testRayCasting::testRayCasting(GLFWwindow* window)
+        : m_window(window), selectedObjectIndex(-1)
+    {
+        cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
+        cameraFront    = glm::vec3(0.0f, 0.0f, -1.0f);
+        cameraUp       = glm::vec3(0.0f, 1.0f, 0.0f);
+        cameraSpeed    = 0.5f;
+
+        objects.push_back({ glm::vec3( 0.0f, 0.0f,  0.0f), 1.0f, &quot;Sphere 1&quot;, ObjectType::Sphere });
+        objects.push_back({ glm::vec3( 2.0f, 0.0f, -3.0f), 1.5f, &quot;Sphere 2&quot;, ObjectType::Sphere });
+        objects.push_back({ glm::vec3(-2.0f, 1.0f, -2.0f), 1.0f, &quot;Sphere 3&quot;, ObjectType::Sphere });
+        objects.push_back({ glm::vec3( 3.0f, 0.5f, -1.0f), 0.8f, &quot;Cube 1&quot;,   ObjectType::Cube });
+        objects.push_back({ glm::vec3(-3.0f, 0.0f, -2.5f), 1.0f, &quot;Cube 2&quot;,   ObjectType::Cube });
+
+        SetupBuffers();
+        SetupCubeBuffers();
+        m_Shader = std::make_unique&lt;Shader&gt;(&quot;res/Shaders/BasicMVP.shader&quot;);
+    }
+
+    void testRayCasting::SetupBuffers() {
+        std::vector&lt;float&gt; vertices;
+        std::vector&lt;unsigned int&gt; indices;
+        GenerateSphereData(vertices, indices, 1.0f, 20, 20);
+
+        m_VAO = std::make_unique&lt;VertexArray&gt;();
+        m_VBO = std::make_unique&lt;VertexBuffer&gt;(vertices.data(), vertices.size() * sizeof(float));
+
+        VertexBufferLayout layout;
+        layout.Push&lt;float&gt;(3);
+        layout.Push&lt;float&gt;(3);
+        m_VAO-&gt;AddBuffer(*m_VBO, layout);
+
+        m_IBO = std::make_unique&lt;IndexBuffer&gt;(indices.data(), indices.size());
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    void testRayCasting::GenerateSphereData(
+        std::vector&lt;float&gt;&amp; vertices,
+        std::vector&lt;unsigned int&gt;&amp; indices,
+        float radius,
+        unsigned int longitudeDiv,
+        unsigned int latitudeDiv)
+    {
+        for (unsigned int lat = 0; lat &lt;= latitudeDiv; ++lat) {
+            float theta    = lat * glm::pi&lt;float&gt;() / latitudeDiv;
+            float sinTheta = sin(theta);
+            float cosTheta = cos(theta);
+
+            for (unsigned int lon = 0; lon &lt;= longitudeDiv; ++lon) {
+                float phi    = lon * 2.0f * glm::pi&lt;float&gt;() / longitudeDiv;
+                float sinPhi = sin(phi);
+                float cosPhi = cos(phi);
+
+                float x = cosPhi * sinTheta;
+                float y = cosTheta;
+                float z = sinPhi * sinTheta;
+
+                vertices.push_back(radius * x);
+                vertices.push_back(radius * y);
+                vertices.push_back(radius * z);
+                vertices.push_back(x);
+                vertices.push_back(y);
+                vertices.push_back(z);
+            }
+        }
+
+        for (unsigned int lat = 0; lat &lt; latitudeDiv; ++lat) {
+            for (unsigned int lon = 0; lon &lt; longitudeDiv; ++lon) {
+                unsigned int first  = (lat * (longitudeDiv + 1)) + lon;
+                unsigned int second = first + longitudeDiv + 1;
+
+                indices.push_back(first);
+                indices.push_back(second);
+                indices.push_back(first + 1);
+                indices.push_back(second);
+                indices.push_back(second + 1);
+                indices.push_back(first + 1);
+            }
+        }
+    }
+
+    void testRayCasting::SetupCubeBuffers() {
+        std::vector&lt;float&gt; vertices;
+        std::vector&lt;unsigned int&gt; indices;
+        GenerateCubeData(vertices, indices, 1.0f);
+
+        m_CubeVAO = std::make_unique&lt;VertexArray&gt;();
+        m_CubeVBO = std::make_unique&lt;VertexBuffer&gt;(vertices.data(), vertices.size() * sizeof(float));
+
+        VertexBufferLayout layout;
+        layout.Push&lt;float&gt;(3);
+        layout.Push&lt;float&gt;(3);
+        m_CubeVAO-&gt;AddBuffer(*m_CubeVBO, layout);
+
+        m_CubeIBO = std::make_unique&lt;IndexBuffer&gt;(indices.data(), indices.size());
+    }
+
+    void testRayCasting::GenerateCubeData(
+        std::vector&lt;float&gt;&amp; vertices,
+        std::vector&lt;unsigned int&gt;&amp; indices,
+        float size)
+    {
+        float s = size;
+        // 8 corner vertices: position (3f) + corner direction as normal placeholder (3f)
+        float verts[8][6] = {
+            {-s, -s, -s,  -1, -1, -1},
+            { s, -s, -s,   1, -1, -1},
+            { s,  s, -s,   1,  1, -1},
+            {-s,  s, -s,  -1,  1, -1},
+            {-s, -s,  s,  -1, -1,  1},
+            { s, -s,  s,   1, -1,  1},
+            { s,  s,  s,   1,  1,  1},
+            {-s,  s,  s,  -1,  1,  1},
+        };
+        for (auto&amp; v : verts)
+            for (float f : v) vertices.push_back(f);
+
+        // 12 triangles, 2 per face (6 faces)
+        unsigned int idx[] = {
+            0, 1, 2,  0, 2, 3,   // -Z face
+            5, 4, 7,  5, 7, 6,   // +Z face
+            4, 0, 3,  4, 3, 7,   // -X face
+            1, 5, 6,  1, 6, 2,   // +X face
+            4, 5, 1,  4, 1, 0,   // -Y face
+            3, 2, 6,  3, 6, 7,   // +Y face
+        };
+        for (unsigned int i : idx) indices.push_back(i);
+    }
+
+    void testRayCasting::Update(float deltaTime) {
+        ProcessInput();
+
+        double mouseX, mouseY;
+        glfwGetCursorPos(m_window, &amp;mouseX, &amp;mouseY);
+
+        glm::vec3 rayDirection = CalculateRayDirection((float)mouseX, (float)mouseY);
+        glm::vec3 rayOrigin    = cameraPosition;
+
+        selectedObjectIndex = -1;
+        for (size_t i = 0; i &lt; objects.size(); ++i) {
+            bool hit = false;
+            if (objects[i].type == ObjectType::Sphere)
+                hit = RayIntersectsSphere(rayOrigin, rayDirection, objects[i].position, objects[i].size);
+            else
+                hit = RayIntersectsCube(rayOrigin, rayDirection, objects[i].position, objects[i].size);
+
+            if (hit) {
+                selectedObjectIndex = static_cast&lt;int&gt;(i);
+                break;
+            }
+        }
+    }
+
+    void testRayCasting::Render() {
+        Renderer renderer;
+        renderer.Clear();
+
+        m_Shader-&gt;Bind();
+
+        viewMatrix       = glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
+        projectionMatrix = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+        m_Shader-&gt;setUniformMat4f(&quot;view&quot;,       viewMatrix);
+        m_Shader-&gt;setUniformMat4f(&quot;projection&quot;, projectionMatrix);
+
+        for (size_t i = 0; i &lt; objects.size(); ++i) {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), objects[i].position);
+            m_Shader-&gt;setUniformMat4f(&quot;model&quot;, model);
+
+            glm::vec3 colour = (selectedObjectIndex == static_cast&lt;int&gt;(i))
+                ? glm::vec3(0.0f, 1.0f, 0.0f)
+                : glm::vec3(1.0f, 0.0f, 0.0f);
+            m_Shader-&gt;setUniform4f(&quot;u_Colour&quot;, colour.r, colour.g, colour.b, 1.0f);
+
+            if (objects[i].type == ObjectType::Sphere)
+                renderer.Draw(*m_VAO, *m_IBO, *m_Shader);
+            else
+                renderer.Draw(*m_CubeVAO, *m_CubeIBO, *m_Shader);
+        }
+    }
+
+    void testRayCasting::RenderGUI() {
+        ImGui::Text(&quot;Camera Position: (%.1f, %.1f, %.1f)&quot;,
+                    cameraPosition.x, cameraPosition.y, cameraPosition.z);
+        ImGui::SliderFloat(&quot;Camera Speed&quot;, &amp;cameraSpeed, 0.1f, 10.0f);
+
+        if (selectedObjectIndex != -1) {
+            const Object&amp; obj = objects[selectedObjectIndex];
+            ImGui::Text(&quot;Selected: %s (%s)&quot;,
+                        obj.name.c_str(),
+                        obj.type == ObjectType::Sphere ? &quot;Sphere&quot; : &quot;Cube&quot;);
+            ImGui::Text(&quot;Position: (%.1f, %.1f, %.1f)&quot;,
+                        obj.position.x, obj.position.y, obj.position.z);
+            ImGui::Text(&quot;Size: %.1f&quot;, obj.size);
+        } else {
+            ImGui::Text(&quot;No object selected.&quot;);
+        }
+    }
+
+    void testRayCasting::ProcessInput() {
+        if (glfwGetKey(m_window, GLFW_KEY_W) == GLFW_PRESS)
+            cameraPosition += cameraSpeed * cameraFront;
+        if (glfwGetKey(m_window, GLFW_KEY_S) == GLFW_PRESS)
+            cameraPosition -= cameraSpeed * cameraFront;
+        if (glfwGetKey(m_window, GLFW_KEY_A) == GLFW_PRESS)
+            cameraPosition -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        if (glfwGetKey(m_window, GLFW_KEY_D) == GLFW_PRESS)
+            cameraPosition += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
+
+    glm::vec3 testRayCasting::CalculateRayDirection(float mouseX, float mouseY) {
+        int width, height;
+        glfwGetFramebufferSize(m_window, &amp;width, &amp;height);
+
+        float x = (2.0f * mouseX) / width  - 1.0f;
+        float y = 1.0f - (2.0f * mouseY) / height;
+
+        glm::vec4 rayClip(x, y, -1.0f, 1.0f);
+
+        glm::vec4 rayEye = glm::inverse(projectionMatrix) * rayClip;
+        rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+
+        glm::vec3 rayWorld = glm::vec3(glm::inverse(viewMatrix) * rayEye);
+        return glm::normalize(rayWorld);
+    }
+
+    bool testRayCasting::RayIntersectsSphere(
+        const glm::vec3&amp; rayOrigin,
+        const glm::vec3&amp; rayDirection,
+        const glm::vec3&amp; sphereCenter,
+        float sphereRadius)
+    {
+        glm::vec3 oc = rayOrigin - sphereCenter;
+        float a = glm::dot(rayDirection, rayDirection);
+        float b = 2.0f * glm::dot(oc, rayDirection);
+        float c = glm::dot(oc, oc) - sphereRadius * sphereRadius;
+        float discriminant = b * b - 4 * a * c;
+        return discriminant &gt; 0;
+    }
+
+    bool testRayCasting::RayIntersectsCube(
+        const glm::vec3&amp; rayOrigin,
+        const glm::vec3&amp; rayDirection,
+        const glm::vec3&amp; boxCenter,
+        float boxSize)
+    {
+        glm::vec3 invDir = 1.0f / rayDirection;
+        glm::vec3 t1 = (boxCenter - glm::vec3(boxSize) - rayOrigin) * invDir;
+        glm::vec3 t2 = (boxCenter + glm::vec3(boxSize) - rayOrigin) * invDir;
+
+        glm::vec3 tMin = glm::min(t1, t2);
+        glm::vec3 tMax = glm::max(t1, t2);
+
+        float tEnter = glm::max(glm::max(tMin.x, tMin.y), tMin.z);
+        float tExit  = glm::min(glm::min(tMax.x, tMax.y), tMax.z);
+
+        return tExit &gt; tEnter &amp;&amp; tExit &gt; 0.0f;
+    }
+
+} // namespace test" data-filename="src/tests/testRayCasting.cpp" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#shader vertex
+#version 330 core
+
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec4 aColour;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+out vec4 fragColour;
+
+void main() {
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    fragColour = aColour;
+}
+
+#shader fragment
+#version 330 core
+
+in vec4 fragColour;
+
+uniform vec4 u_Colour;
+
+out vec4 colour;
+
+void main() {
+    colour = u_Colour;
+}" data-filename="res/Shaders/BasicMVP.shader" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-glsl.min.js"></script>
+
+</body>
+</html>

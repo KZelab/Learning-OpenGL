@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 11 - Vertex Layout and Array | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 11 - Vertex Layout and Array</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>The Vertex and Index Buffers lab (Lab 10) created classes that allocate raw bytes on the GPU. Raw bytes alone are meaningless to the shader - it has no way to know that bytes 0-11 are a position and bytes 12-19 are UV coordinates. This lab introduces the two classes that solve that problem. <code>VertexBufferLayout</code> builds a description of your vertex format by recording the type and size of each attribute. <code>VertexArray</code> (VAO) uses that description to call <code>glVertexAttribPointer</code> once during setup, and then records the result so the entire vertex format can be replayed later with a single <code>Bind()</code> call. Together they replace the manual <code>glEnableVertexAttribArray</code> loop that appeared directly in <code>main.cpp</code> in earlier labs.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Explain what stride and offset mean and how they describe the position of each attribute within a packed vertex</li>
+      <li>Use VertexBufferLayout::Push to build a vertex description and observe how m_Stride accumulates with each call</li>
+      <li>Explain why the VAO is called a recording device and what exactly it records during AddBuffer</li>
+      <li>Implement VertexArray::AddBuffer, iterating the layout elements and calling glVertexAttribPointer for each</li>
+      <li>Replace the manual attribute setup in main.cpp with a VertexArray and VertexBufferLayout</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>A vertex buffer holds a flat array of bytes. Your CPU code knows that the first 12 bytes are a 3-float position, the next 8 bytes are 2-float UV coordinates, and so on - but the GPU does not. To bridge that gap, OpenGL needs you to call <code>glVertexAttribPointer</code> once per attribute, telling it: the attribute index (matching <code>layout(location = N)</code> in the shader), how many components the attribute has, the data type, whether to normalise, the total byte distance between one vertex and the next (<strong>stride</strong>), and the byte offset from the start of the vertex to this particular attribute (<strong>offset</strong>). Without these calls, every vertex shader invocation reads garbage.</p>
+
+<p>The <strong>VertexBufferLayout</strong> class captures the vertex description as a list of <code>VertexBufferElement</code> structs. Each element stores its GL type, component count, and normalisation flag. The <code>Push&lt;float&gt;(3)</code> call appends a three-component float element and adds <code>3 * 4 = 12</code> bytes to the running stride. Calling <code>Push&lt;float&gt;(2)</code> afterwards appends a two-component element and adds 8 more bytes. When all attributes have been pushed, <code>GetStride()</code> returns the total vertex size in bytes and <code>GetElements()</code> returns the ordered list. Template specialisations for <code>float</code>, <code>unsigned int</code>, and <code>unsigned char</code> cover the most common attribute types. A general template with a static assertion catches any unsupported type at compile time rather than at runtime.</p>
+
+<p>A <strong>Vertex Array Object</strong> (VAO) is a recording device built into the GPU driver. While a VAO is bound, every call to <code>glEnableVertexAttribArray</code> and <code>glVertexAttribPointer</code> is saved inside that VAO. The next time you bind the VAO, the driver replays all those calls instantly - no loop, no manual stride arithmetic. <code>VertexArray::AddBuffer</code> exploits this by binding both the VAO and the VBO, iterating the layout elements, and calling <code>glVertexAttribPointer</code> once per element with the accumulated byte offset. When <code>AddBuffer</code> returns, the VAO remembers exactly which buffer holds the data and how to interpret each attribute. Binding the VAO in the render loop is then the only setup needed before a draw call.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Study the Vertex Buffer Layout (Reference)</h3>
+      <p>Create <code>src/VertexBufferLayout.h</code>. This is a header-only class that uses C++ template specialisations, so read it carefully before typing. The reference code below is the complete file.</p>
+<ol>
+  <li>Create <code>src/VertexBufferLayout.h</code> and add <code>#pragma once</code>. Include <code>&lt;vector&gt;</code> and <code>"Renderer.h"</code>.</li>
+  <li>Define the <code>VertexBufferElement</code> struct with three fields: <code>type</code> (GL enum), <code>count</code> (number of components), and <code>normalised</code>. Add the static <code>getSizeOfType</code> helper that maps each GL type to its byte size.</li>
+  <li>Define the <code>VertexBufferLayout</code> class with a <code>std::vector&lt;VertexBufferElement&gt;</code> and an <code>unsigned int m_Stride</code>. Initialise the stride to 0 in the constructor.</li>
+  <li>Write the generic <code>Push</code> template with a <code>static_assert</code> that fires for any unsupported type. Then write three explicit specialisations: <code>Push&lt;float&gt;</code>, <code>Push&lt;unsigned int&gt;</code>, and <code>Push&lt;unsigned char&gt;</code>. Each must append a <code>VertexBufferElement</code> and increase <code>m_Stride</code> by <code>count * getSizeOfType(type)</code>.</li>
+  <li>Add <code>GetElements()</code> and <code>GetStride()</code> accessors.</li>
+  <li>Add the header to your project. It has no <code>.cpp</code> file - all code lives in the header.</li>
+</ol>
+      <div class="code-file-header">src/VertexBufferLayout.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+#include &lt;vector&gt;
+#include &quot;Renderer.h&quot;
+
+// Describes a single vertex attribute: its GL type, component count, and whether to normalise
+struct VertexBufferElement
+{
+    unsigned int  type;
+    unsigned int  count;
+    unsigned char normalised;
+
+    // Returns the byte size of one component of the given GL type
+    static unsigned int getSizeOfType(unsigned int type)
+    {
+        switch (type)
+        {
+            case GL_FLOAT:         return 4;
+            case GL_UNSIGNED_INT:  return 4;
+            case GL_UNSIGNED_BYTE: return 1;
+            default: throw std::runtime_error(&quot;Unknown type!&quot;);
+        }
+        ASSERT(false);
+        return 0;
+    }
+
+    VertexBufferElement(unsigned int type, unsigned int count, unsigned char normalised)
+        : type(type), count(count), normalised(normalised)
+    {
+    }
+};
+
+// Describes the full layout of one vertex: ordered list of attributes and the total stride
+class VertexBufferLayout
+{
+private:
+    std::vector&lt;VertexBufferElement&gt; m_Elements;
+    unsigned int m_Stride;
+public:
+    VertexBufferLayout() : m_Stride(0) {}
+    ~VertexBufferLayout() {}
+
+    // Generic Push - compile error for any type without a specialisation below
+    template&lt;typename t&gt;
+    void Push(unsigned int count)
+    {
+        static_assert(sizeof(t) == 0, &quot;Unsupported type for VertexBufferLayout::Push.&quot;);
+    }
+
+    // Push a float attribute (e.g. Push&lt;float&gt;(3) for a vec3 position)
+    template&lt;&gt;
+    void Push&lt;float&gt;(unsigned int count)
+    {
+        m_Elements.push_back({ GL_FLOAT, count, GL_FALSE });
+        m_Stride += count * VertexBufferElement::getSizeOfType(GL_FLOAT);
+    }
+
+    // Push an unsigned int attribute (e.g. for integer vertex IDs)
+    template&lt;&gt;
+    void Push&lt;unsigned int&gt;(unsigned int count)
+    {
+        m_Elements.push_back({ GL_UNSIGNED_INT, count, GL_FALSE });
+        m_Stride += count * VertexBufferElement::getSizeOfType(GL_UNSIGNED_INT);
+    }
+
+    // Push a normalised unsigned byte attribute (e.g. packed colour 0-255 mapped to 0.0-1.0)
+    template&lt;&gt;
+    void Push&lt;unsigned char&gt;(unsigned int count)
+    {
+        m_Elements.push_back({ GL_UNSIGNED_BYTE, count, GL_TRUE });
+        m_Stride += count * VertexBufferElement::getSizeOfType(GL_UNSIGNED_BYTE);
+    }
+
+    inline const std::vector&lt;VertexBufferElement&gt; GetElements() const { return m_Elements; }
+    inline unsigned int GetStride() const { return m_Stride; }
+};</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Implement the Vertex Array Object</h3>
+      <p>Create <code>src/VertexArray.h</code> and <code>src/VertexArray.cpp</code>. The skeleton for the header is shown below. The VAO is the most important class in this lab - concentrate on understanding what <code>AddBuffer</code> does.</p>
+<ol>
+  <li>Create <code>src/VertexArray.h</code> from the skeleton below. Note the forward declaration of <code>VertexBufferLayout</code> at the top - this avoids a circular include between <code>VertexArray.h</code> and <code>VertexBufferLayout.h</code>.</li>
+  <li>Create <code>src/VertexArray.cpp</code>. Include <code>"VertexArray.h"</code> and <code>"VertexBufferLayout.h"</code> (the full definition is needed in the <code>.cpp</code> file for <code>AddBuffer</code> to access <code>GetElements()</code> and <code>GetStride()</code>).</li>
+  <li>In the constructor, call <code>glGenVertexArrays(1, &amp;m_RendererID)</code> to create the VAO, then <code>glBindVertexArray(m_RendererID)</code> to start recording.</li>
+  <li>In <code>AddBuffer</code>, call <code>Bind()</code> then <code>vb.Bind()</code>. Then loop over <code>layout.GetElements()</code>. For each element, call <code>glEnableVertexAttribArray(i)</code>, then <code>glVertexAttribPointer</code> with the index, count, type, normalised flag, stride, and offset. After the call, advance <code>offset</code> by <code>element.count * VertexBufferElement::getSizeOfType(element.type)</code>.</li>
+  <li>Add both files to your project and build.</li>
+  <li>In <code>main.cpp</code>, replace the raw VAO setup block with:
+    <pre><code class="language-cpp">VertexArray vao;
+VertexBuffer vbo(vertices, sizeof(vertices));
+VertexBufferLayout layout;
+layout.Push&lt;float&gt;(3); // position
+layout.Push&lt;float&gt;(2); // UV coordinates
+vao.AddBuffer(vbo, layout);</code></pre>
+    Build and run. The rendered quad must look identical to the Lab 08 result.
+  </li>
+</ol>
+      <div class="code-file-header">src/VertexArray.h</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+#include &quot;VertexBuffer.h&quot;
+#include &lt;iostream&gt;
+
+class VertexBufferLayout; // forward declare to avoid circular includes
+
+class VertexArray
+{
+private:
+    // TODO: unsigned int m_RendererID
+
+public:
+    // TODO: constructor - generate and immediately bind the VAO
+    VertexArray();
+
+    // TODO: destructor - delete the VAO
+    ~VertexArray();
+
+    // TODO: record the VBO and layout into this VAO by calling glVertexAttribPointer
+    void AddBuffer(const VertexBuffer&amp; vb, const VertexBufferLayout&amp; layout);
+
+    void Bind()   const;
+    void unBind() const;
+};</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Implement the Vertex Array .cpp</h3>
+      <p>Implement <code>src/VertexArray.cpp</code> from the skeleton below. The most important part is the <code>AddBuffer</code> loop - each iteration handles one vertex attribute.</p>
+<ol>
+  <li>Fill in every <code>// TODO:</code> in the skeleton below.</li>
+  <li>Pay attention to the offset accumulation: it starts at 0 and grows by <code>element.count * getSizeOfType(element.type)</code> after each <code>glVertexAttribPointer</code> call. This is what tells GL that the second attribute starts after the first one ends.</li>
+  <li>Build and run. Confirm the textured, rotating, projected quad from Lab 08 still renders correctly.</li>
+</ol>
+      <div class="code-file-header">src/VertexArray.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &quot;VertexArray.h&quot;
+#include &quot;VertexBufferLayout.h&quot;
+
+VertexArray::VertexArray()
+{
+    // TODO: glGenVertexArrays(1, &amp;m_RendererID)
+    // TODO: glBindVertexArray(m_RendererID)
+}
+
+VertexArray::~VertexArray()
+{
+    // TODO: glDeleteVertexArrays(1, &amp;m_RendererID)
+}
+
+void VertexArray::AddBuffer(const VertexBuffer&amp; vb, const VertexBufferLayout&amp; layout)
+{
+    // TODO: Bind() this VAO so the following calls are recorded into it
+    // TODO: vb.Bind() so the VBO is the source for attribute data
+
+    const auto&amp; Elements = layout.GetElements();
+    unsigned int offset = 0;
+
+    for (unsigned int i = 0; i &lt; Elements.size(); i++)
+    {
+        const auto&amp; element = Elements[i];
+
+        // TODO: glEnableVertexAttribArray(i)
+
+        // TODO: glVertexAttribPointer(i, element.count, element.type,
+        //           element.normalised, layout.GetStride(), (const void*)offset)
+
+        // TODO: advance offset by element.count * VertexBufferElement::getSizeOfType(element.type)
+    }
+}
+
+void VertexArray::Bind() const
+{
+    // TODO: glBindVertexArray(m_RendererID)
+}
+
+void VertexArray::unBind() const
+{
+    // TODO: glBindVertexArray(0)
+}</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &lt;vector&gt;
+#include &quot;Renderer.h&quot;
+
+// Describes a single vertex attribute: its GL type, component count, and whether to normalise
+struct VertexBufferElement
+{
+    unsigned int  type;
+    unsigned int  count;
+    unsigned char normalised;
+
+    // Returns the byte size of one component of the given GL type
+    static unsigned int getSizeOfType(unsigned int type)
+    {
+        switch (type)
+        {
+            case GL_FLOAT:         return 4;
+            case GL_UNSIGNED_INT:  return 4;
+            case GL_UNSIGNED_BYTE: return 1;
+            default: throw std::runtime_error(&quot;Unknown type!&quot;);
+        }
+        ASSERT(false);
+        return 0;
+    }
+
+    VertexBufferElement(unsigned int type, unsigned int count, unsigned char normalised)
+        : type(type), count(count), normalised(normalised)
+    {
+    }
+};
+
+// Describes the full layout of one vertex: ordered list of attributes and the total stride
+class VertexBufferLayout
+{
+private:
+    std::vector&lt;VertexBufferElement&gt; m_Elements;
+    unsigned int m_Stride;
+public:
+    VertexBufferLayout() : m_Stride(0) {}
+    ~VertexBufferLayout() {}
+
+    // Generic Push - compile error for any type without a specialisation below
+    template&lt;typename t&gt;
+    void Push(unsigned int count)
+    {
+        static_assert(sizeof(t) == 0, &quot;Unsupported type for VertexBufferLayout::Push.&quot;);
+    }
+
+    // Push a float attribute (e.g. Push&lt;float&gt;(3) for a vec3 position)
+    template&lt;&gt;
+    void Push&lt;float&gt;(unsigned int count)
+    {
+        m_Elements.push_back({ GL_FLOAT, count, GL_FALSE });
+        m_Stride += count * VertexBufferElement::getSizeOfType(GL_FLOAT);
+    }
+
+    // Push an unsigned int attribute (e.g. for integer vertex IDs)
+    template&lt;&gt;
+    void Push&lt;unsigned int&gt;(unsigned int count)
+    {
+        m_Elements.push_back({ GL_UNSIGNED_INT, count, GL_FALSE });
+        m_Stride += count * VertexBufferElement::getSizeOfType(GL_UNSIGNED_INT);
+    }
+
+    // Push a normalised unsigned byte attribute (e.g. packed colour 0-255 mapped to 0.0-1.0)
+    template&lt;&gt;
+    void Push&lt;unsigned char&gt;(unsigned int count)
+    {
+        m_Elements.push_back({ GL_UNSIGNED_BYTE, count, GL_TRUE });
+        m_Stride += count * VertexBufferElement::getSizeOfType(GL_UNSIGNED_BYTE);
+    }
+
+    inline const std::vector&lt;VertexBufferElement&gt; GetElements() const { return m_Elements; }
+    inline unsigned int GetStride() const { return m_Stride; }
+};" data-filename="src/VertexBufferLayout.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &quot;VertexBuffer.h&quot;
+#include &lt;iostream&gt;
+
+class VertexBufferLayout; // forward declare to avoid circular includes
+
+// A Vertex Array Object (VAO) records which VBO and attribute layout were active
+// when AddBuffer was called. Binding the VAO later replays that entire setup
+// with a single call, replacing the manual glEnableVertexAttribArray loop.
+class VertexArray
+{
+private:
+    unsigned int m_RendererID;
+
+public:
+    VertexArray();
+    ~VertexArray();
+
+    // Record the given VBO and layout into this VAO
+    void AddBuffer(const VertexBuffer&amp; vb, const VertexBufferLayout&amp; layout);
+
+    void Bind()   const;
+    void unBind() const;
+};" data-filename="src/VertexArray.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;VertexArray.h&quot;
+#include &quot;VertexBufferLayout.h&quot;
+
+VertexArray::VertexArray()
+{
+    GlCall(glGenVertexArrays(1, &amp;m_RendererID));
+    GlCall(glBindVertexArray(m_RendererID));
+}
+
+VertexArray::~VertexArray()
+{
+    GlCall(glDeleteVertexArrays(1, &amp;m_RendererID));
+}
+
+void VertexArray::AddBuffer(const VertexBuffer&amp; vb, const VertexBufferLayout&amp; layout)
+{
+    Bind();
+    vb.Bind();
+    const auto&amp; Elements = layout.GetElements();
+    unsigned int offset = 0;
+
+    for (unsigned int i = 0; i &lt; Elements.size(); i++)
+    {
+        const auto&amp; element = Elements[i];
+
+        // Tell the GPU this attribute index is active
+        GlCall(glEnableVertexAttribArray(i));
+
+        // Describe where attribute i lives inside each vertex:
+        //   i          = attribute location (matches layout(location = i) in the shader)
+        //   count      = number of components (e.g. 3 for vec3)
+        //   type       = GL data type (GL_FLOAT, GL_UNSIGNED_BYTE, ...)
+        //   normalised = whether integer types are mapped to 0.0-1.0
+        //   stride     = byte distance between the start of one vertex and the next
+        //   offset     = byte distance from the start of the vertex to this attribute
+        GlCall(glVertexAttribPointer(i,
+            element.count,
+            element.type,
+            element.normalised,
+            layout.GetStride(),
+            (const void*)offset));
+
+        offset += element.count * VertexBufferElement::getSizeOfType(element.type);
+    }
+}
+
+void VertexArray::Bind() const
+{
+    GlCall(glBindVertexArray(m_RendererID));
+}
+
+void VertexArray::unBind() const
+{
+    GlCall(glBindVertexArray(0));
+}" data-filename="src/VertexArray.cpp" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+
+</body>
+</html>

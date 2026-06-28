@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab 08 - Projections | ACCA6021</title>
+
+  <style>
+    code[class*=language-],pre[class*=language-]{color:#ccc;background:0 0;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;font-size:1em;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.5;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:1em;margin:.5em 0;overflow:auto}:not(pre)>code[class*=language-],pre[class*=language-]{background:#2d2d2d}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal}.token.block-comment,.token.cdata,.token.comment,.token.doctype,.token.prolog{color:#999}.token.punctuation{color:#ccc}.token.attr-name,.token.deleted,.token.namespace,.token.tag{color:#e2777a}.token.function-name{color:#6196cc}.token.boolean,.token.function,.token.number{color:#f08d49}.token.class-name,.token.constant,.token.property,.token.symbol{color:#f8c555}.token.atrule,.token.builtin,.token.important,.token.keyword,.token.selector{color:#cc99cd}.token.attr-value,.token.char,.token.regex,.token.string,.token.variable{color:#7ec699}.token.entity,.token.operator,.token.url{color:#67cdcc}.token.bold,.token.important{font-weight:700}.token.italic{font-style:italic}.token.entity{cursor:help}.token.inserted{color:green}
+  </style>
+
+  <style>
+    /* ---- Reset and base ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --uwtsd-navy:    #003366;
+      --uwtsd-gold:    #C8A951;
+      --uwtsd-light:   #F4F4F4;
+      --uwtsd-white:   #FFFFFF;
+      --uwtsd-text:    #1A1A1A;
+      --uwtsd-muted:   #555555;
+      --uwtsd-code-bg: #1E1E1E;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--uwtsd-text);
+      background: var(--uwtsd-light);
+    }
+
+    /* ---- Header ---- */
+    .lab-header {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .lab-header img {
+      height: 48px;
+      filter: brightness(0) invert(1);
+    }
+
+    .lab-header-text { flex: 1; }
+
+    .lab-header-text .module-code {
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--uwtsd-gold);
+      font-weight: 600;
+    }
+
+    .lab-header-text h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* ---- Main content ---- */
+    main {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ---- Sections ---- */
+    .lab-section {
+      background: var(--uwtsd-white);
+      border-radius: 6px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    }
+
+    .lab-section h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--uwtsd-navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lab-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--uwtsd-navy);
+      margin: 1.25rem 0 0.5rem;
+    }
+
+    .lab-section p { margin-bottom: 0.75rem; }
+
+    .lab-section ul,
+    .lab-section ol {
+      padding-left: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .lab-section li { margin-bottom: 0.35rem; }
+
+    code {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.88em;
+      background: #eef0f4;
+      color: #c0392b;
+      padding: 0.1em 0.35em;
+      border-radius: 3px;
+    }
+
+    kbd {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85em;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      padding: 0.1em 0.4em;
+    }
+
+    /* ---- Code blocks ---- */
+    pre {
+      background: var(--uwtsd-code-bg) !important;
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    pre code {
+      background: none !important;
+      color: inherit !important;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    /* ---- Package table ---- */
+    .pkg-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin-top: 0.5rem;
+    }
+
+    .pkg-table th {
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      text-align: left;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pkg-table td {
+      padding: 0.7rem 0.85rem;
+      vertical-align: top;
+      border-bottom: 1px solid #e4e8f0;
+    }
+
+    .pkg-table td:first-child { white-space: nowrap; }
+    .pkg-table td:last-child  { white-space: nowrap; }
+
+    .pkg-table tr:last-child td { border-bottom: none; }
+
+    .pkg-table tr:nth-child(even) td { background: #f8f9fc; }
+
+    .pkg-table a { color: var(--uwtsd-navy); font-weight: 600; }
+    .pkg-table a:hover { text-decoration: underline; }
+
+    /* ---- Platform tabs ---- */
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 2px solid #dde3ed;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1.1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      background: none;
+      color: var(--uwtsd-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-btn:hover { color: var(--uwtsd-navy); }
+
+    .tab-btn.active {
+      color: var(--uwtsd-navy);
+      border-bottom-color: var(--uwtsd-gold);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ---- Task steps ---- */
+    .task-block {
+      border: 1px solid #dde3ed;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+      background: #f8f9fc;
+    }
+
+    .task-block h3 {
+      font-size: 0.95rem;
+      color: var(--uwtsd-navy);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ---- Solution reveal ---- */
+    /* ---- Code file header ---- */
+    .code-file-header {
+      background: #2d2d2d;
+      color: #888;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.78rem;
+      padding: 0.3rem 1.25rem;
+      border-radius: 6px 6px 0 0;
+      letter-spacing: 0.03em;
+    }
+
+    .code-file-header + pre {
+      border-radius: 0 0 6px 6px !important;
+      margin-top: 0 !important;
+    }
+
+    /* ---- Solution reveal ---- */
+    .solution-btn {
+      display: inline-block;
+      margin: 0.5rem 0 1rem;
+      padding: 0.55rem 1.4rem;
+      background: var(--uwtsd-navy);
+      color: var(--uwtsd-white);
+      border: none;
+      border-radius: 4px;
+      font-size: 0.93rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .solution-btn:hover { background: #004080; }
+
+    .solution-panel { display: none; margin-top: 0.5rem; }
+    .solution-panel.open { display: block; }
+
+    .solution-canvas-wrap {
+      overflow-x: auto;
+      margin-bottom: 1rem;
+    }
+    .solution-canvas-wrap:last-child { margin-bottom: 0; }
+
+    /* ---- Print stylesheet ---- */
+    @media print {
+      .lab-header { background: white; color: black; border-bottom: 2px solid #003366; }
+      .lab-header img { filter: none; }
+      .lab-header-text .module-code { color: #003366; }
+      .lab-header-text .lab-meta { color: #555; }
+      body { background: white; font-size: 13px; }
+      main { max-width: 100%; margin: 0; padding: 0 1rem; }
+      .lab-section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      pre { white-space: pre-wrap; word-break: break-word; }
+      a { color: inherit; text-decoration: none; }
+      .solution-btn { display: none; }
+      .solution-panel { display: block !important; }
+      @page {
+        margin: 1.8cm 2cm;
+        @top-right { content: "ACCA6021"; font-size: 9pt; color: #555; }
+        @bottom-center { content: counter(page) " of " counter(pages); font-size: 9pt; }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="lab-header">
+  <img src="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg"
+       alt="University of Wales Trinity Saint David">
+  <div class="lab-header-text">
+    <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
+    <h1>Lab 08 - Projections</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="lab-section">
+    <h2>Overview</h2>
+    <p>In the Transformations lab (Lab 07), a single rotation matrix was uploaded as <code>u_Transform</code> and the GPU applied it directly to every vertex. That worked, but it left no room for a camera or any sense of depth. This lab introduces the <strong>Model-View-Projection</strong> pipeline: three distinct matrices that together move geometry from local object coordinates through world space and camera space into the clip coordinates that OpenGL rasterises. You will rename the shader uniform to <code>u_MVP</code>, compose the three matrices in C++, position a real camera with <code>glm::lookAt</code>, and switch between a perspective frustum and an orthographic box at runtime by pressing <kbd>P</kbd>.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Learning Objectives</h2>
+    <p>By the end of this lab you will be able to:</p>
+    <ul>
+      <li>Explain the role of each matrix in the Model-View-Projection pipeline and why they multiply as <code>proj * view * model</code></li>
+      <li>Rename a shader uniform and update the corresponding C++ upload without changing any rendering logic</li>
+      <li>Construct a view matrix using <code>glm::lookAt</code> and describe what its three parameters represent</li>
+      <li>Build a perspective projection matrix with <code>glm::perspective</code> and an orthographic matrix with <code>glm::ortho</code></li>
+      <li>Enable depth testing and poll a GLFW key each frame to toggle the active projection at runtime</li>
+    </ul>
+  </section>
+
+  <section class="lab-section">
+    <h2>Concept</h2>
+    <p>The Lab 07 solution uploaded a single rotation matrix as <code>u_Transform</code> and applied it directly to each vertex position. The renderer happened to work because OpenGL's default camera sits at the world origin looking down the negative Z axis and the rotating quad was already in front of it. As soon as you need to move the camera, describe a scene with multiple objects at different distances, or choose between a 2D and 3D look, a single raw transform is not enough.</p>
+
+<p>The standard solution is to decompose the transform into three matrices multiplied together: <code>MVP = Projection * View * Model</code>. The <strong>Model matrix</strong> moves vertices from local object space into world space - it is the rotation matrix from Lab 07. The <strong>View matrix</strong> then repositions everything relative to a virtual camera. <code>glm::lookAt(eye, centre, up)</code> builds this matrix from three vectors: <code>eye</code> is the camera position in world space, <code>centre</code> is the point the camera aims at, and <code>up</code> is the world up direction (usually <code>glm::vec3(0, 1, 0)</code>). The <strong>Projection matrix</strong> maps camera space into clip space, the coordinate system the GPU uses before rasterisation. The vertex shader still performs one matrix multiplication: <code>gl_Position = u_MVP * vec4(position, 1.0)</code>. Only the name and the value passed from C++ change.</p>
+
+<p><code>glm::perspective(fov, aspect, near, far)</code> builds a frustum where the vertical field of view angle and aspect ratio define the visible region. Perspective division during rasterisation makes distant vertices project to smaller screen positions, producing the familiar depth cue. <code>glm::ortho(left, right, bottom, top, near, far)</code> maps a rectangular box directly to the clip cube, skipping perspective division so object size stays constant at all depths. Orthographic mode is standard for 2D games, UI layers, and technical diagrams. Both require <code>glEnable(GL_DEPTH_TEST)</code> at startup and <code>GL_DEPTH_BUFFER_BIT</code> added to every <code>glClear</code> so stale depth values do not accumulate across frames.</p>
+  </section>
+
+  <section class="lab-section">
+    <h2>Tasks</h2>
+
+    <div class="task-block">
+      <h3>Task 1 - Introduce the MVP Pipeline</h3>
+      <p>This task introduces the Model-View-Projection decomposition by renaming the shader uniform and refactoring the C++ upload to compose three named matrices.</p>
+<ol>
+  <li>Open <code>res/shaders/transform.shader</code>. Rename the uniform from <code>u_Transform</code> to <code>u_MVP</code> and update the <code>main()</code> call to match:
+    <pre><code class="language-glsl">uniform mat4 u_MVP;
+
+void main() {
+    gl_Position = u_MVP * vec4(position, 1.0);
+    v_TexCoords = texCoords;
+}</code></pre>
+  </li>
+  <li>In <code>src/main.cpp</code>, inside the render loop, replace the single-matrix upload with three named matrices. Start with identity view and projection so the result is identical to Lab 07:
+    <pre><code class="language-cpp">glm::mat4 view = glm::mat4(1.0f);
+glm::mat4 proj = glm::mat4(1.0f);
+glm::mat4 mvp  = proj * view * model;
+glUseProgram(shader);
+glUniformMatrix4fv(glGetUniformLocation(shader, "u_MVP"), 1, GL_FALSE, glm::value_ptr(mvp));</code></pre>
+  </li>
+  <li>Build and run. The quad should spin identically to Lab 07. The behaviour has not changed; only the structure has been made explicit.</li>
+  <li>Now enable depth testing. After <code>glewInit()</code> and before the vertex data, call <code>glEnable(GL_DEPTH_TEST)</code>. Inside the loop, add <code>GL_DEPTH_BUFFER_BIT</code> to the <code>glClear</code> call.</li>
+  <li>Change the rotation axis from Z to Y so depth effects will be visible once the camera is real:
+    <pre><code class="language-cpp">model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));</code></pre>
+  </li>
+  <li>Replace the identity view matrix with a <code>glm::lookAt</code> call. Place the camera 3 units back along Z, aimed at the origin, with Y as the up direction.</li>
+  <li>Build and run. The quad should now appear smaller (it is 3 units away) and its Y-axis spin should look convincingly 3D even though projection is still identity.</li>
+</ol>
+      <div class="code-file-header">src/main.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">// After glewInit()
+// TODO: glEnable(GL_DEPTH_TEST);
+
+// --- Inside the render loop ---
+glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+// TODO: add GL_DEPTH_BUFFER_BIT
+glClear(GL_COLOR_BUFFER_BIT);
+
+float angle = (float)glfwGetTime();
+glm::mat4 model = glm::mat4(1.0f);
+// TODO: change rotation axis from Z to Y: glm::vec3(0.0f, 1.0f, 0.0f)
+model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
+
+// TODO: replace identity view with glm::lookAt
+//       eye    = glm::vec3(0.0f, 0.0f, 3.0f)
+//       centre = glm::vec3(0.0f, 0.0f, 0.0f)
+//       up     = glm::vec3(0.0f, 1.0f, 0.0f)
+glm::mat4 view = glm::mat4(1.0f);
+glm::mat4 proj = glm::mat4(1.0f);
+
+// TODO: compose and upload
+glm::mat4 mvp = proj * view * model;
+glUseProgram(shader);
+glUniformMatrix4fv(glGetUniformLocation(shader, &quot;u_MVP&quot;), 1, GL_FALSE, glm::value_ptr(mvp));</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 2 - Add Perspective Projection</h3>
+      <p>With the camera positioned, replace the identity projection with a perspective frustum. <code>glm::perspective</code> takes a vertical field of view in radians, an aspect ratio, and near and far clipping distances. Use <code>glm::radians</code> to convert a degree value to radians.</p>
+<ol>
+  <li>Inside the render loop, replace <code>glm::mat4 proj = glm::mat4(1.0f);</code> with a <code>glm::perspective</code> call. Use a 45-degree vertical field of view, the window aspect ratio (800.0f / 600.0f), and clipping planes at 0.1 and 100.</li>
+  <li>Build and run. The quad should recede convincingly when its far edge swings away from the camera. Notice how the near edge appears larger than the far edge.</li>
+  <li>Experiment: change the field of view to 90 degrees and observe the wider, more distorted view. Change it back to 45 before continuing.</li>
+</ol>
+      <div class="code-file-header">src/main.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">// --- Inside the render loop, after the view matrix ---
+
+// TODO: replace the identity projection with glm::perspective
+//       fov    = glm::radians(45.0f)
+//       aspect = 800.0f / 600.0f
+//       near   = 0.1f
+//       far    = 100.0f
+glm::mat4 proj = glm::mat4(1.0f);
+
+glm::mat4 mvp = proj * view * model;
+glUseProgram(shader);
+glUniformMatrix4fv(glGetUniformLocation(shader, &quot;u_MVP&quot;), 1, GL_FALSE, glm::value_ptr(mvp));</code></pre>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 3 - Add an Orthographic Toggle</h3>
+      <p>Orthographic projection removes depth distortion entirely. Objects at any depth appear the same size, which is the standard mode for 2D games, UI layers, and technical diagrams. Add a boolean flag and a key-edge detector so pressing <kbd>P</kbd> switches projection modes at runtime.</p>
+<ol>
+  <li>Before the render loop, declare two variables:
+    <pre><code class="language-cpp">bool useOrtho  = false;
+bool pWasDown  = false;</code></pre>
+  </li>
+  <li>At the top of the loop body, detect a fresh press of the P key. A fresh press means the key is down this frame but was up the previous frame:
+    <pre><code class="language-cpp">bool pDown = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
+if (pDown &amp;&amp; !pWasDown) {
+    useOrtho = !useOrtho;
+    std::cout &lt;&lt; (useOrtho ? "Orthographic\n" : "Perspective\n");
+}
+pWasDown = pDown;</code></pre>
+  </li>
+  <li>Replace the single <code>proj</code> line with an <code>if/else</code> block. For orthographic mode, match the aspect ratio by setting horizontal extents to -1.33 and 1.33 (800 / 600 times the vertical half-extent of 1.0). Keep the perspective call from Task 2 in the else branch.</li>
+  <li>Build and run. Press <kbd>P</kbd> while the quad spins and compare the two modes. In perspective mode the near edge appears noticeably larger. In orthographic mode both edges stay the same width throughout the rotation.</li>
+</ol>
+      <div class="code-file-header">src/main.cpp</div>
+      <pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">// Before the render loop
+bool useOrtho = false;
+bool pWasDown = false;
+
+// --- Inside the render loop ---
+
+bool pDown = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
+if (pDown &amp;&amp; !pWasDown) {
+    useOrtho = !useOrtho;
+    std::cout &lt;&lt; (useOrtho ? &quot;Orthographic\n&quot; : &quot;Perspective\n&quot;);
+}
+pWasDown = pDown;
+
+// TODO: replace the single proj line with an if/else block
+//   if (useOrtho)
+//       proj = glm::ortho(-1.33f, 1.33f, -1.0f, 1.0f, 0.1f, 100.0f)
+//   else
+//       proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f)
+glm::mat4 proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);</code></pre>
+    </div>
+
+  </section>
+
+  <section class="lab-section worked-solution">
+    <h2>Solution</h2>
+    <p>Try the tasks above before revealing the solution.</p>
+    <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
+    <div class="solution-panel">
+      <div class="solution-canvas-wrap"><canvas data-code="#shader vertex
+#version 430 core
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec2 texCoords;
+
+out vec2 v_TexCoords;
+
+uniform mat4 u_MVP;
+
+void main() {
+    gl_Position = u_MVP * vec4(position, 1.0);
+    v_TexCoords = texCoords;
+}
+
+#shader fragment
+#version 430 core
+out vec4 FragColour;
+
+in vec2 v_TexCoords;
+uniform sampler2D u_Texture;
+
+void main() {
+    FragColour = texture(u_Texture, v_TexCoords);
+}" data-filename="res/shaders/transform.shader" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &lt;GL/glew.h&gt;
+#include &lt;GLFW/glfw3.h&gt;
+#include &lt;glm/glm.hpp&gt;
+#include &lt;glm/gtc/matrix_transform.hpp&gt;
+#include &lt;glm/gtc/type_ptr.hpp&gt;
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+#include &quot;vendor/stb_image.h&quot;
+
+struct ShaderSource { std::string vertex; std::string fragment; };
+
+ShaderSource parseShader(const std::string&amp; filepath) {
+    std::ifstream file(filepath);
+    std::stringstream ss[2];
+    int type = -1;
+    std::string line;
+    while (std::getline(file, line)) {
+        if      (line.find(&quot;#shader vertex&quot;)   != std::string::npos) type = 0;
+        else if (line.find(&quot;#shader fragment&quot;) != std::string::npos) type = 1;
+        else if (type == 0 || type == 1) ss[type] &lt;&lt; line &lt;&lt; '\n';
+    }
+    return { ss[0].str(), ss[1].str() };
+}
+
+static unsigned int compileShader(unsigned int type, const std::string&amp; source) {
+    unsigned int id = glCreateShader(type);
+    const char* src = source.c_str();
+    glShaderSource(id, 1, &amp;src, nullptr);
+    glCompileShader(id);
+    int result;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &amp;result);
+    if (!result) {
+        int len;
+        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &amp;len);
+        char* msg = new char[len];
+        glGetShaderInfoLog(id, len, &amp;len, msg);
+        std::cerr &lt;&lt; &quot;Shader compile error: &quot; &lt;&lt; msg &lt;&lt; &quot;\n&quot;;
+        delete[] msg;
+        glDeleteShader(id);
+        return 0;
+    }
+    return id;
+}
+
+unsigned int createProgram(const std::string&amp; vertSrc, const std::string&amp; fragSrc) {
+    unsigned int program = glCreateProgram();
+    unsigned int vs = compileShader(GL_VERTEX_SHADER,   vertSrc);
+    unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragSrc);
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+    return program;
+}
+
+int main() {
+    if (!glfwInit()) { std::cerr &lt;&lt; &quot;Failed to initialise GLFW\n&quot;; return -1; }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    GLFWwindow* window = glfwCreateWindow(800, 600, &quot;Projections&quot;, nullptr, nullptr);
+    if (!window) { glfwTerminate(); return -1; }
+    glfwMakeContextCurrent(window);
+    glewExperimental = GL_TRUE;
+    if (glewInit() != GLEW_OK) {
+        std::cerr &lt;&lt; &quot;Failed to initialise GLEW\n&quot;;
+        glfwTerminate();
+        return -1;
+    }
+    glfwSwapInterval(1);
+
+    // Enable depth testing so closer fragments overwrite farther ones
+    glEnable(GL_DEPTH_TEST);
+
+    // Each vertex: 3D position (x, y, z) then UV coordinates (u, v)
+    float vertices[] = {
+        -0.5f, -0.5f,  0.0f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.0f,  0.0f, 1.0f
+    };
+
+    unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+
+    unsigned int vao, vbo, ibo;
+    glGenVertexArrays(1, &amp;vao);
+    glBindVertexArray(vao);
+
+    glGenBuffers(1, &amp;vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Attribute 0: position (3 floats), stride = 5 floats
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+
+    // Attribute 1: UV coords (2 floats), stride = 5 floats, offset = 3 floats
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+    glGenBuffers(1, &amp;ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glBindVertexArray(0);
+
+    ShaderSource src = parseShader(&quot;res/shaders/transform.shader&quot;);
+    unsigned int shader = createProgram(src.vertex, src.fragment);
+
+    // Load texture (flip vertically because OpenGL reads rows bottom-up)
+    stbi_set_flip_vertically_on_load(1);
+    int imgWidth, imgHeight, imgChannels;
+    unsigned char* imgData = stbi_load(&quot;res/Textures/1.png&quot;, &amp;imgWidth, &amp;imgHeight, &amp;imgChannels, 4);
+
+    unsigned int texture;
+    glGenTextures(1, &amp;texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    if (imgData) stbi_image_free(imgData);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Link u_Texture sampler to texture unit 0
+    glUseProgram(shader);
+    glUniform1i(glGetUniformLocation(shader, &quot;u_Texture&quot;), 0);
+    glUseProgram(0);
+
+    // Press P to toggle between perspective and orthographic projection
+    bool useOrtho = false;
+    bool pWasDown = false;
+
+    while (!glfwWindowShouldClose(window)) {
+        glClearColor(0.15f, 0.15f, 0.15f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Detect a fresh P key press to toggle projection mode
+        bool pDown = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
+        if (pDown &amp;&amp; !pWasDown) {
+            useOrtho = !useOrtho;
+            std::cout &lt;&lt; (useOrtho ? &quot;Orthographic\n&quot; : &quot;Perspective\n&quot;);
+        }
+        pWasDown = pDown;
+
+        // Rotate around Y axis so depth effects are clearly visible
+        float angle = (float)glfwGetTime();
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
+
+        // Place the camera 3 units back along Z, aimed at the origin
+        glm::mat4 view = glm::lookAt(
+            glm::vec3(0.0f, 0.0f, 3.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 1.0f, 0.0f)
+        );
+
+        glm::mat4 proj;
+        if (useOrtho) {
+            // Orthographic: constant size at all depths, aspect-corrected extents
+            proj = glm::ortho(-1.33f, 1.33f, -1.0f, 1.0f, 0.1f, 100.0f);
+        } else {
+            // Perspective: distant geometry projects to smaller screen positions
+            proj = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        }
+
+        glm::mat4 mvp = proj * view * model;
+
+        glUseProgram(shader);
+        glUniformMatrix4fv(glGetUniformLocation(shader, &quot;u_MVP&quot;), 1, GL_FALSE, glm::value_ptr(mvp));
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glBindVertexArray(vao);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    glDeleteTextures(1, &amp;texture);
+    glDeleteBuffers(1, &amp;ibo);
+    glDeleteBuffers(1, &amp;vbo);
+    glDeleteVertexArrays(1, &amp;vao);
+    glDeleteProgram(shader);
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    return 0;
+}" data-filename="src/main.cpp" style="display:block;border-radius:6px"></canvas></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  function switchTab(e, id) {
+    const section = e.target.closest('.lab-section');
+    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    section.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    section.querySelector('#' + id).classList.add('active');
+  }
+
+  function renderSolutionCanvas(canvas, code, filename) {
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var lineHeight = 19;
+    var headerHeight = filename ? 28 : 0;
+    var padX = 20;
+    var padY = 14;
+    var codeFont = '13px Consolas, "Courier New", monospace';
+    ctx.font = codeFont;
+    var lines = code.split('\n').map(function(l) { return l.replace(/\r$/, ''); });
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    var maxW = 0;
+    for (var i = 0; i < lines.length; i++) {
+      var w = ctx.measureText(lines[i]).width;
+      if (w > maxW) maxW = w;
+    }
+    var containerW = canvas.parentElement ? (canvas.parentElement.clientWidth || 0) : 0;
+    var cssW = Math.max(maxW + padX * 2, containerW || 400);
+    var cssH = lines.length * lineHeight + padY * 2 + headerHeight;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.scale(dpr, dpr);
+    if (filename) {
+      ctx.fillStyle = '#2d2d2d';
+      ctx.fillRect(0, 0, cssW, headerHeight);
+      ctx.font = '11px Consolas, "Courier New", monospace';
+      ctx.fillStyle = '#888888';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(filename, padX, headerHeight / 2);
+      ctx.fillStyle = '#444444';
+      ctx.fillRect(0, headerHeight - 1, cssW, 1);
+    }
+    ctx.fillStyle = '#1E1E1E';
+    ctx.fillRect(0, headerHeight, cssW, cssH - headerHeight);
+    ctx.font = codeFont;
+    ctx.fillStyle = '#cccccc';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], padX, headerHeight + padY + i * lineHeight);
+    }
+  }
+
+  function toggleSolution(btn) {
+    var panel = btn.nextElementSibling;
+    var open = panel.classList.toggle('open');
+    btn.textContent = open ? 'Hide Solution' : 'Show Solution';
+    if (open) {
+      panel.querySelectorAll('canvas[data-code]').forEach(function(c) {
+        if (!c.dataset.rendered) {
+          renderSolutionCanvas(c, c.dataset.code, c.dataset.filename || '');
+          c.dataset.rendered = '1';
+        }
+      });
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-cpp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-glsl.min.js"></script>
+
+</body>
+</html>
