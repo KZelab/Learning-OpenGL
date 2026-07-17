@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lab GP01 - The OpenGL Rendering Pipeline | ACCA6021</title>
+  <title>Lab 14b - Mesh Class - Combining Buffer Abstractions | ACCA6021</title>
   <link rel="icon" type="image/svg+xml" href="https://www.uwtsd.ac.uk/themes/custom/rutherford/images/logo.svg">
 
   <style>
@@ -504,7 +504,7 @@
        alt="University of Wales Trinity Saint David">
   <div class="lab-header-text">
     <div class="module-code">ACCA6021 - Graphics and Games Programming</div>
-    <h1>Lab GP01 - The OpenGL Rendering Pipeline</h1>
+    <h1>Lab 14b - Mesh Class - Combining Buffer Abstractions</h1>
   </div>
 </header>
 
@@ -512,161 +512,134 @@
 
   <section class="lab-section">
     <h2>Overview</h2>
-    <p>This worksheet traces the journey a vertex takes from CPU memory to a pixel colour
-  on screen. You will learn the name and purpose of each stage in the OpenGL rendering pipeline,
-  which stages you can program in GLSL, and how to identify which stage is responsible when
-  something goes wrong.</p>
+    <p>By the end of the Renderer Refactoring lab (Lab 14), you have four individual buffer abstractions: <code>VertexBuffer</code>, <code>IndexBuffer</code>, <code>VertexArray</code>, and <code>VertexBufferLayout</code>. Every time you want to draw a new piece of geometry you must create all four objects separately, keep them in sync, and manage their lifetimes by hand. The <strong>Mesh</strong> class solves this by bundling vertex data, index data, and the three buffer objects into a single unit with one <code>Draw()</code> call. This lab walks you through defining the <code>Vertex</code> data struct and implementing <code>Mesh.h</code> and <code>Mesh.cpp</code>, completing the abstraction layer before the test harness and camera labs that follow.</p>
   </section>
 
   <section class="lab-section">
     <h2>Learning Objectives</h2>
     <p>By the end of this lab you will be able to:</p>
     <ul>
-      <li>Name each stage of the OpenGL rendering pipeline and describe its input and output</li>
-      <li>Distinguish programmable stages from fixed-function stages</li>
-      <li>Trace vertex data from application memory through to a pixel colour in the framebuffer</li>
-      <li>Explain what data passes between each pair of adjacent stages</li>
-      <li>Identify which pipeline stage is responsible for common rendering artefacts</li>
+      <li>Define a Vertex struct that stores position, normal, colour, UV, and tangent data as packed float arrays</li>
+      <li>Declare the Mesh class with unique_ptr buffer members, virtual destructor, and correct Rule of Five declarations</li>
+      <li>Implement SetupMesh() to create and configure a VertexArray, VertexBuffer, and IndexBuffer from the stored vertex and index data</li>
+      <li>Implement Draw() to delegate rendering to the Renderer class</li>
+      <li>Build a TRS transform matrix from position, rotation, and scale using GLM</li>
+      <li>Explain why move operations must be declared explicitly when a class owns unique_ptr members</li>
     </ul>
   </section>
 
   <section class="lab-section">
     <h2>Concept</h2>
-    <p>When you call <code>glDrawArrays</code>, a white triangle appears on screen. But
-  between that one API call and the final pixel, the GPU executes a sequence of distinct stages.
-  Most pipeline bugs come from not knowing which stage transformed, discarded, or interpolated your data.</p>
-
-  <p>The pipeline has seven stages. The <strong>Application</strong> stage runs on the CPU. Your code
-  uploads vertex data into a <strong>Vertex Buffer Object (VBO)</strong>, describes its layout with
-  <code>glVertexAttribPointer</code>, and supplies uniform values. The <strong>Vertex Shader</strong>
-  is the first programmable stage: the GPU runs your GLSL once per vertex and you must write a value
-  to <code>gl_Position</code> in clip space. <strong>Primitive Assembly</strong> groups the output
-  vertices into triangles. The <strong>Rasterization</strong> stage walks each triangle, determines
-  which pixels it covers, and emits one <strong>fragment</strong> per covered pixel. It also linearly
-  interpolates any <code>out</code> variables declared in the vertex shader across the triangle
-  surface. The <strong>Fragment Shader</strong> is the second programmable stage: it receives those
-  interpolated values and must write a colour to <code>out_Color</code>. Finally, the
-  <strong>Output Merger</strong> (also called per-fragment tests) applies the depth test, stencil
-  test, and blending before writing surviving fragments into the framebuffer.</p>
-
-  <p>Two stages accept GLSL code: the vertex shader and the fragment shader. The remaining stages
-  are <strong>fixed-function</strong> — their behaviour is configured through OpenGL state calls
-  such as <code>glEnable</code>, <code>glDepthFunc</code>, and <code>glBlendFunc</code>, but you
-  cannot replace their logic with custom code. Understanding this split explains why some bugs
-  require a shader change and others require a state call.</p>
+    <p>Without a <strong>Mesh</strong> class, every piece of geometry in the scene requires its own <code>VertexBuffer</code>, <code>IndexBuffer</code>, <code>VertexArray</code>, and layout to be set up inline. As the number of objects grows this becomes unmanageable. The <code>Mesh</code> class acts as an owner: it receives raw geometry as a <code>std::vector&lt;Vertex&gt;</code> and a <code>std::vector&lt;unsigned int&gt;</code>, then calls a private <code>SetupMesh()</code> method that allocates and configures all three buffer objects. From that point on, the caller only needs to call <code>Draw()</code>.</p>
+<p>The <strong>Vertex</strong> struct is a plain data type that packs every per-vertex attribute into a single flat C struct: three floats for position, three for the surface normal, three for colour, two for UV texture coordinates, and three for the tangent vector used in normal mapping in later labs. Packing the data this way means one <code>VertexBuffer</code> upload copies the whole struct array, and the <code>VertexBufferLayout</code> pushes each attribute in field order using <code>Push&lt;float&gt;(n)</code>.</p>
+<p>Because <code>Mesh</code> owns three <code>std::unique_ptr</code> members and declares a virtual destructor, the <strong>Rule of Five</strong> applies. In C++11, declaring a user-defined destructor suppresses the implicit generation of the move constructor and move assignment operator. Without explicit move operations, returning a <code>Mesh</code> from a factory function fails to compile. Declaring both as <code>= default</code> lets the compiler generate them so that ownership of the <code>unique_ptr</code> members transfers cleanly. Copy operations are explicitly <code>= delete</code> because <code>unique_ptr</code> cannot be copied.</p>
   </section>
 
   <section class="lab-section">
     <h2>Tasks</h2>
 
     <div class="task-block">
-      <h3>Task 1 - Pipeline Overview</h3>
-      <p>The diagram below shows the six main stages of the OpenGL rendering pipeline.
-          Navy boxes are programmable in GLSL. Study the diagram, then complete the blanks.</p>
+      <h3>Task 1 - Define the Vertex Struct</h3>
+      <p>Create <code>src/Mesh/Vertex.h</code>. The <code>Vertex</code> struct holds every per-vertex attribute as a packed flat array so that one <code>VertexBuffer</code> upload copies all geometry data in a single contiguous block. Attributes are stored in this order:</p>
+<ol>
+  <li><code>position[3]</code> - X, Y, Z world position</li>
+  <li><code>normal[3]</code> - surface normal NX, NY, NZ</li>
+  <li><code>colour[3]</code> - RGB colour in the 0.0 to 1.0 range</li>
+  <li><code>texCoords[2]</code> - UV texture coordinates</li>
+  <li><code>tangent[3]</code> - tangent vector for normal mapping in later labs</li>
+</ol>
+<p>Provide two constructors. The full constructor accepts all 14 float values; the tangent parameters default to <code>(1.0f, 0.0f, 0.0f)</code>. The convenience constructor accepts only position, colour, and UV, defaulting the normal to <code>(0.0f, 0.0f, 1.0f)</code> and the tangent to <code>(1.0f, 0.0f, 0.0f)</code>.</p>
 
 <div class="viz-block">
-  <div id="viz-pipeline-diagram" style="width:100%;height:185px;"></div>
+  <div id="viz-vertex-layout" style="width:100%;height:170px;"></div>
   <script>(function(){
-    const container = document.getElementById('viz-pipeline-diagram');
+    const container = document.getElementById('viz-vertex-layout');
     
-  container.style.overflowX = 'auto';
-  const w = Math.max(container.clientWidth || 0, 700);
-  const h = 185;
-
-  const stages = [
-    { lines: ['Application'],           color: '#5a6268', sub: 'CPU' },
-    { lines: ['Vertex', 'Shader'],      color: '#003366', sub: 'programmable' },
-    { lines: ['Primitive','Assembly'],  color: '#5a6268', sub: 'fixed' },
-    { lines: ['Rasterization'],         color: '#5a6268', sub: 'fixed' },
-    { lines: ['Fragment','Shader'],     color: '#003366', sub: 'programmable' },
-    { lines: ['Output','Merger'],       color: '#5a6268', sub: 'fixed' },
-  ];
-  const arrowLabels = ['VBO / uniforms', 'gl_Position', 'triangles', 'fragments', 'out_Color'];
-
-  const n = stages.length;
-  const arrowW = 50;
-  const pad = 14;
-  const boxW = Math.floor((w - 2*pad - (n-1)*arrowW) / n);
-  const boxH = 60;
-  const boxY = 48;
-  const midY = boxY + boxH / 2;
-
+  const w = container.clientWidth || 700, h = 160;
   const svg = d3.select(container).append('svg')
     .attr('width', w).attr('height', h)
     .style('font-family', "'Segoe UI', Arial, sans-serif");
 
-  svg.append('defs').append('marker')
-    .attr('id', 'pipe-arrow').attr('markerWidth', 7).attr('markerHeight', 5)
-    .attr('refX', 7).attr('refY', 2.5).attr('orient', 'auto')
-    .append('polygon').attr('points', '0 0, 7 2.5, 0 5').attr('fill', '#888');
+  const attrs = [
+    { name: 'position',  floats: 3, colour: '#003366' },
+    { name: 'normal',    floats: 3, colour: '#1a5276' },
+    { name: 'colour',    floats: 3, colour: '#C8A951' },
+    { name: 'texCoords', floats: 2, colour: '#8a6914' },
+    { name: 'tangent',   floats: 3, colour: '#4a235a' },
+  ];
+  const total = 14;
+  const padX = 20, padY = 50, cellH = 36;
+  const cellW = (w - padX * 2) / total;
 
-  stages.forEach((s, i) => {
-    const x = pad + i * (boxW + arrowW);
-
-    svg.append('rect')
-      .attr('x', x).attr('y', boxY)
-      .attr('width', boxW).attr('height', boxH)
-      .attr('rx', 4).attr('fill', s.color);
-
-    const lh = 14;
-    const ly = midY - (s.lines.length - 1) * lh / 2;
-    s.lines.forEach((line, li) =>
+  let x = padX;
+  attrs.forEach(attr => {
+    for (let i = 0; i < attr.floats; i++) {
+      const idx = attrs.slice(0, attrs.indexOf(attr)).reduce((s, a) => s + a.floats, 0) + i;
+      svg.append('rect')
+        .attr('x', x + 1).attr('y', padY)
+        .attr('width', cellW - 2).attr('height', cellH)
+        .attr('fill', attr.colour).attr('rx', 3);
       svg.append('text')
-        .attr('x', x + boxW / 2).attr('y', ly + li * lh)
-        .attr('text-anchor', 'middle').attr('dominant-baseline', 'middle')
-        .attr('fill', '#fff').attr('font-size', 10.5).attr('font-weight', '600')
-        .text(line)
-    );
-
-    svg.append('text')
-      .attr('x', x + boxW / 2).attr('y', boxY + boxH + 12)
-      .attr('text-anchor', 'middle').attr('fill', '#777')
-      .attr('font-size', 9).attr('font-style', 'italic')
-      .text(s.sub);
-
-    if (i < n - 1) {
-      const ax = x + boxW;
-      svg.append('line')
-        .attr('x1', ax).attr('y1', midY).attr('x2', ax + arrowW).attr('y2', midY)
-        .attr('stroke', '#888').attr('stroke-width', 1.5)
-        .attr('marker-end', 'url(#pipe-arrow)');
-      svg.append('text')
-        .attr('x', ax + arrowW / 2).attr('y', boxY - 7)
-        .attr('text-anchor', 'middle').attr('fill', '#555').attr('font-size', 8.5)
-        .text(arrowLabels[i]);
+        .attr('x', x + cellW / 2).attr('y', padY + cellH / 2 + 4)
+        .attr('text-anchor', 'middle')
+        .attr('fill', '#fff').attr('font-size', 10)
+        .text('f' + idx);
+      x += cellW;
     }
   });
 
-  // Legend
-  const legY = 163;
-  [['#003366', 'Programmable (GLSL)'], ['#5a6268', 'Fixed-function']].forEach(([c, l], i) => {
-    const lx = pad + i * 170;
-    svg.append('rect').attr('x', lx).attr('y', legY - 8).attr('width', 12).attr('height', 10).attr('fill', c).attr('rx', 2);
-    svg.append('text').attr('x', lx + 16).attr('y', legY).attr('font-size', 10).attr('fill', '#555').text(l);
+  x = padX;
+  attrs.forEach(attr => {
+    const groupW = cellW * attr.floats;
+    svg.append('text')
+      .attr('x', x + groupW / 2).attr('y', padY - 8)
+      .attr('text-anchor', 'middle')
+      .attr('fill', attr.colour).attr('font-size', 11).attr('font-weight', '600')
+      .text(attr.name + ' (' + attr.floats + 'f)');
+    x += groupW;
   });
+
+  svg.append('text')
+    .attr('x', w / 2).attr('y', padY + cellH + 18)
+    .attr('text-anchor', 'middle')
+    .attr('fill', '#555').attr('font-size', 11)
+    .text('14 floats total = 56 bytes per Vertex (at 4 bytes per float)');
 
   })();</script>
 </div>
 
+<div class="code-file-header">src/Mesh/Vertex.h</div>
+<pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+
+struct Vertex {
+    float position[3];
+    float normal[3];
+    float colour[3];
+    float texCoords[2];
+    float tangent[3];   // used for normal mapping in later labs
+
+    // TODO: Full constructor - accepts px,py,pz, nx,ny,nz, r,g,b, u,v,
+    //       and optional tangent tx,ty,tz (default 1,0,0).
+    Vertex(float px, float py, float pz,
+           float nx, float ny, float nz,
+           float r,  float g,  float b,
+           float u,  float v,
+           float tx = 1.f, float ty = 0.f, float tz = 0.f)
+        : /* TODO: initialise all five arrays using brace initialisation */ {}
+
+    // TODO: Convenience constructor - position, colour, UV only.
+    //       Normal defaults to (0,0,1), tangent to (1,0,0).
+    Vertex(float px, float py, float pz, float r, float g, float b, float u, float v)
+        : /* TODO */ {}
+};</code></pre>
+
 <div class="fill-blanks-group">
-<div class="blank-question" data-answers="[[&quot;Vertex&quot;,&quot;vertex&quot;]]">
-  <p>The first programmable stage is the <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong> Shader.</p>
+<div class="blank-question" data-answers="[[&quot;14&quot;],[&quot;56&quot;]]">
+  <p>The <code>Vertex</code> struct stores <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong> floats in total, making each vertex <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 2"></strong> bytes wide at 4 bytes per float.</p>
   <span class="blank-feedback"></span>
 </div>
-<div class="blank-question" data-answers="[[&quot;Assembly&quot;,&quot;assembly&quot;]]">
-  <p>Primitive <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong> groups the vertices produced by the vertex shader into geometric shapes such as triangles.</p>
-  <span class="blank-feedback"></span>
-</div>
-<div class="blank-question" data-answers="[[&quot;Rasterization&quot;,&quot;rasterization&quot;,&quot;Rasteriser&quot;,&quot;Rasterizer&quot;,&quot;rasteriser&quot;,&quot;rasterizer&quot;]]">
-  <p>The <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong> stage walks each triangle and emits one fragment per covered pixel.</p>
-  <span class="blank-feedback"></span>
-</div>
-<div class="blank-question" data-answers="[[&quot;varyings&quot;,&quot;varying&quot;,&quot;Varyings&quot;]]">
-  <p>Vertex shader <code>out</code> variables are called <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong>. The rasterizer interpolates them across the triangle before passing them to the fragment shader.</p>
-  <span class="blank-feedback"></span>
-</div>
-<div class="blank-question" data-answers="[[&quot;Output Merger&quot;,&quot;output merger&quot;,&quot;per-fragment&quot;,&quot;per-fragment tests&quot;,&quot;output&quot;]]">
-  <p>The depth test runs in the <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong> stage, after the fragment shader has written a colour.</p>
+<div class="blank-question" data-answers="[[&quot;3&quot;],[&quot;normal&quot;]]">
+  <p>The <code>tangent</code> attribute holds <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong> floats and is used in later labs for <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 2"></strong> mapping.</p>
   <span class="blank-feedback"></span>
 </div>
 </div>
@@ -674,144 +647,236 @@
     </div>
 
     <div class="task-block">
-      <h3>Task 2 - Tracing a Vertex from CPU to Pixel</h3>
-      <p>Consider a textured triangle. One vertex has position <code>(0.5, 0.5, 0.0)</code>
-          and texture coordinate <code>(1.0, 1.0)</code>. Work through each stage below to trace
-          this vertex from CPU memory to a sampled colour on screen.</p>
-          <ol>
-            <li><strong>Application stage.</strong> You upload the vertex data into a VBO and call:
-              <pre style="margin:0.5rem 0"><code class="language-cpp">glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
-glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));</code></pre>
-              Location 0 holds the 3-component position and location 1 holds the 2-component texture
-              coordinate.</li>
-            <li><strong>Vertex shader.</strong> The shader receives the vertex via
-              <code>layout(location=0) in vec3 aPos</code> and
-              <code>layout(location=1) in vec2 aTexCoord</code>. It transforms the position and
-              declares <code>out vec2 TexCoord</code> to pass the texture coordinate to the
-              rasterizer. The MVP formula below shows the clip-space result written to
-              <code>gl_Position</code>.</li>
-          </ol>
+      <h3>Task 2 - Declare the Mesh Class</h3>
+      <p>Create <code>src/Mesh/Mesh.h</code>. The class stores vertex data, index data, and three <code>unique_ptr</code> buffer objects in <code>protected</code> members so that derived classes (such as the model mesh used in later labs) can access them directly. It also stores position, rotation, and scale so a caller can reposition a mesh in world space without touching GPU memory.</p>
+<p>Because <code>Mesh</code> declares a virtual destructor, you must add explicit move and copy declarations to satisfy the Rule of Five. Declare the move constructor and move assignment operator as <code>= default</code>. Delete the copy constructor and copy assignment operator.</p>
 
-<div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>gl_Position</mtext><mo>=</mo><mi mathvariant="bold">P</mi><mo>⋅</mo><mi mathvariant="bold">V</mi><mo>⋅</mo><mi mathvariant="bold">M</mi><mo>⋅</mo><msub><mi mathvariant="bold">v</mi><mtext>local</mtext></msub></mrow><annotation encoding="application/x-tex">\text{gl\_Position} = \mathbf{P} \cdot \mathbf{V} \cdot \mathbf{M} \cdot \mathbf{v}_{\text{local}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0044em;vertical-align:-0.31em;"></span><span class="mord text"><span class="mord">gl_Position</span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6861em;"></span><span class="mord mathbf">P</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6861em;"></span><span class="mord mathbf" style="margin-right:0.016em;">V</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6861em;"></span><span class="mord mathbf">M</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5944em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.016em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord text mtight"><span class="mord mtight">local</span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></div>
+<div class="code-file-header">src/Mesh/Mesh.h</div>
+<pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#pragma once
+#include &lt;vector&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
 
-<ol start="3">
-            <li><strong>Primitive assembly and clipping.</strong> Three transformed vertices are
-              grouped into a triangle. Fixed-function hardware clips any geometry whose clip-space
-              coordinates fall outside the view frustum and discards it before it reaches the
-              rasterizer.</li>
-            <li><strong>Rasterization.</strong> The GPU determines which pixels the triangle covers
-              and emits one fragment per covered pixel. The texture coordinate
-              <code>(1.0, 1.0)</code> at this corner and the coordinates at the other two corners
-              are linearly interpolated. A fragment at the centre receives a
-              <code>TexCoord</code> roughly midway between all three corner values.</li>
-            <li><strong>Fragment shader.</strong> The fragment receives the interpolated
-              <code>in vec2 TexCoord</code>. The shader samples the bound texture with
-              <code>texture(uTexture, TexCoord)</code> and writes the result to
-              <code>out vec4 out_Color</code>.</li>
-            <li><strong>Output merger.</strong> The depth value is compared to the value already
-              stored in the depth buffer at that pixel. If this fragment is closer, it passes the
-              depth test and its colour is written to the framebuffer. Otherwise it is discarded.</li>
-          </ol>
+#include &quot;../VertexArray.h&quot;
+#include &quot;../IndexBuffer.h&quot;
+#include &quot;../VertexBuffer.h&quot;
+#include &quot;Vertex.h&quot;
 
-<div class="mc-block"><div class="mc-item" data-correct="2">
-  <p class="mc-question-text">A vertex attribute declared as `layout(location=2) in vec2 aTexCoord` in the vertex shader corresponds to which glVertexAttribPointer call?</p>
+#include &quot;glm/glm.hpp&quot;
+
+class Mesh
+{
+protected:
+    std::vector&lt;Vertex&gt;       m_Vertices;
+    std::vector&lt;unsigned int&gt; m_Indices;
+
+    std::unique_ptr&lt;VertexArray&gt;  m_VAO;
+    std::unique_ptr&lt;IndexBuffer&gt;  m_EBO;
+    std::unique_ptr&lt;VertexBuffer&gt; m_VBO;
+
+    glm::vec3 m_Position;
+    glm::vec3 m_Rotation;
+    glm::vec3 m_Scale;
+
+public:
+    Mesh() : m_Position(0.0f), m_Rotation(0.0f), m_Scale(1.0f) {}
+    Mesh(const std::vector&lt;Vertex&gt;&amp; vertices, const std::vector&lt;unsigned int&gt;&amp; indices);
+    virtual ~Mesh();
+
+    // TODO: Declare the move constructor    as = default
+    // TODO: Declare the move assignment     as = default
+    // TODO: Delete  the copy constructor
+    // TODO: Delete  the copy assignment operator
+
+    virtual void SetupMesh();
+    virtual void Draw();
+
+    void setPosition(const glm::vec3&amp; position) { m_Position = position; }
+    void setRotation(const glm::vec3&amp; rotation) { m_Rotation = rotation; }
+    void setScale   (const glm::vec3&amp; scale)    { m_Scale    = scale;    }
+
+    glm::vec3 getPosition() const { return m_Position; }
+    glm::vec3 getRotation() const { return m_Rotation; }
+    glm::vec3 getScale()    const { return m_Scale;    }
+
+    glm::mat4 getTransformMatrix() const;
+};</code></pre>
+
+<div class="mc-block"><div class="mc-item" data-correct="1">
+  <p class="mc-question-text">Why are the copy constructor and copy assignment operator deleted in Mesh?</p>
   <div class="mc-options"><label class="mc-option">
     <input type="radio" name="mc-1-0" onchange="revealMCAnswer(this)">
-    <span>A. glVertexAttribPointer(0, ...)</span>
+    <span>A. GLM vector types are not copyable and would cause a compile error</span>
   </label>
 <label class="mc-option">
     <input type="radio" name="mc-1-0" onchange="revealMCAnswer(this)">
-    <span>B. glVertexAttribPointer(1, ...)</span>
+    <span>B. std::unique_ptr cannot be copied, so deleting copy operations makes the intent explicit and produces clearer error messages</span>
   </label>
 <label class="mc-option">
     <input type="radio" name="mc-1-0" onchange="revealMCAnswer(this)">
-    <span>C. glVertexAttribPointer(2, ...)</span>
+    <span>C. Copying GPU buffer handles would corrupt the OpenGL driver state</span>
   </label>
 <label class="mc-option">
     <input type="radio" name="mc-1-0" onchange="revealMCAnswer(this)">
-    <span>D. glVertexAttribPointer(3, ...)</span>
+    <span>D. The Rule of Five requires all five operations to be deleted together</span>
   </label></div>
   <div class="mc-feedback"></div>
-  <div class="mc-explanation">The layout location qualifier (2) maps directly to the first argument (index) of glVertexAttribPointer. Location 2 corresponds to index 2.</div>
+  <div class="mc-explanation">std::unique_ptr deletes its own copy operations because there can only be one owner. The compiler would implicitly delete Mesh copies too, but writing = delete explicitly documents intent and gives a clearer compiler error when someone tries to copy a Mesh by accident.</div>
 </div>
 <div class="mc-item" data-correct="2">
-  <p class="mc-question-text">Which value does the rasterizer interpolate across a triangle?</p>
+  <p class="mc-question-text">A class declares a virtual destructor. What does this suppress in C++11?</p>
   <div class="mc-options"><label class="mc-option">
     <input type="radio" name="mc-1-1" onchange="revealMCAnswer(this)">
-    <span>A. Uniform variables</span>
+    <span>A. The default constructor</span>
   </label>
 <label class="mc-option">
     <input type="radio" name="mc-1-1" onchange="revealMCAnswer(this)">
-    <span>B. gl_Position components</span>
+    <span>B. The copy constructor and copy assignment operator</span>
   </label>
 <label class="mc-option">
     <input type="radio" name="mc-1-1" onchange="revealMCAnswer(this)">
-    <span>C. Vertex shader `out` varyings</span>
+    <span>C. The move constructor and move assignment operator</span>
   </label>
 <label class="mc-option">
     <input type="radio" name="mc-1-1" onchange="revealMCAnswer(this)">
-    <span>D. Raw vertex data from the VBO</span>
+    <span>D. All five special member functions</span>
   </label></div>
   <div class="mc-feedback"></div>
-  <div class="mc-explanation">Uniforms are constant across the draw call. gl_Position is consumed by the rasterizer to determine coverage. Raw VBO data goes through the vertex shader first. Only `out` variables from the vertex shader are linearly interpolated by the rasterizer.</div>
-</div>
-<div class="mc-item" data-correct="2">
-  <p class="mc-question-text">At which stage is gl_FragCoord (the fragment's window-space pixel coordinates) available?</p>
-  <div class="mc-options"><label class="mc-option">
-    <input type="radio" name="mc-1-2" onchange="revealMCAnswer(this)">
-    <span>A. Vertex Shader</span>
-  </label>
-<label class="mc-option">
-    <input type="radio" name="mc-1-2" onchange="revealMCAnswer(this)">
-    <span>B. Primitive Assembly</span>
-  </label>
-<label class="mc-option">
-    <input type="radio" name="mc-1-2" onchange="revealMCAnswer(this)">
-    <span>C. Fragment Shader</span>
-  </label>
-<label class="mc-option">
-    <input type="radio" name="mc-1-2" onchange="revealMCAnswer(this)">
-    <span>D. Application (CPU)</span>
-  </label></div>
-  <div class="mc-feedback"></div>
-  <div class="mc-explanation">gl_FragCoord is a built-in input variable in the fragment shader. It contains the window-space coordinates of the fragment being processed, computed by the rasterizer.</div>
+  <div class="mc-explanation">In C++11, declaring any user-defined destructor suppresses the compiler-generated move constructor and move assignment operator. Copy operations are not affected by this rule. This is why Mesh must declare them explicitly as = default.</div>
 </div></div>
     </div>
 
     <div class="task-block">
-      <h3>Task 3 - Programmable vs Fixed-Function</h3>
-      <p>Two stages accept custom GLSL. The others are configured through state calls but
-          cannot be replaced. Complete the blanks and answer the questions below.</p>
+      <h3>Task 3 - Implement SetupMesh</h3>
+      <p>Open <code>src/Mesh/Mesh.cpp</code> and implement <code>Mesh::SetupMesh()</code>. This method creates the three buffer objects, uploads the geometry, and configures the vertex attribute layout. It mirrors the setup code you wrote manually in the VertexBuffer and Index Buffers lab (Lab 10) and the Vertex Layout and Array lab (Lab 11), but now it runs once inside the constructor and is never repeated by the caller.</p>
+<ol>
+  <li>Guard against empty data with an early return and a message to <code>std::cerr</code>.</li>
+  <li>Create all three buffer objects with <code>std::make_unique</code>. The <code>VertexBuffer</code> size argument is <code>m_Vertices.size() * sizeof(Vertex)</code>.</li>
+  <li>Build a <code>VertexBufferLayout</code> and push each attribute in the same order as the fields in <code>Vertex.h</code>.</li>
+  <li>Call <code>m_VAO->AddBuffer(*m_VBO, layout)</code>.</li>
+  <li>Unbind all three objects so no state leaks into subsequent draw calls.</li>
+</ol>
+
+<div class="code-file-header">src/Mesh/Mesh.cpp</div>
+<pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">#include &quot;Mesh.h&quot;
+#include &quot;../VertexBufferLayout.h&quot;
+#include &quot;../Renderer.h&quot;
+
+Mesh::Mesh(const std::vector&lt;Vertex&gt;&amp; vertices, const std::vector&lt;unsigned int&gt;&amp; indices)
+    : m_Vertices(vertices), m_Indices(indices)
+{
+    SetupMesh();
+}
+
+Mesh::~Mesh()
+{
+    m_VAO-&gt;unBind();
+    m_VBO-&gt;Unbind();
+    m_EBO-&gt;Unbind();
+}
+
+void Mesh::SetupMesh()
+{
+    if (m_Vertices.empty() || m_Indices.empty())
+    {
+        std::cerr &lt;&lt; &quot;Mesh::SetupMesh() called with empty vertex or index data&quot; &lt;&lt; std::endl;
+        return;
+    }
+
+    // TODO: create m_VAO  using make_unique&lt;VertexArray&gt;()
+    // TODO: create m_VBO  using make_unique&lt;VertexBuffer&gt;(data ptr, byte size)
+    // TODO: create m_EBO  using make_unique&lt;IndexBuffer&gt;(data ptr, index count)
+
+    VertexBufferLayout layout;
+    // TODO: Push 3 floats for position
+    // TODO: Push 3 floats for normal
+    // TODO: Push 3 floats for colour
+    // TODO: Push 2 floats for texture coordinates
+    // TODO: Push 3 floats for tangent
+
+    // TODO: call m_VAO-&gt;AddBuffer(*m_VBO, layout)
+
+    // TODO: unbind m_VAO, m_VBO, and m_EBO
+}</code></pre>
 
 <div class="fill-blanks-group">
-<div class="blank-question" data-answers="[[&quot;Vertex&quot;,&quot;vertex&quot;],[&quot;Fragment&quot;,&quot;fragment&quot;]]">
-  <p>You can write GLSL for the <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong> shader and the <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 2"></strong> shader.</p>
+<div class="blank-question" data-answers="[[&quot;Vertex&quot;]]">
+  <p>The byte-size argument passed to <code>VertexBuffer</code> is <code>m_Vertices.size() * sizeof(<input class="blank-input" type="text" autocomplete="off" aria-label="blank 1">)</code>.</p>
   <span class="blank-feedback"></span>
 </div>
-<div class="blank-question" data-answers="[[&quot;fixed&quot;,&quot;Fixed&quot;]]">
-  <p>Rasterization is a <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong>-function stage. You control it through state calls such as <code>glPolygonMode</code>, not by writing GLSL.</p>
+<div class="blank-question" data-answers="[[&quot;size&quot;]]">
+  <p>The count argument passed to <code>IndexBuffer</code> is <code>m_Indices.<input class="blank-input" type="text" autocomplete="off" aria-label="blank 1">()</code>.</p>
   <span class="blank-feedback"></span>
 </div>
-<div class="blank-question" data-answers="[[&quot;Output Merger&quot;,&quot;output merger&quot;,&quot;per-fragment&quot;,&quot;per-fragment tests&quot;,&quot;output&quot;]]">
-  <p>The depth buffer comparison runs in the <strong><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1"></strong> stage.</p>
+<div class="blank-question" data-answers="[[&quot;Vertex&quot;]]">
+  <p>Attributes must be pushed in the same order as the fields declared in <code><input class="blank-input" type="text" autocomplete="off" aria-label="blank 1">.h</code> so that the layout offsets match the struct memory layout.</p>
   <span class="blank-feedback"></span>
 </div>
 </div>
 <button class="check-blanks-btn" onclick="checkBlanks(this)">Check Answers</button>
+    </div>
+
+    <div class="task-block">
+      <h3>Task 4 - Implement Draw and getTransformMatrix</h3>
+      <p>Still in <code>src/Mesh/Mesh.cpp</code>, implement <code>Mesh::Draw()</code> and <code>Mesh::getTransformMatrix()</code>.</p>
+<p><code>Draw()</code> creates a local <code>Renderer</code> and calls <code>renderer.Draw(*m_VAO, *m_EBO)</code>. Guard the call with a null check on <code>m_VAO</code> and <code>m_EBO</code> so that calling <code>Draw()</code> before <code>SetupMesh()</code> logs an error to <code>std::cerr</code> rather than crashing.</p>
+<p><code>getTransformMatrix()</code> builds the <strong>TRS matrix</strong> that moves the mesh from local space to world space. Start from an identity matrix and apply operations in TRS order: translate first, then rotate around X (pitch), then Y (yaw), then Z (roll), then scale. The GLM functions you need are <code>glm::translate</code>, <code>glm::rotate</code>, <code>glm::radians</code>, and <code>glm::scale</code>.</p>
+
+<div class="math-block"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi mathvariant="bold">M</mi><mo>=</mo><mi mathvariant="bold">T</mi><mo>⋅</mo><msub><mi mathvariant="bold">R</mi><mi>x</mi></msub><mo>⋅</mo><msub><mi mathvariant="bold">R</mi><mi>y</mi></msub><mo>⋅</mo><msub><mi mathvariant="bold">R</mi><mi>z</mi></msub><mo>⋅</mo><mi mathvariant="bold">S</mi></mrow><annotation encoding="application/x-tex">\mathbf{M} = \mathbf{T} \cdot \mathbf{R}_x \cdot \mathbf{R}_y \cdot \mathbf{R}_z \cdot \mathbf{S}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6861em;"></span><span class="mord mathbf">M</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6861em;"></span><span class="mord mathbf">T</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8361em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.9722em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathbf">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.0359em;">y</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8361em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">R</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.044em;">z</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6861em;"></span><span class="mord mathbf">S</span></span></span></span></span></div>
+
+<div class="code-file-header">src/Mesh/Mesh.cpp (continued)</div>
+<pre style="border-radius:0 0 6px 6px;margin-top:0"><code class="language-cpp">void Mesh::Draw()
+{
+    if (!m_VAO || !m_EBO)
+    {
+        std::cerr &lt;&lt; &quot;Mesh::Draw() called before SetupMesh()!&quot; &lt;&lt; std::endl;
+        return;
+    }
+
+    // TODO: create a local Renderer instance
+    // TODO: call renderer.Draw(*m_VAO, *m_EBO)
+}
+
+glm::mat4 Mesh::getTransformMatrix() const
+{
+    glm::mat4 transform = glm::mat4(1.0f);
+
+    // TODO: translate by m_Position
+    // TODO: rotate around X axis (pitch) using m_Rotation.x
+    // TODO: rotate around Y axis (yaw)   using m_Rotation.y
+    // TODO: rotate around Z axis (roll)  using m_Rotation.z
+    // TODO: scale by m_Scale
+
+    return transform;
+}</code></pre>
+
+<div class="mc-block"><div class="mc-item" data-correct="0">
+  <p class="mc-question-text">getTransformMatrix() writes glm::translate before glm::rotate before glm::scale. In what order are these transformations actually applied to a vertex?</p>
+  <div class="mc-options"><label class="mc-option">
+    <input type="radio" name="mc-2-0" onchange="revealMCAnswer(this)">
+    <span>A. Scale, then rotate, then translate (right to left in the code)</span>
+  </label>
+<label class="mc-option">
+    <input type="radio" name="mc-2-0" onchange="revealMCAnswer(this)">
+    <span>B. Translate, then rotate, then scale (left to right in the code)</span>
+  </label>
+<label class="mc-option">
+    <input type="radio" name="mc-2-0" onchange="revealMCAnswer(this)">
+    <span>C. The order does not matter because GLM matrices commute</span>
+  </label>
+<label class="mc-option">
+    <input type="radio" name="mc-2-0" onchange="revealMCAnswer(this)">
+    <span>D. Rotate, then scale, then translate because GLM applies rotation first</span>
+  </label></div>
+  <div class="mc-feedback"></div>
+  <div class="mc-explanation">GLM uses column-major matrices matching the OpenGL convention. Each glm::translate/rotate/scale call post-multiplies the current matrix on the right. When the final matrix multiplies a vertex, the rightmost operation (scale) is applied first, then rotation, then translation. This is the standard TRS order that keeps objects scaled and rotated around their local origin before being moved to world position.</div>
+</div></div>
 
 <div class="sa-block"><div class="sa-item">
-  <p class="sa-question-text">Explain what happens to geometry that falls outside the view frustum after the vertex shader has run. Which stage handles this, and can your GLSL code control it?</p>
+  <p class="sa-question-text">The current Draw() method creates a new Renderer object on every call. Why might this be considered inefficient, and how could it be improved in a future refactor?</p>
   <textarea class="sa-textarea" rows="4" placeholder="Write your answer here..."></textarea>
   <button class="sa-reveal-btn" onclick="toggleModelAnswer(this)">Show Model Answer</button>
-  <div class="sa-answer-panel">After the vertex shader, geometry is in clip space. A fixed-function clipping stage (part of primitive assembly) discards or trims any triangle whose clip-space coordinates fall outside [-w, w] on any axis. Your GLSL does not control this clipping directly. You can influence what is clipped by adjusting the near and far planes in the projection matrix, which changes the shape of the frustum and therefore what lies inside it.</div>
-</div>
-<div class="sa-item">
-  <p class="sa-question-text">A fragment shader writes a fully opaque red colour (1.0, 0.0, 0.0, 1.0) to out_Color, but the pixel on screen appears black. Name two pipeline stages that could be responsible and give one plausible cause for each.</p>
-  <textarea class="sa-textarea" rows="4" placeholder="Write your answer here..."></textarea>
-  <button class="sa-reveal-btn" onclick="toggleModelAnswer(this)">Show Model Answer</button>
-  <div class="sa-answer-panel">(1) Output Merger - depth test: a closer object already wrote a black colour and a depth value to the framebuffer at that pixel. The red fragment is behind it, fails the depth test, and is discarded. The black colour from the earlier draw remains.
-
-(2) Output Merger - blending: alpha blending is enabled with blend factors that zero out the output. For example, if GL_ZERO is used as the destination blend factor and an additive equation is set, the red colour could be blended away. The fragment is not discarded but its colour is mathematically reduced to black.</div>
+  <div class="sa-answer-panel">Constructing a Renderer every frame adds unnecessary overhead because the Renderer holds no state that changes between calls. A better design would accept a Renderer reference as a parameter (or use a shared/static instance) so the caller controls its lifetime and the same object is reused across all Draw calls in a frame.</div>
 </div></div>
     </div>
 
@@ -822,49 +887,148 @@ glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float
     <p>Try the tasks above before revealing the solution.</p>
     <button class="solution-btn" onclick="toggleSolution(this)">Show Solution</button>
     <div class="solution-panel">
-      <div class="solution-canvas-wrap"><canvas data-code="ANSWER KEY - The OpenGL Rendering Pipeline (ACCA6021 GP01)
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
 
-Task 1 - Fill in the Blanks
-1. Vertex           (first programmable stage is the Vertex Shader)
-2. Assembly         (Primitive Assembly)
-3. Rasterization    (also accepted: Rasteriser, Rasterizer)
-4. varyings         (also accepted: varying)
-5. Output Merger    (also accepted: per-fragment, per-fragment tests)
+struct Vertex {
+    float position[3];
+    float normal[3];
+    float colour[3];
+    float texCoords[2];
+    float tangent[3];
 
-Task 2 - Multiple Choice
-Q1: C - glVertexAttribPointer(2, ...)
-    The layout location value (2) matches the first argument of glVertexAttribPointer.
-    Location 2 maps to index 2.
+    // Full constructor
+    Vertex(float px, float py, float pz,
+           float nx, float ny, float nz,
+           float r,  float g,  float b,
+           float u,  float v,
+           float tx = 1.f, float ty = 0.f, float tz = 0.f)
+        : position{ px, py, pz }, normal{ nx, ny, nz }, colour{ r, g, b },
+          texCoords{ u, v }, tangent{ tx, ty, tz } {}
 
-Q2: C - Vertex shader out varyings
-    Uniforms are constant across the draw call.
-    gl_Position is consumed by the rasterizer to determine coverage, not interpolated.
-    Raw VBO data does not bypass the vertex shader.
-    Only out variables from the vertex shader are linearly interpolated by the rasterizer.
+    // Convenience constructor (position, colour, UV only)
+    Vertex(float px, float py, float pz, float r, float g, float b, float u, float v)
+        : position{ px, py, pz }, normal{ 0.0f, 0.0f, 1.0f }, colour{ r, g, b },
+          texCoords{ u, v }, tangent{ 1.0f, 0.0f, 0.0f } {}
+};" data-filename="src/Mesh/Vertex.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#pragma once
+#include &lt;vector&gt;
+#include &lt;memory&gt;
+#include &lt;string&gt;
 
-Q3: C - Fragment Shader
-    gl_FragCoord is a built-in input available only in the fragment shader.
-    It is computed by the rasterizer and contains window-space pixel coordinates.
+#include &quot;../VertexArray.h&quot;
+#include &quot;../IndexBuffer.h&quot;
+#include &quot;../VertexBuffer.h&quot;
+#include &quot;Vertex.h&quot;
 
-Task 3 - Fill in the Blanks
-1. Vertex / Fragment    (either order accepted)
-2. fixed
-3. Output Merger        (also accepted: per-fragment, per-fragment tests)
+#include &quot;glm/glm.hpp&quot;
 
-Task 3 - Short Answer Q1 (Clipping)
-After the vertex shader, geometry is in clip space. Fixed-function clipping (part of primitive
-assembly) discards or trims any triangle whose clip-space coordinates fall outside [-w, w] on any
-axis. Your GLSL does not control this. You can influence it indirectly by adjusting near and far
-in the projection matrix, which changes the frustum shape and therefore what gets clipped.
+class Mesh
+{
+protected:
+    std::vector&lt;Vertex&gt;       m_Vertices;
+    std::vector&lt;unsigned int&gt; m_Indices;
 
-Task 3 - Short Answer Q2 (Black pixel causes)
-(1) Depth test failure at the Output Merger: a closer object already wrote a black colour and a
-depth value at that pixel. The red fragment fails the depth test and is discarded. The black
-colour from the earlier object remains in the framebuffer.
+    std::unique_ptr&lt;VertexArray&gt;  m_VAO;
+    std::unique_ptr&lt;IndexBuffer&gt;  m_EBO;
+    std::unique_ptr&lt;VertexBuffer&gt; m_VBO;
 
-(2) Blend state at the Output Merger: alpha blending is enabled with blend factors that zero the
-output. For example, GL_ZERO as the source factor multiplies the red colour by zero, producing
-black before writing. The fragment is not discarded but its colour is blended away." style="display:block;border-radius:6px"></canvas></div>
+    glm::vec3 m_Position;
+    glm::vec3 m_Rotation;
+    glm::vec3 m_Scale;
+
+public:
+    Mesh() : m_Position(0.0f), m_Rotation(0.0f), m_Scale(1.0f) {}
+    Mesh(const std::vector&lt;Vertex&gt;&amp; vertices, const std::vector&lt;unsigned int&gt;&amp; indices);
+    virtual ~Mesh();
+
+    // Move operations: declared = default because the virtual destructor suppresses them
+    Mesh(Mesh&amp;&amp;) = default;
+    Mesh&amp; operator=(Mesh&amp;&amp;) = default;
+
+    // Copy operations: deleted because unique_ptr cannot be copied
+    Mesh(const Mesh&amp;) = delete;
+    Mesh&amp; operator=(const Mesh&amp;) = delete;
+
+    virtual void SetupMesh();
+    virtual void Draw();
+
+    void setPosition(const glm::vec3&amp; position) { m_Position = position; }
+    void setRotation(const glm::vec3&amp; rotation) { m_Rotation = rotation; }
+    void setScale   (const glm::vec3&amp; scale)    { m_Scale    = scale;    }
+
+    glm::vec3 getPosition() const { return m_Position; }
+    glm::vec3 getRotation() const { return m_Rotation; }
+    glm::vec3 getScale()    const { return m_Scale;    }
+
+    glm::mat4 getTransformMatrix() const;
+};" data-filename="src/Mesh/Mesh.h" style="display:block;border-radius:6px"></canvas></div>
+      <div class="solution-canvas-wrap"><canvas data-code="#include &quot;Mesh.h&quot;
+#include &quot;../VertexBufferLayout.h&quot;
+#include &quot;../Renderer.h&quot;
+
+Mesh::Mesh(const std::vector&lt;Vertex&gt;&amp; vertices, const std::vector&lt;unsigned int&gt;&amp; indices)
+    : m_Vertices(vertices), m_Indices(indices)
+{
+    SetupMesh();
+}
+
+Mesh::~Mesh()
+{
+    m_VAO-&gt;unBind();
+    m_VBO-&gt;Unbind();
+    m_EBO-&gt;Unbind();
+}
+
+void Mesh::SetupMesh()
+{
+    if (m_Vertices.empty() || m_Indices.empty())
+    {
+        std::cerr &lt;&lt; &quot;Mesh::SetupMesh() called with empty vertex or index data&quot; &lt;&lt; std::endl;
+        return;
+    }
+
+    m_VAO = std::make_unique&lt;VertexArray&gt;();
+    m_VBO = std::make_unique&lt;VertexBuffer&gt;(m_Vertices.data(), m_Vertices.size() * sizeof(Vertex));
+    m_EBO = std::make_unique&lt;IndexBuffer&gt;(m_Indices.data(), m_Indices.size());
+
+    VertexBufferLayout layout;
+    layout.Push&lt;float&gt;(3); // position x,y,z
+    layout.Push&lt;float&gt;(3); // normal nx,ny,nz
+    layout.Push&lt;float&gt;(3); // colour r,g,b
+    layout.Push&lt;float&gt;(2); // texture coords u,v
+    layout.Push&lt;float&gt;(3); // tangent tx,ty,tz
+
+    m_VAO-&gt;AddBuffer(*m_VBO, layout);
+
+    m_VAO-&gt;unBind();
+    m_VBO-&gt;Unbind();
+    m_EBO-&gt;Unbind();
+}
+
+void Mesh::Draw()
+{
+    if (!m_VAO || !m_EBO)
+    {
+        std::cerr &lt;&lt; &quot;Mesh::Draw() called before SetupMesh()!&quot; &lt;&lt; std::endl;
+        return;
+    }
+
+    Renderer renderer;
+    renderer.Draw(*m_VAO, *m_EBO);
+}
+
+glm::mat4 Mesh::getTransformMatrix() const
+{
+    glm::mat4 transform = glm::mat4(1.0f);
+
+    transform = glm::translate(transform, m_Position);
+    transform = glm::rotate(transform, glm::radians(m_Rotation.x), glm::vec3(1, 0, 0)); // pitch
+    transform = glm::rotate(transform, glm::radians(m_Rotation.y), glm::vec3(0, 1, 0)); // yaw
+    transform = glm::rotate(transform, glm::radians(m_Rotation.z), glm::vec3(0, 0, 1)); // roll
+    transform = glm::scale(transform, m_Scale);
+
+    return transform;
+}" data-filename="src/Mesh/Mesh.cpp" style="display:block;border-radius:6px"></canvas></div>
     </div>
   </section>
 </main>
@@ -999,8 +1163,7 @@ var _self="undefined"!=typeof window?window:"undefined"!=typeof WorkerGlobalScop
  */"undefined"!=typeof module&&module.exports&&(module.exports=Prism),"undefined"!=typeof global&&(global.Prism=Prism),Prism.languages.markup={comment:{pattern:/<!--(?:(?!<!--)[\s\S])*?-->/,greedy:!0},prolog:{pattern:/<\?[\s\S]+?\?>/,greedy:!0},doctype:{pattern:/<!DOCTYPE(?:[^>"'[\]]|"[^"]*"|'[^']*')+(?:\[(?:[^<"'\]]|"[^"]*"|'[^']*'|<(?!!--)|<!--(?:[^-]|-(?!->))*-->)*\]\s*)?>/i,greedy:!0,inside:{"internal-subset":{pattern:/(^[^\[]*\[)[\s\S]+(?=\]>$)/,lookbehind:!0,greedy:!0,inside:null},string:{pattern:/"[^"]*"|'[^']*'/,greedy:!0},punctuation:/^<!|>$|[[\]]/,"doctype-tag":/^DOCTYPE/i,name:/[^\s<>'"]+/}},cdata:{pattern:/<!\[CDATA\[[\s\S]*?\]\]>/i,greedy:!0},tag:{pattern:/<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/,greedy:!0,inside:{tag:{pattern:/^<\/?[^\s>\/]+/,inside:{punctuation:/^<\/?/,namespace:/^[^\s>\/:]+:/}},"special-attr":[],"attr-value":{pattern:/=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+)/,inside:{punctuation:[{pattern:/^=/,alias:"attr-equals"},{pattern:/^(\s*)["']|["']$/,lookbehind:!0}]}},punctuation:/\/?>/,"attr-name":{pattern:/[^\s>\/]+/,inside:{namespace:/^[^\s>\/:]+:/}}}},entity:[{pattern:/&[\da-z]{1,8};/i,alias:"named-entity"},/&#x?[\da-f]{1,8};/i]},Prism.languages.markup.tag.inside["attr-value"].inside.entity=Prism.languages.markup.entity,Prism.languages.markup.doctype.inside["internal-subset"].inside=Prism.languages.markup,Prism.hooks.add("wrap",(function(e){"entity"===e.type&&(e.attributes.title=e.content.replace(/&amp;/,"&"))})),Object.defineProperty(Prism.languages.markup.tag,"addInlined",{value:function(e,t){var n={};n["language-"+t]={pattern:/(^<!\[CDATA\[)[\s\S]+?(?=\]\]>$)/i,lookbehind:!0,inside:Prism.languages[t]},n.cdata=/^<!\[CDATA\[|\]\]>$/i;var a={"included-cdata":{pattern:/<!\[CDATA\[[\s\S]*?\]\]>/i,inside:n}};a["language-"+t]={pattern:/[\s\S]+/,inside:Prism.languages[t]};var r={};r[e]={pattern:RegExp(/(<__[^>]*>)(?:<!\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]>|(?!<!\[CDATA\[)[\s\S])*?(?=<\/__>)/.source.replace(/__/g,(function(){return e})),"i"),lookbehind:!0,greedy:!0,inside:a},Prism.languages.insertBefore("markup","cdata",r)}}),Object.defineProperty(Prism.languages.markup.tag,"addAttribute",{value:function(e,t){Prism.languages.markup.tag.inside["special-attr"].push({pattern:RegExp(/(^|["'\s])/.source+"(?:"+e+")"+/\s*=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+(?=[\s>]))/.source,"i"),lookbehind:!0,inside:{"attr-name":/^[^\s=]+/,"attr-value":{pattern:/=[\s\S]+/,inside:{value:{pattern:/(^=\s*(["']|(?!["'])))\S[\s\S]*(?=\2$)/,lookbehind:!0,alias:[t,"language-"+t],inside:Prism.languages[t]},punctuation:[{pattern:/^=/,alias:"attr-equals"},/"|'/]}}}})}}),Prism.languages.html=Prism.languages.markup,Prism.languages.mathml=Prism.languages.markup,Prism.languages.svg=Prism.languages.markup,Prism.languages.xml=Prism.languages.extend("markup",{}),Prism.languages.ssml=Prism.languages.xml,Prism.languages.atom=Prism.languages.xml,Prism.languages.rss=Prism.languages.xml,function(e){var t=/(?:"(?:\\(?:\r\n|[\s\S])|[^"\\\r\n])*"|'(?:\\(?:\r\n|[\s\S])|[^'\\\r\n])*')/;e.languages.css={comment:/\/\*[\s\S]*?\*\//,atrule:{pattern:RegExp("@[\\w-](?:"+/[^;{\s"']|\s+(?!\s)/.source+"|"+t.source+")*?"+/(?:;|(?=\s*\{))/.source),inside:{rule:/^@[\w-]+/,"selector-function-argument":{pattern:/(\bselector\s*\(\s*(?![\s)]))(?:[^()\s]|\s+(?![\s)])|\((?:[^()]|\([^()]*\))*\))+(?=\s*\))/,lookbehind:!0,alias:"selector"},keyword:{pattern:/(^|[^\w-])(?:and|not|only|or)(?![\w-])/,lookbehind:!0}}},url:{pattern:RegExp("\\burl\\((?:"+t.source+"|"+/(?:[^\\\r\n()"']|\\[\s\S])*/.source+")\\)","i"),greedy:!0,inside:{function:/^url/i,punctuation:/^\(|\)$/,string:{pattern:RegExp("^"+t.source+"$"),alias:"url"}}},selector:{pattern:RegExp("(^|[{}\\s])[^{}\\s](?:[^{};\"'\\s]|\\s+(?![\\s{])|"+t.source+")*(?=\\s*\\{)"),lookbehind:!0},string:{pattern:t,greedy:!0},property:{pattern:/(^|[^-\w\xA0-\uFFFF])(?!\s)[-_a-z\xA0-\uFFFF](?:(?!\s)[-\w\xA0-\uFFFF])*(?=\s*:)/i,lookbehind:!0},important:/!important\b/i,function:{pattern:/(^|[^-a-z0-9])[-a-z0-9]+(?=\()/i,lookbehind:!0},punctuation:/[(){};:,]/},e.languages.css.atrule.inside.rest=e.languages.css;var n=e.languages.markup;n&&(n.tag.addInlined("style","css"),n.tag.addAttribute("style","css"))}(Prism),Prism.languages.clike={comment:[{pattern:/(^|[^\\])\/\*[\s\S]*?(?:\*\/|$)/,lookbehind:!0,greedy:!0},{pattern:/(^|[^\\:])\/\/.*/,lookbehind:!0,greedy:!0}],string:{pattern:/(["'])(?:\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/,greedy:!0},"class-name":{pattern:/(\b(?:class|extends|implements|instanceof|interface|new|trait)\s+|\bcatch\s+\()[\w.\\]+/i,lookbehind:!0,inside:{punctuation:/[.\\]/}},keyword:/\b(?:break|catch|continue|do|else|finally|for|function|if|in|instanceof|new|null|return|throw|try|while)\b/,boolean:/\b(?:false|true)\b/,function:/\b\w+(?=\()/,number:/\b0x[\da-f]+\b|(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[+-]?\d+)?/i,operator:/[<>]=?|[!=]=?=?|--?|\+\+?|&&?|\|\|?|[?*/~^%]/,punctuation:/[{}[\];(),.:]/},Prism.languages.javascript=Prism.languages.extend("clike",{"class-name":[Prism.languages.clike["class-name"],{pattern:/(^|[^$\w\xA0-\uFFFF])(?!\s)[_$A-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\.(?:constructor|prototype))/,lookbehind:!0}],keyword:[{pattern:/((?:^|\})\s*)catch\b/,lookbehind:!0},{pattern:/(^|[^.]|\.\.\.\s*)\b(?:as|assert(?=\s*\{)|async(?=\s*(?:function\b|\(|[$\w\xA0-\uFFFF]|$))|await|break|case|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally(?=\s*(?:\{|$))|for|from(?=\s*(?:['"]|$))|function|(?:get|set)(?=\s*(?:[#\[$\w\xA0-\uFFFF]|$))|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)\b/,lookbehind:!0}],function:/#?(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*(?:\.\s*(?:apply|bind|call)\s*)?\()/,number:{pattern:RegExp(/(^|[^\w$])/.source+"(?:"+/NaN|Infinity/.source+"|"+/0[bB][01]+(?:_[01]+)*n?/.source+"|"+/0[oO][0-7]+(?:_[0-7]+)*n?/.source+"|"+/0[xX][\dA-Fa-f]+(?:_[\dA-Fa-f]+)*n?/.source+"|"+/\d+(?:_\d+)*n/.source+"|"+/(?:\d+(?:_\d+)*(?:\.(?:\d+(?:_\d+)*)?)?|\.\d+(?:_\d+)*)(?:[Ee][+-]?\d+(?:_\d+)*)?/.source+")"+/(?![\w$])/.source),lookbehind:!0},operator:/--|\+\+|\*\*=?|=>|&&=?|\|\|=?|[!=]==|<<=?|>>>?=?|[-+*/%&|^!=<>]=?|\.{3}|\?\?=?|\?\.?|[~:]/}),Prism.languages.javascript["class-name"][0].pattern=/(\b(?:class|extends|implements|instanceof|interface|new)\s+)[\w.\\]+/,Prism.languages.insertBefore("javascript","keyword",{regex:{pattern:RegExp(/((?:^|[^$\w\xA0-\uFFFF."'\])\s]|\b(?:return|yield))\s*)/.source+/\//.source+"(?:"+/(?:\[(?:[^\]\\\r\n]|\\.)*\]|\\.|[^/\\\[\r\n])+\/[dgimyus]{0,7}/.source+"|"+/(?:\[(?:[^[\]\\\r\n]|\\.|\[(?:[^[\]\\\r\n]|\\.|\[(?:[^[\]\\\r\n]|\\.)*\])*\])*\]|\\.|[^/\\\[\r\n])+\/[dgimyus]{0,7}v[dgimyus]{0,7}/.source+")"+/(?=(?:\s|\/\*(?:[^*]|\*(?!\/))*\*\/)*(?:$|[\r\n,.;:})\]]|\/\/))/.source),lookbehind:!0,greedy:!0,inside:{"regex-source":{pattern:/^(\/)[\s\S]+(?=\/[a-z]*$)/,lookbehind:!0,alias:"language-regex",inside:Prism.languages.regex},"regex-delimiter":/^\/|\/$/,"regex-flags":/^[a-z]+$/}},"function-variable":{pattern:/#?(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*[=:]\s*(?:async\s*)?(?:\bfunction\b|(?:\((?:[^()]|\([^()]*\))*\)|(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*)\s*=>))/,alias:"function"},parameter:[{pattern:/(function(?:\s+(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*)?\s*\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\))/,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/(^|[^$\w\xA0-\uFFFF])(?!\s)[_$a-z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*=>)/i,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/(\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\)\s*=>)/,lookbehind:!0,inside:Prism.languages.javascript},{pattern:/((?:\b|\s|^)(?!(?:as|async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|from|function|get|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|set|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)(?![$\w\xA0-\uFFFF]))(?:(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*\s*)\(\s*|\]\s*\(\s*)(?!\s)(?:[^()\s]|\s+(?![\s)])|\([^()]*\))+(?=\s*\)\s*\{)/,lookbehind:!0,inside:Prism.languages.javascript}],constant:/\b[A-Z](?:[A-Z_]|\dx?)*\b/}),Prism.languages.insertBefore("javascript","string",{hashbang:{pattern:/^#!.*/,greedy:!0,alias:"comment"},"template-string":{pattern:/`(?:\\[\s\S]|\$\{(?:[^{}]|\{(?:[^{}]|\{[^}]*\})*\})+\}|(?!\$\{)[^\\`])*`/,greedy:!0,inside:{"template-punctuation":{pattern:/^`|`$/,alias:"string"},interpolation:{pattern:/((?:^|[^\\])(?:\\{2})*)\$\{(?:[^{}]|\{(?:[^{}]|\{[^}]*\})*\})+\}/,lookbehind:!0,inside:{"interpolation-punctuation":{pattern:/^\$\{|\}$/,alias:"punctuation"},rest:Prism.languages.javascript}},string:/[\s\S]+/}},"string-property":{pattern:/((?:^|[,{])[ \t]*)(["'])(?:\\(?:\r\n|[\s\S])|(?!\2)[^\\\r\n])*\2(?=\s*:)/m,lookbehind:!0,greedy:!0,alias:"property"}}),Prism.languages.insertBefore("javascript","operator",{"literal-property":{pattern:/((?:^|[,{])[ \t]*)(?!\s)[_$a-zA-Z\xA0-\uFFFF](?:(?!\s)[$\w\xA0-\uFFFF])*(?=\s*:)/m,lookbehind:!0,alias:"property"}}),Prism.languages.markup&&(Prism.languages.markup.tag.addInlined("script","javascript"),Prism.languages.markup.tag.addAttribute(/on(?:abort|blur|change|click|composition(?:end|start|update)|dblclick|error|focus(?:in|out)?|key(?:down|up)|load|mouse(?:down|enter|leave|move|out|over|up)|reset|resize|scroll|select|slotchange|submit|unload|wheel)/.source,"javascript")),Prism.languages.js=Prism.languages.javascript,function(){if(void 0!==Prism&&"undefined"!=typeof document){Element.prototype.matches||(Element.prototype.matches=Element.prototype.msMatchesSelector||Element.prototype.webkitMatchesSelector);var e={js:"javascript",py:"python",rb:"ruby",ps1:"powershell",psm1:"powershell",sh:"bash",bat:"batch",h:"c",tex:"latex"},t="data-src-status",n="loading",a="loaded",r="pre[data-src]:not(["+t+'="'+a+'"]):not(['+t+'="'+n+'"])';Prism.hooks.add("before-highlightall",(function(e){e.selector+=", "+r})),Prism.hooks.add("before-sanity-check",(function(s){var i=s.element;if(i.matches(r)){s.code="",i.setAttribute(t,n);var o=i.appendChild(document.createElement("CODE"));o.textContent="Loading…";var l=i.getAttribute("data-src"),u=s.language;if("none"===u){var g=(/\.(\w+)$/.exec(l)||[,"none"])[1];u=e[g]||g}Prism.util.setLanguage(o,u),Prism.util.setLanguage(i,u);var c=Prism.plugins.autoloader;c&&c.loadLanguages(u),function(e,t,n){var a=new XMLHttpRequest;a.open("GET",e,!0),a.onreadystatechange=function(){4==a.readyState&&(a.status<400&&a.responseText?t(a.responseText):a.status>=400?n("✖ Error "+a.status+" while fetching file: "+a.statusText):n("✖ Error: File does not exist or is empty"))},a.send(null)}(l,(function(e){i.setAttribute(t,a);var n=function(e){var t=/^\s*(\d+)\s*(?:(,)\s*(?:(\d+)\s*)?)?$/.exec(e||"");if(t){var n=Number(t[1]),a=t[2],r=t[3];return a?r?[n,Number(r)]:[n,void 0]:[n,n]}}(i.getAttribute("data-range"));if(n){var r=e.split(/\r\n?|\n/g),s=n[0],l=null==n[1]?r.length:n[1];s<0&&(s+=r.length),s=Math.max(0,Math.min(s-1,r.length)),l<0&&(l+=r.length),l=Math.max(0,Math.min(l,r.length)),e=r.slice(s,l).join("\n"),i.hasAttribute("data-start")||i.setAttribute("data-start",String(s+1))}o.textContent=e,Prism.highlightElement(o)}),(function(e){i.setAttribute(t,"failed"),o.textContent=e}))}})),Prism.plugins.fileHighlight={highlight:function(e){for(var t,n=(e||document).querySelectorAll(r),a=0;t=n[a++];)Prism.highlightElement(t)}};var s=!1;Prism.fileHighlight=function(){s||(console.warn("Prism.fileHighlight is deprecated. Use `Prism.plugins.fileHighlight.highlight` instead."),s=!0),Prism.plugins.fileHighlight.highlight.apply(this,arguments)}}}();
 //# sourceMappingURL=/sm/1f55244a569fc0911044b5e4725a97872b6d85b0662a3429a809bb62f713c381.map
 Prism.languages.c=Prism.languages.extend("clike",{comment:{pattern:/\/\/(?:[^\r\n\\]|\\(?:\r\n?|\n|(?![\r\n])))*|\/\*[\s\S]*?(?:\*\/|$)/,greedy:!0},string:{pattern:/"(?:\\(?:\r\n|[\s\S])|[^"\\\r\n])*"/,greedy:!0},"class-name":{pattern:/(\b(?:enum|struct)\s+(?:__attribute__\s*\(\([\s\S]*?\)\)\s*)?)\w+|\b[a-z]\w*_t\b/,lookbehind:!0},keyword:/\b(?:_Alignas|_Alignof|_Atomic|_Bool|_Complex|_Generic|_Imaginary|_Noreturn|_Static_assert|_Thread_local|__attribute__|asm|auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|inline|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|typeof|union|unsigned|void|volatile|while)\b/,function:/\b[a-z_]\w*(?=\s*\()/i,number:/(?:\b0x(?:[\da-f]+(?:\.[\da-f]*)?|\.[\da-f]+)(?:p[+-]?\d+)?|(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[+-]?\d+)?)[ful]{0,4}/i,operator:/>>=?|<<=?|->|([-+&|:])\1|[?:~]|[-+*/%&|^!=<>]=?/}),Prism.languages.insertBefore("c","string",{char:{pattern:/'(?:\\(?:\r\n|[\s\S])|[^'\\\r\n]){0,32}'/,greedy:!0}}),Prism.languages.insertBefore("c","string",{macro:{pattern:/(^[\t ]*)#\s*[a-z](?:[^\r\n\\/]|\/(?!\*)|\/\*(?:[^*]|\*(?!\/))*\*\/|\\(?:\r\n|[\s\S]))*/im,lookbehind:!0,greedy:!0,alias:"property",inside:{string:[{pattern:/^(#\s*include\s*)<[^>]+>/,lookbehind:!0},Prism.languages.c.string],char:Prism.languages.c.char,comment:Prism.languages.c.comment,"macro-name":[{pattern:/(^#\s*define\s+)\w+\b(?!\()/i,lookbehind:!0},{pattern:/(^#\s*define\s+)\w+\b(?=\()/i,lookbehind:!0,alias:"function"}],directive:{pattern:/^(#\s*)[a-z]+/,lookbehind:!0,alias:"keyword"},"directive-hash":/^#/,punctuation:/##|\\(?=[\r\n])/,expression:{pattern:/\S[\s\S]*/,inside:Prism.languages.c}}}}),Prism.languages.insertBefore("c","function",{constant:/\b(?:EOF|NULL|SEEK_CUR|SEEK_END|SEEK_SET|__DATE__|__FILE__|__LINE__|__TIMESTAMP__|__TIME__|__func__|stderr|stdin|stdout)\b/}),delete Prism.languages.c.boolean;
-!function(e){var t=/\b(?:alignas|alignof|asm|auto|bool|break|case|catch|char|char16_t|char32_t|char8_t|class|co_await|co_return|co_yield|compl|concept|const|const_cast|consteval|constexpr|constinit|continue|decltype|default|delete|do|double|dynamic_cast|else|enum|explicit|export|extern|final|float|for|friend|goto|if|import|inline|int|int16_t|int32_t|int64_t|int8_t|long|module|mutable|namespace|new|noexcept|nullptr|operator|override|private|protected|public|register|reinterpret_cast|requires|return|short|signed|sizeof|static|static_assert|static_cast|struct|switch|template|this|thread_local|throw|try|typedef|typeid|typename|uint16_t|uint32_t|uint64_t|uint8_t|union|unsigned|using|virtual|void|volatile|wchar_t|while)\b/,n="\\b(?!<keyword>)\\w+(?:\\s*\\.\\s*\\w+)*\\b".replace(/<keyword>/g,(function(){return t.source}));e.languages.cpp=e.languages.extend("c",{"class-name":[{pattern:RegExp("(\\b(?:class|concept|enum|struct|typename)\\s+)(?!<keyword>)\\w+".replace(/<keyword>/g,(function(){return t.source}))),lookbehind:!0},/\b[A-Z]\w*(?=\s*::\s*\w+\s*\()/,/\b[A-Z_]\w*(?=\s*::\s*~\w+\s*\()/i,/\b\w+(?=\s*<(?:[^<>]|<(?:[^<>]|<[^<>]*>)*>)*>\s*::\s*\w+\s*\()/],keyword:t,number:{pattern:/(?:\b0b[01']+|\b0x(?:[\da-f']+(?:\.[\da-f']*)?|\.[\da-f']+)(?:p[+-]?[\d']+)?|(?:\b[\d']+(?:\.[\d']*)?|\B\.[\d']+)(?:e[+-]?[\d']+)?)[ful]{0,4}/i,greedy:!0},operator:/>>=?|<<=?|->|--|\+\+|&&|\|\||[?:~]|<=>|[-+*/%&|^!=<>]=?|\b(?:and|and_eq|bitand|bitor|not|not_eq|or|or_eq|xor|xor_eq)\b/,boolean:/\b(?:false|true)\b/}),e.languages.insertBefore("cpp","string",{module:{pattern:RegExp('(\\b(?:import|module)\\s+)(?:"(?:\\\\(?:\r\n|[^])|[^"\\\\\r\n])*"|<[^<>\r\n]*>|'+"<mod-name>(?:\\s*:\\s*<mod-name>)?|:\\s*<mod-name>".replace(/<mod-name>/g,(function(){return n}))+")"),lookbehind:!0,greedy:!0,inside:{string:/^[<"][\s\S]+/,operator:/:/,punctuation:/\./}},"raw-string":{pattern:/R"([^()\\ ]{0,16})\([\s\S]*?\)\1"/,alias:"string",greedy:!0}}),e.languages.insertBefore("cpp","keyword",{"generic-function":{pattern:/\b(?!operator\b)[a-z_]\w*\s*<(?:[^<>]|<[^<>]*>)*>(?=\s*\()/i,inside:{function:/^\w+/,generic:{pattern:/<[\s\S]+/,alias:"class-name",inside:e.languages.cpp}}}}),e.languages.insertBefore("cpp","operator",{"double-colon":{pattern:/::/,alias:"punctuation"}}),e.languages.insertBefore("cpp","class-name",{"base-clause":{pattern:/(\b(?:class|struct)\s+\w+\s*:\s*)[^;{}"'\s]+(?:\s+[^;{}"'\s]+)*(?=\s*[;{])/,lookbehind:!0,greedy:!0,inside:e.languages.extend("cpp",{})}}),e.languages.insertBefore("inside","double-colon",{"class-name":/\b[a-z_]\w*\b(?!\s*::)/i},e.languages.cpp["base-clause"])}(Prism);
-Prism.languages.glsl=Prism.languages.extend("c",{keyword:/\b(?:active|asm|atomic_uint|attribute|[ibdu]?vec[234]|bool|break|buffer|case|cast|centroid|class|coherent|common|const|continue|d?mat[234](?:x[234])?|default|discard|do|double|else|enum|extern|external|false|filter|fixed|flat|float|for|fvec[234]|goto|half|highp|hvec[234]|[iu]?sampler2DMS(?:Array)?|[iu]?sampler2DRect|[iu]?samplerBuffer|[iu]?samplerCube|[iu]?samplerCubeArray|[iu]?sampler[123]D|[iu]?sampler[12]DArray|[iu]?image2DMS(?:Array)?|[iu]?image2DRect|[iu]?imageBuffer|[iu]?imageCube|[iu]?imageCubeArray|[iu]?image[123]D|[iu]?image[12]DArray|if|in|inline|inout|input|int|interface|invariant|layout|long|lowp|mediump|namespace|noinline|noperspective|out|output|partition|patch|precise|precision|public|readonly|resource|restrict|return|sample|sampler[12]DArrayShadow|sampler[12]DShadow|sampler2DRectShadow|sampler3DRect|samplerCubeArrayShadow|samplerCubeShadow|shared|short|sizeof|smooth|static|struct|subroutine|superp|switch|template|this|true|typedef|uint|uniform|union|unsigned|using|varying|void|volatile|while|writeonly)\b/});</script>
+!function(e){var t=/\b(?:alignas|alignof|asm|auto|bool|break|case|catch|char|char16_t|char32_t|char8_t|class|co_await|co_return|co_yield|compl|concept|const|const_cast|consteval|constexpr|constinit|continue|decltype|default|delete|do|double|dynamic_cast|else|enum|explicit|export|extern|final|float|for|friend|goto|if|import|inline|int|int16_t|int32_t|int64_t|int8_t|long|module|mutable|namespace|new|noexcept|nullptr|operator|override|private|protected|public|register|reinterpret_cast|requires|return|short|signed|sizeof|static|static_assert|static_cast|struct|switch|template|this|thread_local|throw|try|typedef|typeid|typename|uint16_t|uint32_t|uint64_t|uint8_t|union|unsigned|using|virtual|void|volatile|wchar_t|while)\b/,n="\\b(?!<keyword>)\\w+(?:\\s*\\.\\s*\\w+)*\\b".replace(/<keyword>/g,(function(){return t.source}));e.languages.cpp=e.languages.extend("c",{"class-name":[{pattern:RegExp("(\\b(?:class|concept|enum|struct|typename)\\s+)(?!<keyword>)\\w+".replace(/<keyword>/g,(function(){return t.source}))),lookbehind:!0},/\b[A-Z]\w*(?=\s*::\s*\w+\s*\()/,/\b[A-Z_]\w*(?=\s*::\s*~\w+\s*\()/i,/\b\w+(?=\s*<(?:[^<>]|<(?:[^<>]|<[^<>]*>)*>)*>\s*::\s*\w+\s*\()/],keyword:t,number:{pattern:/(?:\b0b[01']+|\b0x(?:[\da-f']+(?:\.[\da-f']*)?|\.[\da-f']+)(?:p[+-]?[\d']+)?|(?:\b[\d']+(?:\.[\d']*)?|\B\.[\d']+)(?:e[+-]?[\d']+)?)[ful]{0,4}/i,greedy:!0},operator:/>>=?|<<=?|->|--|\+\+|&&|\|\||[?:~]|<=>|[-+*/%&|^!=<>]=?|\b(?:and|and_eq|bitand|bitor|not|not_eq|or|or_eq|xor|xor_eq)\b/,boolean:/\b(?:false|true)\b/}),e.languages.insertBefore("cpp","string",{module:{pattern:RegExp('(\\b(?:import|module)\\s+)(?:"(?:\\\\(?:\r\n|[^])|[^"\\\\\r\n])*"|<[^<>\r\n]*>|'+"<mod-name>(?:\\s*:\\s*<mod-name>)?|:\\s*<mod-name>".replace(/<mod-name>/g,(function(){return n}))+")"),lookbehind:!0,greedy:!0,inside:{string:/^[<"][\s\S]+/,operator:/:/,punctuation:/\./}},"raw-string":{pattern:/R"([^()\\ ]{0,16})\([\s\S]*?\)\1"/,alias:"string",greedy:!0}}),e.languages.insertBefore("cpp","keyword",{"generic-function":{pattern:/\b(?!operator\b)[a-z_]\w*\s*<(?:[^<>]|<[^<>]*>)*>(?=\s*\()/i,inside:{function:/^\w+/,generic:{pattern:/<[\s\S]+/,alias:"class-name",inside:e.languages.cpp}}}}),e.languages.insertBefore("cpp","operator",{"double-colon":{pattern:/::/,alias:"punctuation"}}),e.languages.insertBefore("cpp","class-name",{"base-clause":{pattern:/(\b(?:class|struct)\s+\w+\s*:\s*)[^;{}"'\s]+(?:\s+[^;{}"'\s]+)*(?=\s*[;{])/,lookbehind:!0,greedy:!0,inside:e.languages.extend("cpp",{})}}),e.languages.insertBefore("inside","double-colon",{"class-name":/\b[a-z_]\w*\b(?!\s*::)/i},e.languages.cpp["base-clause"])}(Prism);</script>
 
 </body>
 </html>

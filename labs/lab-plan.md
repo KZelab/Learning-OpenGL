@@ -36,9 +36,11 @@ The next few labs will focus on refactoring and abstracting our code | | | |
 | 22 | Collectibles, Timer, and Win Condition | Collect all coins before the timer expires; game has Playing/Won/Lost states | `src/tests/maze/TestMaze.h/.cpp` | Lab 22 |
 | 23 | Exit Door, Polish, and Complete Game | Key unlocks exit door (RayCasting interaction); two levels; full HUD and state machine | `src/tests/maze/TestMaze.h/.cpp`, ray math from `testRayCasting.cpp` | Lab 23 |
 
+Geometry factory 
 
+doesnt the cube have more than two faces? 
 
-
+expand the gen script to include the sphere generation code and the plane/full screen quad generation code.
 
 
 
@@ -63,8 +65,18 @@ The following labs will introduce more advanced graphics techniques and concepts
 | 10 | CPU Particle System | Particle fountain emits, fades, and respects gravity | `src/tests/TestParticleSystem.h/.cpp` | Lab 11 |
 | 11 | Compute Shaders & GPU Particles | Millions of particles updated entirely on the GPU | `src/ComputeShader.h/.cpp`, `src/tests/TestGPUParticles` | Lab 19 |
 
+Nvidia basics lab series 
+link off to the training courses
 
-Geometry factory 
+highlight difference between phong shading and illumination
+
+heat effect post processing 
+
+go into great detail about kernals
+
+
+
+
 Camera │ FPS controls (introduces the  mesh/geometry factory / utils camera)
 Effects │ Post-processing 
 ProceduralArt │ Shader art (5 patterns) 

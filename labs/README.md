@@ -6,6 +6,7 @@
 | 01 | Window and Context | mcp/lab_01_window_context.html |
 | 02 | First Triangle | mcp/lab_02_first_triangle.html |
 | 03 | Shaders | mcp/lab_03_shaders.html |
+| 03B | The OpenGL Pipeline - Implementing Each Stage | acca6021/lab_03b_opengl_pipeline.html |
 | 04 | Two Triangles | mcp/lab_04_two_triangles.html |
 | 05 | Index Buffers and Uniforms | mcp/lab_05_index_buffers_uniforms.html |
 | 06 | Textures | mcp/lab_06_textures.html |
@@ -31,6 +32,7 @@
 
 | Worksheet | Title | File |
 |-----------|-------|------|
+| GP01 | The OpenGL Rendering Pipeline (theory) | acca6021/math_WS_GP01_graphics_pipeline.html |
 | M01 | Coordinate Spaces and the Transformation Pipeline | mcp/math_WS01_coordinate_spaces.html |
 | M02 | The Identity Matrix | mcp/math_WS02_identity_matrix.html |
 | M03 | Homogeneous Coordinates and Transformation Matrices | mcp/math_WS03_homogeneous_and_matrices.html |

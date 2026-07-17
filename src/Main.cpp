@@ -97,7 +97,7 @@ int main() {
 
         TestMenu->RegisterTest<test::testClearColour>("Test Clear Colour");
         TestMenu->RegisterTest<test::testTexture2D>("Test Texture2D");
-        TestMenu->RegisterTest<test::TestRayCasting>("Test Ray Casting", window);
+        TestMenu->RegisterTest<test::testRayCasting>("Test Ray Casting", window);
         TestMenu->RegisterTest<test::TestLightingShader>("Lighting shader", window);
         TestMenu->RegisterTest<test::testMultipleLightSources>("Multiple light shader", window);
         TestMenu->RegisterTest<test::testEffects>("Effects shader", window);

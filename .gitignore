@@ -9,5 +9,7 @@
 *.cache
 x64/
 docs/
+tools/
+.claude/
 tools/lab-assembler/node_modules/
-tools/lab-assembler/dist/
+tools/lab-assembler/dist
