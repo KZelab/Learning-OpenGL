@@ -20,3 +20,14 @@ a reference worksheet on window configuration and management in opengl, glfw, gl
 
 
 a further agents job that is to lets try to run the code from each lab and see if it works, and if not, what errors are thrown.
+
+
+Update the skill to use less questions, and more focus on providing education instructions. 
+Questions should come in a seperate type of worksheet, that is specifically for testing knowledge.
+
+rip apart matt pococks learn skill, identify prompts that will be useful here. 
+
+Ask me before creating content and making assumptions, the plan phase should include me more, ask more questions 
+
+
+
